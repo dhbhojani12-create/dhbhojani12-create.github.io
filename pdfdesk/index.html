@@ -257,6 +257,79 @@ body.t-kp #stack{cursor:copy}
 .textLayer[data-main-rotation="180"]{transform:rotate(180deg) translate(-100%,-100%)}
 .textLayer[data-main-rotation="270"]{transform:rotate(270deg) translateX(-100%)}
 body:not(.t-hand) .textLayer{pointer-events:none;-webkit-user-select:none;user-select:none}
+body.has-lib .home-in{max-width:1080px}
+body.has-lib .feats{display:none}
+body.has-lib #home{padding-top:28px}
+body.has-lib .lede{margin-bottom:16px}
+body.has-lib .drop{flex-direction:row;padding:14px 18px;gap:14px;text-align:left;justify-content:flex-start}
+body.has-lib .drop svg{width:24px!important;height:24px!important}
+body.has-lib .drop b{font-size:15px}
+body.has-lib .openbar{display:flex;gap:8px;align-items:stretch}
+body.has-lib .openbar .drop{flex:1;min-width:0}
+body.has-lib .openbar .drop span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.has-lib .openrow{margin-top:0;flex:none}
+body.has-lib .openrow .btn{height:auto;padding:0 18px}
+@media (max-width:640px){body.has-lib .openbar{flex-direction:column}body.has-lib .openrow .btn{height:44px}body.has-lib .drop span{display:none}}
+.llist .lacts{width:64px;justify-content:flex-end}
+.llist .lcard.pinned .lrm{display:grid}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.fcard{display:flex;align-items:center;gap:10px;padding:10px 6px 10px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line);cursor:pointer;text-align:left;min-width:0}
+.fcard:hover{border-color:#cfc7b6}
+.fcard .fic{width:26px;height:26px;flex:none}
+.fcard .fn{flex:1;min-width:0}
+.fcard .fn b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fcard .fn small{color:var(--muted);font-size:12px}
+.fcard .iconbtn{width:30px;height:30px;color:var(--muted)}
+.fcard.add{border-style:dashed;color:var(--accent)}
+.fcard.add .i{width:22px;height:22px}
+.libh{flex-wrap:wrap;gap:8px}
+.libtools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.libq{height:36px;width:220px;padding:0 10px}
+.libq input{font-size:13.5px}
+.libsel{height:36px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 8px;font:inherit;font-size:13px;color:var(--ink)}
+.vseg button{height:28px;padding:0 8px}
+.vseg svg{width:17px;height:17px}
+.libchips{display:flex;gap:6px;align-items:center;margin:0 2px 12px;flex-wrap:wrap}
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:22px 16px}
+.lgrid .lcard{position:relative;cursor:pointer;display:flex;flex-direction:column;gap:8px;min-width:0}
+.lgrid .lthumb{position:relative;aspect-ratio:3/4;border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12),0 4px 14px rgba(0,0,0,.05);transition:transform .15s, box-shadow .15s}
+.lgrid .lcard:hover .lthumb{transform:translateY(-2px);box-shadow:0 2px 6px rgba(0,0,0,.12),0 10px 24px rgba(0,0,0,.08)}
+.lthumb img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.lthumb .ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:hsl(var(--h) 35% 94%);color:hsl(var(--h) 35% 38%)}
+.lthumb .ph b{font-size:34px;font-weight:700}
+.lthumb .ph i{font-style:normal;font-size:11px;font-weight:700;letter-spacing:.08em;opacity:.7}
+.lthumb .src{position:absolute;left:6px;bottom:6px;color:#4a7c9b;background:rgba(255,255,255,.9);border-radius:6px;display:grid;place-items:center}
+.lthumb .src:empty{display:none}
+.lthumb .src svg{width:16px;height:16px;margin:2px}
+.linfo{min-width:0}
+.linfo b{display:block;font-weight:600;font-size:13.5px;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
+.linfo small{display:block;color:var(--muted);font-size:11.5px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lacts{position:absolute;top:6px;right:6px;display:flex;gap:4px;opacity:0;transition:opacity .15s}
+.lcard:hover .lacts,.lcard.pinned .lacts,.lcard:focus-within .lacts{opacity:1}
+.lcard.pinned .lrm{display:none}
+.lcard.pinned:hover .lrm{display:grid}
+.lacts button{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.95);box-shadow:0 1px 3px rgba(0,0,0,.15);display:grid;place-items:center;font-size:15px;color:#c79a1e;line-height:1}
+.lacts .lrm{color:var(--muted)}
+.lacts .lrm svg{width:15px;height:15px}
+@media (hover:none){.lgrid .lacts{opacity:1}.lcard:not(.pinned) .lpin{opacity:.85}}
+.llist{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.llist .lcard{position:relative;display:flex;align-items:center;gap:14px;padding:8px 12px;border-top:1px solid var(--line);cursor:pointer}
+.llist .lcard:first-child{border-top:0}
+.llist .lcard:hover{background:#faf8f3}
+.llist .lthumb{position:relative;width:38px;height:50px;flex:none;border-radius:4px;overflow:hidden;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.llist .lthumb .ph b{font-size:16px}.llist .lthumb .ph i{display:none}.llist .lthumb .src{display:none}
+.llist .linfo{flex:1;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);align-items:center;gap:12px}
+.llist .linfo b{-webkit-line-clamp:1}
+.llist .lacts{position:static;opacity:1}
+.llist .lacts button{box-shadow:none;background:transparent}
+.llist .lcard:not(.pinned) .lpin{opacity:.35}.llist .lcard:hover .lpin{opacity:1}
+@media (max-width:640px){
+  .lgrid{grid-template-columns:repeat(2,1fr);gap:18px 12px}
+  .libq{width:100%;flex:1}.libtools{width:100%}
+  .libchips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.libchips .chip,.libchips .btn{flex:none}
+  .llist .linfo{grid-template-columns:1fr;gap:0}
+  .fgrid{grid-template-columns:1fr}
+}
 #toast{position:fixed;left:50%;top:66px;transform:translateX(-50%) translateY(-8px);background:var(--ink);color:#fff;padding:9px 15px;border-radius:11px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:40;max-width:90%;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #busy{position:fixed;inset:0;background:rgba(244,241,234,.7);z-index:30;display:flex;align-items:center;justify-content:center}
@@ -316,6 +389,7 @@ body:not(.t-hand) .textLayer{pointer-events:none;-webkit-user-select:none;user-s
   <div class="home-in">
     <div class="brand"><span class="dot"><svg class="i" style="width:18px;height:18px"><use href="#i-doc"/></svg></span>PDF Desk</div>
     <p class="lede">For your everyday PDFs: highlight, sign, merge and pull out pages, all in one calm place.</p>
+    <div class="openbar">
     <label class="drop" id="dropzone">
       <svg class="i" style="width:30px;height:30px;color:var(--accent)"><use href="#i-plus"/></svg>
       <b>Open PDFs or photos</b>
@@ -325,6 +399,7 @@ body:not(.t-hand) .textLayer{pointer-events:none;-webkit-user-select:none;user-s
     <div class="openrow">
       <button class="btn" id="devBtn"><svg class="i"><use href="#i-doc"/></svg>This device</button>
       <button class="btn" id="pdBtn"><svg class="i" style="color:#4a7c9b"><use href="#i-cloud"/></svg>PoolDrive</button>
+    </div>
     </div>
     <div id="installBox" class="resume hidden" style="margin-top:10px">
       <svg class="i" style="color:var(--accent)"><use href="#i-save"/></svg>
@@ -639,6 +714,7 @@ async function addFiles(input, atIndex){
       const isImg = /^image\//.test(f.type);
       const bytes = isImg ? await imageToPdfBytes(f) : new Uint8Array(await f.arrayBuffer());
       const id = await addSource(bytes, f.name, {origin: items[i].origin||null});
+      items[i].srcId = id;
       const newPages = S.sources[id].pages.map((_,k)=>({id:uid(), src:id, idx:k, rot:0, ann:[]}));
       try{ await importOutline(id, newPages); }catch(e){ console.warn('outline',e); }
       added.push(...newPages);
@@ -1474,7 +1550,7 @@ async function doExport(act, list, name, numbers, dest){
       busy(true,'Packing…',1); data=await zip.generateAsync({type:'blob'});
     }
     busy(false);
-    if(dest.kind==='handle'){ await writeLocal(dest.handle, data instanceof Blob?data:new Blob([data],{type:mimeOf(fname)})); toast('Saved '+dest.handle.name, 2600); if(isPdfName(dest.handle.name)) addRecent([{kind:'local', handle:dest.handle, name:dest.handle.name}]); }
+    if(dest.kind==='handle'){ await writeLocal(dest.handle, data instanceof Blob?data:new Blob([data],{type:mimeOf(fname)})); toast('Saved '+dest.handle.name, 2600); if(isPdfName(dest.handle.name)) libAdd({kind:'local', handle:dest.handle, name:dest.handle.name}); }
     else await saveOut(fname, data, dest);
   }catch(err){ console.error(err); toast('Something went wrong while saving: '+(err.message||err), 4000); }
   busy(false);
@@ -1624,11 +1700,6 @@ async function getPlaces(){ return (await DB.get('places'))||[]; }
 async function setPlaces(v){ await DB.set('places',v); }
 async function getRecent(){ return (await DB.get('recent'))||[]; }
 function originKey(o){ return o.kind==='pd' ? 'pd:'+o.email+':'+o.id : 'local:'+o.name+':'+(o.dirName||''); }
-async function addRecent(list){
-  let r=await getRecent();
-  for(const o of list){ if(!o) continue; const k=originKey(o); r=r.filter(x=>originKey(x)!==k); r.unshift(Object.assign({t:Date.now()},o)); }
-  await DB.set('recent', r.slice(0,8)); renderHomeLists();
-}
 function placeLink(p){
   const base=location.origin+location.pathname;
   if(p.kind==='pd'){ const j=JSON.stringify({n:p.name,r:p.refs.map(r=>[r.email,r.id])}); return base+'#pd='+btoa(unescape(encodeURIComponent(j))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
@@ -1637,34 +1708,115 @@ function placeLink(p){
 function parsePdHash(h){ try{ let s=h.replace(/-/g,'+').replace(/_/g,'/'); while(s.length%4) s+='='; const j=JSON.parse(decodeURIComponent(escape(atob(s)))); return {kind:'pd', name:j.n, refs:j.r.map(([email,id])=>({email,id}))}; }catch(e){ return null; } }
 function placeSub(p){ return p.kind==='pd' ? 'PoolDrive'+(p.refs.length>1?` · ${p.refs.length} accounts`:'') : 'This device'; }
 
+/* ---- library: every file you open or save, with a first-page picture ---- */
+const LIB = Object.assign({q:'', sort:'recent', view:'grid', filter:'all'}, lsGet('pdfdesk:lib',{}));
+function saveLibPrefs(){ lsSet('pdfdesk:lib',{sort:LIB.sort, view:LIB.view, filter:LIB.filter}); }
+async function addRecent(list){
+  let r=await getRecent();
+  for(const o of list){ if(!o) continue; const k=originKey(o); const old=r.find(x=>originKey(x)===k);
+    r=r.filter(x=>originKey(x)!==k);
+    const keep = old ? {pinned:old.pinned, thumb:old.thumb, pages:old.pages, added:old.added} : {added:Date.now()};
+    const n=Object.assign({}, keep, o, {t:Date.now()}); if(!n.thumb && keep.thumb) n.thumb=keep.thumb; delete n.thumbSrc;
+    r.unshift(n); }
+  await DB.set('recent', r.slice(0,80)); renderHomeLists();
+}
+async function updateRecent(key, patch){ const r=await getRecent(); const e=r.find(x=>originKey(x)===key); if(!e) return; Object.assign(e,patch); await DB.set('recent',r); }
+async function thumbOf(p){ try{ const v=vp1(p); const c=await rasterPage(p, 240/v.width, true); const u=c.toDataURL('image/jpeg',0.72); c.width=0; return u; }catch(e){ return null; } }
+// record the open document (after a save) with a fresh picture of its first page
+async function libAdd(o){ if(!o) return; await addRecent([Object.assign({}, o, {pages:S.pages.length})]); if(S.pages[0]){ const th=await thumbOf(S.pages[0]); if(th){ await updateRecent(originKey(o),{thumb:th}); renderLibItems(); } } }
+function ago(t){ if(!t) return ''; const s=(Date.now()-t)/1000; if(s<60) return 'just now'; if(s<3600) return Math.round(s/60)+' min ago'; if(s<86400) return Math.round(s/3600)+' h ago';
+  const d=new Date(t), y=new Date(); y.setDate(y.getDate()-1); if(d.toDateString()===y.toDateString()) return 'yesterday';
+  return d.toLocaleDateString([], {day:'numeric', month:'short'}); }
+function hue(s){ let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))%360; return h; }
 async function renderHomeLists(){
   const box=$('#places'); if(!box) return;
   if(!TOP){ box.innerHTML=''; $('#pdBtn').classList.add('hidden'); return; }
-  const places=await getPlaces(), recent=await getRecent();
-  const ic=k=>`<svg class="i" style="color:${k==='pd'?'#4a7c9b':'var(--accent)'}"><use href="#${k==='pd'?'i-cloud':'i-folder'}"/></svg>`;
-  let h='';
+  const places=await getPlaces(), lib=await getRecent();
+  document.body.classList.toggle('has-lib', lib.length>0 || places.length>0);
   const canAdd = FSA_DIR || PD.has();
-  h+=`<div class="sec"><div class="sech"><b>Shortcuts</b>${canAdd?'<button class="btn small ghost" id="addPlace"><svg class="i"><use href="#i-plus"/></svg>Add folder</button>':''}</div>`;
-  if(places.length) h+='<div class="list">'+places.map((p,i)=>`<div class="li"><button class="lmain" data-place="${i}">${ic(p.kind)}<span><b>${esc(p.name)}</b><small>${placeSub(p)}</small></span></button><button class="iconbtn" data-plink="${i}" title="Copy a link that opens this folder"><svg class="i"><use href="#i-link"/></svg></button><button class="iconbtn" data-pdel="${i}" title="Remove shortcut"><svg class="i"><use href="#i-x"/></svg></button></div>`).join('')+'</div>';
-  else h+=`<p class="muted" style="margin:4px 2px 0">${canAdd?'Pin folders you use often (bills, forms, scans) to open them in one tap.':'Folder shortcuts need Chrome or Edge on a computer, or PoolDrive signed in on this browser.'}</p>`;
-  h+='</div>';
-  if(recent.length){
-    h+='<div class="sec"><div class="sech"><b>Recent</b><button class="btn small ghost" id="clrRecent">Clear</button></div><div class="list">'+recent.map((o,i)=>`<div class="li"><button class="lmain" data-recent="${i}">${o.kind==='pd'?ic('pd'):'<svg class="i" style="color:var(--muted)"><use href="#i-doc"/></svg>'}<span><b>${esc(o.name)}</b><small>${o.kind==='pd'?'PoolDrive':'This device'}${o.dirName?' · '+esc(o.dirName):''}</small></span></button></div>`).join('')+'</div></div>';
+  let h='';
+  h+=`<div class="sec"><div class="sech"><b>Folders</b></div><div class="fgrid">`+
+     places.map((p,i)=>`<div class="fcard" data-place="${i}" role="button" tabindex="0"><svg class="i fic" style="color:${p.kind==='pd'?'#4a7c9b':'#d9a520'}"><use href="#${p.kind==='pd'?'i-cloud':'i-folder'}"/></svg><span class="fn"><b>${esc(p.name)}</b><small>${placeSub(p)}</small></span><button class="iconbtn" data-plink="${i}" title="Copy a link that opens this folder"><svg class="i"><use href="#i-link"/></svg></button><button class="iconbtn" data-pdel="${i}" title="Remove folder shortcut"><svg class="i"><use href="#i-x"/></svg></button></div>`).join('')+
+     (canAdd?`<button class="fcard add" id="addPlace"><svg class="i"><use href="#i-plus"/></svg><span class="fn"><b>Add folder</b><small>${FSA_DIR?'This device or PoolDrive':'PoolDrive'}</small></span></button>`:'')+
+     `</div></div>`;
+  if(lib.length){
+    h+=`<div class="sec"><div class="sech libh"><b>Library</b><span class="libtools">
+        <span class="field libq"><svg class="i" style="width:16px;height:16px;color:var(--muted)"><use href="#i-search"/></svg><input id="libQ" placeholder="Search files" value="${esc(LIB.q)}" autocomplete="off"></span>
+        <select id="libSort" class="libsel"><option value="recent">Last opened</option><option value="name">Name</option><option value="added">Date added</option></select>
+        <span class="seg vseg"><button data-view="grid" title="Grid"><svg class="i"><use href="#i-grid"/></svg></button><button data-view="list" title="List"><svg class="i"><use href="#i-list"/></svg></button></span>
+      </span></div>
+      <div class="libchips">${[['all','All'],['local','This device'],['pd','PoolDrive'],['pin','★ Pinned']].map(([k,l])=>`<button class="chip" data-lf="${k}">${l}</button>`).join('')}<span class="spacer"></span><button class="btn small ghost" id="clrRecent">Clear library</button></div>
+      <div id="libItems"></div></div>`;
   }
   box.innerHTML=h;
+  const so=$('#libSort'); if(so) so.value=LIB.sort;
+  const q=$('#libQ'); if(q){ q.addEventListener('input',()=>{ LIB.q=q.value; renderLibItems(); }); q.addEventListener('keydown',e=>e.stopPropagation()); }
+  if(so) so.addEventListener('change',()=>{ LIB.sort=so.value; saveLibPrefs(); renderLibItems(); });
   $('#pdBtn').classList.toggle('hidden', !TOP);
+  renderLibItems();
+  backfillThumbs(lib);
+}
+async function renderLibItems(){
+  const el=$('#libItems'); if(!el) return;
+  $$('[data-lf]').forEach(b=>b.classList.toggle('on',b.dataset.lf===LIB.filter));
+  $$('[data-view]').forEach(b=>b.classList.toggle('on',b.dataset.view===LIB.view));
+  let lib=(await getRecent()).map((o,i)=>({o,i}));
+  const q=LIB.q.trim().toLowerCase();
+  lib=lib.filter(({o})=> (!q || o.name.toLowerCase().includes(q) || (o.dirName||'').toLowerCase().includes(q)) &&
+    (LIB.filter==='all' || (LIB.filter==='pin'?o.pinned: o.kind===LIB.filter)));
+  const cmp = LIB.sort==='name' ? (a,b)=>a.o.name.localeCompare(b.o.name,undefined,{numeric:true,sensitivity:'base'})
+            : LIB.sort==='added' ? (a,b)=>(b.o.added||0)-(a.o.added||0) : (a,b)=>(b.o.t||0)-(a.o.t||0);
+  lib.sort((a,b)=>(b.o.pinned?1:0)-(a.o.pinned?1:0) || cmp(a,b));
+  if(!lib.length){ el.className=''; el.innerHTML=`<div class="empty" style="padding:30px">${q?'No files match “'+esc(LIB.q)+'”.':'Nothing here yet.'}</div>`; return; }
+  el.className = LIB.view==='list' ? 'llist' : 'lgrid';
+  el.innerHTML = lib.map(({o,i})=>{
+    const where = (o.kind==='pd'?'PoolDrive':'This device') + (o.dirName?' · '+esc(o.dirName):'');
+    const meta = [ago(o.t), o.pages?o.pages+' page'+(o.pages>1?'s':''):''].filter(Boolean).join(' · ');
+    const pic = o.thumb ? `<img src="${o.thumb}" alt="" loading="lazy">` : `<span class="ph" style="--h:${hue(o.name)}"><b>${esc((o.name.match(/[A-Za-z0-9]/)||['P'])[0].toUpperCase())}</b><i>PDF</i></span>`;
+    const key=esc(originKey(o));
+    return `<div class="lcard${o.pinned?' pinned':''}" data-lk="${key}" role="button" tabindex="0" title="${esc(o.name)}">
+      <div class="lthumb">${pic}<span class="src">${o.kind==='pd'?'<svg class="i"><use href="#i-cloud"/></svg>':''}</span></div>
+      <div class="linfo"><b>${esc(o.name.replace(/\.pdf$/i,''))}</b><small>${where}</small><small>${meta}</small></div>
+      <div class="lacts"><button class="lpin" data-pin="${key}" title="${o.pinned?'Unpin':'Pin to top'}">${o.pinned?'★':'☆'}</button><button class="lrm" data-rm="${key}" title="Remove from library (the file is not deleted)"><svg class="i"><use href="#i-x"/></svg></button></div></div>`;
+  }).join('');
+}
+let backfilling=false;
+async function backfillThumbs(lib){
+  if(backfilling) return; backfilling=true;
+  try{
+    let n=0;
+    for(const o of lib){
+      if(n>=8) break; if(o.thumb || o.kind!=='local' || !o.handle || o.noThumb) continue;
+      try{
+        if(!o.handle.queryPermission || await o.handle.queryPermission({mode:'read'})!=='granted') continue;
+        const f=await o.handle.getFile(); if(f.size>40*1048576) continue; n++;
+        const doc=await pdfjsLib.getDocument({data:new Uint8Array(await f.arrayBuffer()), isEvalSupported:false}).promise;
+        const pg=await doc.getPage(1); const v=pg.getViewport({scale:1}); const vv=pg.getViewport({scale:240/v.width});
+        const c=document.createElement('canvas'); c.width=Math.ceil(vv.width); c.height=Math.ceil(vv.height); const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height);
+        await pg.render({canvasContext:x, viewport:vv}).promise;
+        await updateRecent(originKey(o), {thumb:c.toDataURL('image/jpeg',0.72), pages:doc.numPages}); doc.destroy(); c.width=0;
+        renderLibItems();
+      }catch(e){ await updateRecent(originKey(o), {noThumb:1}); }
+    }
+  } finally { backfilling=false; }
 }
 document.addEventListener('click', async e=>{
   const t=e.target;
   if(!t.closest || !t.closest('#places')) return;
   if(t.closest('#addPlace')) return addPlaceSheet();
-  if(t.closest('#clrRecent')){ await DB.set('recent',[]); renderHomeLists(); return; }
-  const pl=t.closest('[data-place]'); if(pl){ const p=(await getPlaces())[+pl.dataset.place]; if(p) openBrowser(p,'open'); return; }
-  const lk=t.closest('[data-plink]'); if(lk){ const p=(await getPlaces())[+lk.dataset.plink]; const url=placeLink(p);
+  if(t.closest('#clrRecent')){ const s=document.createElement('div'); s.className='scrim';
+    s.innerHTML=`<div class="sheet"><h3>Clear the library?</h3><p class="muted">This only empties the list here. Your files stay where they are.</p><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn small ghost" data-k="x">Cancel</button><button class="btn small primary" data-k="ok">Clear</button></div></div>`;
+    document.body.appendChild(s); s.addEventListener('click',async ev=>{ const b=ev.target.closest('[data-k]'); if(ev.target!==s&&!b) return; s.remove(); if(b&&b.dataset.k==='ok'){ const keep=(await getRecent()).filter(o=>o.pinned); await DB.set('recent',keep); renderHomeLists(); } }); return; }
+  const lf=t.closest('[data-lf]'); if(lf){ LIB.filter=lf.dataset.lf; saveLibPrefs(); renderLibItems(); return; }
+  const vw=t.closest('[data-view]'); if(vw){ LIB.view=vw.dataset.view; saveLibPrefs(); renderLibItems(); return; }
+  const pin=t.closest('[data-pin]'); if(pin){ e.stopPropagation(); const r=await getRecent(); const o=r.find(x=>originKey(x)===pin.dataset.pin); if(o){ o.pinned=!o.pinned; await DB.set('recent',r); renderLibItems(); } return; }
+  const rm=t.closest('[data-rm]'); if(rm){ e.stopPropagation(); const r=(await getRecent()).filter(x=>originKey(x)!==rm.dataset.rm); await DB.set('recent',r); if(!r.length) renderHomeLists(); else renderLibItems(); toast('Removed from the library. The file itself is untouched.'); return; }
+  const lk=t.closest('[data-plink]'); if(lk){ e.stopPropagation(); const p=(await getPlaces())[+lk.dataset.plink]; const url=placeLink(p);
     try{ await navigator.clipboard.writeText(url); toast(p.kind==='pd'?'Link copied. Opens this folder on any device signed in to PoolDrive.':'Link copied. It opens this folder in this browser on this device.',3600); }
     catch(err){ showLinkSheet(url); } return; }
-  const dl=t.closest('[data-pdel]'); if(dl){ const L=await getPlaces(); L.splice(+dl.dataset.pdel,1); await setPlaces(L); renderHomeLists(); return; }
-  const rc=t.closest('[data-recent]'); if(rc){ const o=(await getRecent())[+rc.dataset.recent]; if(o) openRecent(o); return; }
+  const dl=t.closest('[data-pdel]'); if(dl){ e.stopPropagation(); const L=await getPlaces(); L.splice(+dl.dataset.pdel,1); await setPlaces(L); renderHomeLists(); return; }
+  const pl=t.closest('[data-place]'); if(pl){ const p=(await getPlaces())[+pl.dataset.place]; if(p) openBrowser(p,'open'); return; }
+  const card=t.closest('[data-lk]'); if(card){ const o=(await getRecent()).find(x=>originKey(x)===card.dataset.lk); if(o) openRecent(o); return; }
 });
 function showLinkSheet(url){
   const s=document.createElement('div'); s.className='scrim';
@@ -1689,7 +1841,9 @@ async function openItems(items, mode){
   // mode 'new' = start a new document, 'add' = add pages to the open one
   if(mode==='new' && S.pages.length) resetDoc();
   await addFiles(items);
-  addRecent(items.map(i=>i.origin).filter(Boolean));
+  const withO=items.filter(i=>i.origin && i.srcId && S.sources[i.srcId]);
+  await addRecent(withO.map(i=>Object.assign({}, i.origin, {pages:S.sources[i.srcId].pages.length})));
+  for(const it of withO){ const p=S.pages.find(q=>q.src===it.srcId && q.idx===0); if(!p) continue; const th=await thumbOf(p); if(th) await updateRecent(originKey(it.origin),{thumb:th}); }
 }
 async function pickFromDevice(mode){
   if(FSA){
@@ -1861,13 +2015,13 @@ async function saveOut(filename, data, dest){
       const o=dest.origin;
       if(o.kind==='local'){ await writeLocal(o.handle, blob); toast('Saved to '+o.name, 2600); }
       else { busy(true,'Saving to PoolDrive…',0.9); await PD.replace(PD.acc(o.email), o.id, blob, 'application/pdf'); busy(false); toast('Saved to '+o.name+' in PoolDrive. Older versions stay in Drive’s version history.', 3600); }
-      S.sources[S.pages[0].src].savedAt=Date.now(); return true;
+      S.sources[S.pages[0].src].savedAt=Date.now(); libAdd(o); return true;
     }
     if(dest.kind==='local-dir'){
       if(!(await ensurePerm(dest.handle,'readwrite'))){ toast('Permission needed to save there'); return false; }
       const n=await uniqueLocal(dest.handle, filename); const h=await dest.handle.getFileHandle(n,{create:true}); await writeLocal(h, blob);
       toast('Saved '+n+' in '+dest.name, 2800);
-      if(isPdfName(n)) addRecent([{kind:'local', handle:h, name:n, dir:dest.handle, dirName:dest.name}]);
+      if(isPdfName(n)) libAdd({kind:'local', handle:h, name:n, dir:dest.handle, dirName:dest.name});
       return true;
     }
     if(dest.kind==='pd-dir' || dest.kind==='pd-parent'){
@@ -1878,7 +2032,7 @@ async function saveOut(filename, data, dest){
       busy(true,'Saving to PoolDrive…',0.9);
       const n=await PD.uniqueName(a,parent,filename); const r=await PD.create(a,parent,n,blob,mimeOf(n)); busy(false);
       toast('Saved '+n+' to PoolDrive'+(dest.name?' · '+dest.name:''), 3000);
-      if(isPdfName(n)) addRecent([{kind:'pd', email:a.email, id:r.id, parent, name:n, dirName:dest.name||''}]);
+      if(isPdfName(n)) libAdd({kind:'pd', email:a.email, id:r.id, parent, name:n, dirName:dest.name||''});
       return true;
     }
     if(dest.kind==='device' && FSA_SAVE){
@@ -1887,7 +2041,7 @@ async function saveOut(filename, data, dest){
       const ext=(filename.match(/\.[^.]+$/)||['.pdf'])[0]; opts.types=[{description:ext.slice(1).toUpperCase()+' file', accept:{[mimeOf(filename)]:[ext]}}];
       let h; try{ h=await window.showSaveFilePicker(opts); }catch(e){ if(e.name==='AbortError'){ toast('Not saved'); return false; } throw e; }
       await writeLocal(h, blob); toast('Saved '+h.name, 2600);
-      if(isPdfName(h.name)) addRecent([{kind:'local', handle:h, name:h.name}]);
+      if(isPdfName(h.name)) libAdd({kind:'local', handle:h, name:h.name});
       return true;
     }
   }catch(e){ busy(false); console.error(e); toast(e instanceof PDAuth ? 'Sign-in expired for '+e.acc.email+'. Reconnect it in PoolDrive.' : 'Could not save: '+(e.message||e), 4000); return false; }
