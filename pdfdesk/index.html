@@ -731,6 +731,7 @@ async function addFiles(input, atIndex){
   showWork();
   if(!wasEmpty) toast(`Added ${added.length} page${added.length>1?'s':''} at the end`);
   refreshAll(wasEmpty);
+  if(wasEmpty) restorePos();
   persist();
 }
 
@@ -869,6 +870,7 @@ function setScale(s, ax, ay){
   S.pages.forEach(sizePage);
   scroller.scrollLeft = cx*ratio-ax; scroller.scrollTop = cy*ratio-ay;
   $('#zVal').textContent = Math.round(s*100)+'%';
+  savePos();
   clearTimeout(zoomT); zoomT=setTimeout(()=>{ S.pages.forEach(p=>{ if((S.selAnn&&S.selAnn.pid===p.id) || p.ann.some(a=>a.t==='kp'||a.t==='ink')) drawAnn(p); }); visible.forEach(queueRender); }, 180);
 }
 
@@ -1253,7 +1255,7 @@ $('#docname').addEventListener('input',e=>{ S.name=e.target.value.trim()||'Docum
 $('#docname').addEventListener('keydown',e=>{ if(e.key==='Enter') e.target.blur(); e.stopPropagation(); });
 
 function showWork(){ $('#home').classList.add('hidden'); $('#work').classList.remove('hidden'); $('#docname').value=S.name; }
-function showHome(){ closeEditor(); closePop(); if(!$('#srBar').classList.contains('hidden')) closeSearch(); $('#work').classList.add('hidden'); $('#home').classList.remove('hidden'); checkResume(); }
+function showHome(){ savePos(true); closeEditor(); closePop(); if(!$('#srBar').classList.contains('hidden')) closeSearch(); $('#work').classList.add('hidden'); $('#home').classList.remove('hidden'); checkResume(); renderLibItems(); }
 $('#bHome').onclick=showHome;
 
 /* ---------- files in ---------- */
@@ -1291,7 +1293,7 @@ $('#resGo').onclick=async()=>{
     for(const s of ses.srcs){ const rec=await DB.get('src:'+s.id); if(rec) await addSource(rec.bytes, rec.name, {id:s.id, color:rec.color, restore:true, origin:rec.origin||s.origin||null}); if(rec && rec.name==='Blank page') S.blankId=s.id; }
     S.srcCount=ses.srcs.length;
     S.pages=ses.pages.filter(p=>S.sources[p.src] && S.sources[p.src].pages[p.idx]); S.images=ses.images||{}; S.name=ses.name;
-    busy(false); showWork(); setView('mark'); refreshAll(true);
+    busy(false); showWork(); setView('mark'); refreshAll(true); restorePos();
   }catch(e){ console.error(e); busy(false); toast('Could not reopen that session'); }
 };
 $('#resDrop').onclick=()=>{ resetDoc(); $('#resume').classList.add('hidden'); };
@@ -1771,7 +1773,8 @@ async function renderLibItems(){
   el.className = LIB.view==='list' ? 'llist' : 'lgrid';
   el.innerHTML = lib.map(({o,i})=>{
     const where = (o.kind==='pd'?'PoolDrive':'This device') + (o.dirName?' · '+esc(o.dirName):'');
-    const meta = [ago(o.t), o.pages?o.pages+' page'+(o.pages>1?'s':''):''].filter(Boolean).join(' · ');
+    const ps=POS[originKey(o)]; const pg = ps && ps.i>0 && o.pages ? `Page ${Math.min(ps.i+1,o.pages)} of ${o.pages}` : (o.pages?o.pages+' page'+(o.pages>1?'s':''):'');
+    const meta = [ago(o.t), pg].filter(Boolean).join(' · ');
     const pic = o.thumb ? `<img src="${o.thumb}" alt="" loading="lazy">` : `<span class="ph" style="--h:${hue(o.name)}"><b>${esc((o.name.match(/[A-Za-z0-9]/)||['P'])[0].toUpperCase())}</b><i>PDF</i></span>`;
     const key=esc(originKey(o));
     return `<div class="lcard${o.pinned?' pinned':''}" data-lk="${key}" role="button" tabindex="0" title="${esc(o.name)}">
@@ -2350,6 +2353,38 @@ $('#tHl').onclick=()=>{
   if(made){ pushHist(snap); persist(); }
   const s2=getSelection(); if(s2) s2.removeAllRanges();
 };
+
+/* ---------- remember where each PDF was left (page, spot on the page, zoom) ---------- */
+const POS = lsGet('pdfdesk:pos', {});
+function docKey(){ const p=S.pages[0]; const src=p && S.sources[p.src]; if(!src) return null; return src.origin ? originKey(src.origin) : 'f:'+src.name+':'+src.bytes.length; }
+let posT, restoring=false;
+function savePos(now){
+  clearTimeout(posT);
+  const run=()=>{
+    if(restoring || S.view!=='mark' || !S.pages.length || $('#work').classList.contains('hidden')) return;
+    const k=docKey(); if(!k) return;
+    const top=scroller.scrollTop; let i=0, f=0;
+    for(let n=0;n<S.pages.length;n++){ const r=pgEls.get(S.pages[n].id); if(!r) continue; const t=r.el.offsetTop, h=r.el.offsetHeight; if(t+h>top){ i=n; f=Math.max(0,Math.min(1,(top-t)/h)); break; } }
+    POS[k]={i, f:Math.round(f*1000)/1000, s:Math.round(S.scale*1000)/1000, n:S.pages.length, t:Date.now()};
+    const keys=Object.keys(POS); if(keys.length>300){ keys.sort((a,b)=>POS[a].t-POS[b].t).slice(0,keys.length-300).forEach(x=>delete POS[x]); }
+    lsSet('pdfdesk:pos', POS);
+  };
+  if(now) run(); else posT=setTimeout(run, 500);
+}
+function restorePos(){
+  const k=docKey(); const ps=k && POS[k]; if(!ps || (ps.i===0 && ps.f<0.02)) return;
+  restoring=true;
+  if(ps.s && Math.abs(ps.s-S.scale)>0.01){ S.scale=Math.max(0.2,Math.min(5,ps.s)); S.pages.forEach(sizePage); $('#zVal').textContent=Math.round(S.scale*100)+'%'; }
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const i=Math.min(ps.i, S.pages.length-1); const r=pgEls.get(S.pages[i].id);
+    if(r){ scroller.scrollTop = r.el.offsetTop + ps.f*r.el.offsetHeight; }
+    restoring=false;
+    if(i>0) toast(`Back where you left off · page ${i+1}`, 2400);
+  }));
+}
+scroller.addEventListener('scroll', ()=>savePos(), {passive:true});
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') savePos(true); });
+window.addEventListener('pagehide', ()=>savePos(true));
 
 /* ---------- keyboard ---------- */
 document.addEventListener('keydown',e=>{
