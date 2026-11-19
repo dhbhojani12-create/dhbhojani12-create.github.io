@@ -210,7 +210,7 @@ body.t-kp #stack{cursor:copy}
 @media (max-width:640px){#zoomBox{display:none!important}}
 .kpbtn{position:relative}
 .kpbtn .badge{position:absolute;top:3px;right:2px;min-width:16px;height:16px;border-radius:8px;background:#e8710a;color:#fff;font-size:10px;font-weight:700;line-height:16px;padding:0 4px;text-align:center}
-#kpPanel{position:absolute;top:0;right:0;bottom:0;width:330px;background:var(--surface);border-left:1px solid var(--line);z-index:8;display:flex;flex-direction:column;box-shadow:-8px 0 24px rgba(40,32,20,.06)}
+#kpPanel{position:absolute;top:0;right:0;bottom:0;width:320px;max-width:45%;background:var(--surface);border-left:1px solid var(--line);z-index:8;display:flex;flex-direction:column;box-shadow:-8px 0 24px rgba(40,32,20,.06)}
 @media (max-width:640px){#kpPanel{position:fixed;top:auto;left:0;width:auto;height:66vh;border-left:0;border-radius:18px 18px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.18);padding-bottom:env(safe-area-inset-bottom)}}
 .kph{display:flex;align-items:center;gap:8px;padding:12px 12px 8px 16px}
 .kph h3{margin:0;font-size:16px;flex:1}
@@ -235,6 +235,9 @@ body.t-kp #stack{cursor:copy}
 #srBar input::-webkit-search-cancel-button{display:none}
 #srCount{font-size:12.5px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
 .main.searching #scroller{top:50px}
+@media (min-width:641px){.main.kp-open #scroller,.main.kp-open #srBar{right:min(320px,45%)}.main.kp-open .pill,.main.kp-open .pop{left:calc((100% - min(320px,45%))/2)}}
+.kpl{overflow-x:hidden}
+.kph,.kpf{padding-right:12px}
 #bSearch.on,#bKp.on{background:var(--accent-soft);color:var(--accent)}
 @media (max-width:640px){#docname{min-width:30px}}
 #toast{position:fixed;left:50%;top:66px;transform:translateX(-50%) translateY(-8px);background:var(--ink);color:#fff;padding:9px 15px;border-radius:11px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:40;max-width:90%;text-align:center}
@@ -637,7 +640,7 @@ function rotPt(x,y,deg){ const r=deg*Math.PI/180, c=Math.cos(r), s=Math.sin(r); 
 function annBox(a){ // PDF-space bbox [x0,y0,x1,y1]
   if(a.t==='ink'){ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; for(let i=0;i<a.pts.length;i+=2){ const x=a.pts[i],y=a.pts[i+1]; if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; } const h=a.w/2; return [x0-h,y0-h,x1+h,y1+h]; }
   if(a.t==='wo'||a.t==='box') return [a.x,a.y,a.x+a.w,a.y+a.h];
-  if(a.t==='kp') return [a.x-9,a.y-9,a.x+9,a.y+9];
+  if(a.t==='kp'){ const r=10/S.scale; return [a.x-r,a.y-r,a.x+r,a.y+r]; }
   let lx0,ly0,lx1,ly1;
   if(a.t==='text'){ const n=a.txt.split('\n').length; lx0=-1; lx1=textW(a.txt,a.s)+1; ly1=a.s*0.95; ly0=-(n-1)*a.s*1.2-a.s*0.25; }
   else { lx0=0; ly0=0; lx1=a.w; ly1=a.h; }
@@ -660,7 +663,7 @@ function annMarkup(p, opts={}){
     const di = opts.interactive ? ` data-i="${i}"` : '';
     if(a._hide) return;
     if(a.t==='kp'){ if(opts.print) return; const R=totalRot(p);
-      s += `<g${di} transform="translate(${a.x} ${a.y}) rotate(${R}) scale(1 -1)"><title>${esc(a.label||'Key point')}</title><circle r="10" fill="#fff" stroke="#e8710a" stroke-width="1.2"/><path d="M-4 -6h8v12l-4-3-4 3z" fill="#e8710a"/></g>`; return; }
+      const k=(opts.interactive?1/S.scale:0.6)*0.85; s += `<g${di} transform="translate(${a.x} ${a.y}) rotate(${R}) scale(${k} ${-k})"><title>${esc(a.label||'Key point')}</title><circle r="11" fill="transparent"/><path d="M-5 -8h10v16l-5-3.6-5 3.6z" fill="#e8710a" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></g>`; return; }
     if(a.t==='ink'){
       let d=''; const P=a.pts; for(let k=0;k<P.length;k+=2) d += (k?'L':'M')+P[k].toFixed(2)+' '+P[k+1].toFixed(2);
       if(P.length===2) d += 'l0.01 0';
@@ -749,7 +752,7 @@ function setScale(s, ax, ay){
   S.pages.forEach(sizePage);
   scroller.scrollLeft = cx*ratio-ax; scroller.scrollTop = cy*ratio-ay;
   $('#zVal').textContent = Math.round(s*100)+'%';
-  clearTimeout(zoomT); zoomT=setTimeout(()=>{ S.pages.forEach(p=>{ if(S.selAnn) drawAnn(p); }); visible.forEach(queueRender); }, 180);
+  clearTimeout(zoomT); zoomT=setTimeout(()=>{ S.pages.forEach(p=>{ if((S.selAnn&&S.selAnn.pid===p.id) || p.ann.some(a=>a.t==='kp'||a.t==='ink')) drawAnn(p); }); visible.forEach(queueRender); }, 180);
 }
 
 /* ---------- pointer interaction in mark view ---------- */
@@ -1113,7 +1116,7 @@ function setView(v){
   $('#vMark').classList.toggle('on',v==='mark'); $('#vPages').classList.toggle('on',v==='pages');
   $('#scroller').classList.toggle('hidden',v!=='mark'); $('#pagesview').classList.toggle('hidden',v!=='pages');
   $('#zoomBox').style.visibility = v==='mark'?'visible':'hidden';
-  if(v==='pages'){ if(!$('#srBar').classList.contains('hidden')) closeSearch(); selectAnn(null); buildGrid(); $('#kpPanel').classList.add('hidden'); $('#bKp').classList.remove('on'); }
+  if(v==='pages'){ if(!$('#srBar').classList.contains('hidden')) closeSearch(); selectAnn(null); buildGrid(); $('#kpPanel').classList.add('hidden'); $('.main').classList.remove('kp-open'); $('#bKp').classList.remove('on'); }
   else { if(stackDirty){ buildStack(); stackDirty=false; } }
   updatePills();
 }
@@ -1930,7 +1933,7 @@ function allMarks(){
   return out;
 }
 function updateKpCount(){ const n=S.pages.reduce((s,p)=>s+p.ann.filter(a=>a.t==='kp').length,0); const b=$('#kpCount'); if(!b) return; b.textContent=n; b.classList.toggle('hidden',!n); }
-function toggleKp(force){ const el=$('#kpPanel'); const show = force!=null ? force : el.classList.contains('hidden'); if(show && S.view!=='mark') setView('mark'); el.classList.toggle('hidden',!show); $('#bKp').classList.toggle('on',show); if(show) renderKp(); }
+function toggleKp(force){ const el=$('#kpPanel'); const show = force!=null ? force : el.classList.contains('hidden'); if(show && S.view!=='mark') setView('mark'); el.classList.toggle('hidden',!show); $('.main').classList.toggle('kp-open',show); $('#bKp').classList.toggle('on',show); if(show) renderKp(); }
 let kpSeq=0;
 async function renderKp(){
   const el=$('#kpPanel'); if(!el || el.classList.contains('hidden')) return;
