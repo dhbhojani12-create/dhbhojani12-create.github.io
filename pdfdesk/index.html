@@ -423,7 +423,7 @@ body:not(.t-hand) .textLayer{pointer-events:none;-webkit-user-select:none;user-s
     </div>
     <div class="pop hidden" id="pop"></div>
     <aside id="kpPanel" class="hidden"><div class="kph"><svg class="i" style="color:#e8710a"><use href="#i-kp"/></svg><h3>Key points</h3><button class="iconbtn" id="kpClose" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
-      <div class="kpf"><button class="chip on" data-kf="all">All</button><button class="chip" data-kf="kp">Bookmarks</button><button class="chip" data-kf="hl">Boxes</button></div>
+      <div class="kpf"><button class="chip on" data-kf="all">All</button><button class="chip" data-kf="kp">Bookmarks</button><button class="chip" data-kf="hl">Boxes</button><button class="chip hidden" data-kf="toc" id="kpToc">Contents</button></div>
       <div class="kpl" id="kpList"></div>
       <div class="kpn">Bookmarks are saved inside the PDF, so they come back next time and show in other PDF apps too.</div></aside>
   </div>
@@ -678,6 +678,7 @@ function annBox(a){ // PDF-space bbox [x0,y0,x1,y1]
 }
 function distSeg(px,py,ax,ay,bx,by){ const dx=bx-ax, dy=by-ay; const l=dx*dx+dy*dy; let t = l? ((px-ax)*dx+(py-ay)*dy)/l : 0; t=Math.max(0,Math.min(1,t)); const x=ax+t*dx-px, y=ay+t*dy-py; return Math.sqrt(x*x+y*y); }
 function hitAnn(a, x, y, tol){
+  if(a.imp) return false;
   if(a.t==='ink'){ const P=a.pts; if(P.length===2) return Math.hypot(P[0]-x,P[1]-y) < a.w/2+tol; for(let i=0;i+3<P.length;i+=2) if(distSeg(x,y,P[i],P[i+1],P[i+2],P[i+3]) < a.w/2+tol) return true; return false; }
   const b=annBox(a); return x>=b[0]-tol&&x<=b[2]+tol&&y>=b[1]-tol&&y<=b[3]+tol;
 }
@@ -690,7 +691,7 @@ function annMarkup(p, opts={}){
   p.ann.forEach((a,i)=>{
     const di = opts.interactive ? ` data-i="${i}"` : '';
     if(a._hide) return;
-    if(a.t==='kp'){ if(opts.print) return; const R=totalRot(p);
+    if(a.t==='kp'){ if(opts.print || a.imp) return; const R=totalRot(p);
       const k=(opts.interactive?1/S.scale:0.6)*0.85; s += `<g${di} transform="translate(${a.x} ${a.y}) rotate(${R}) scale(${k} ${-k})"><title>${esc(a.label||'Key point')}</title><circle r="11" fill="transparent"/><path d="M-5 -8h10v16l-5-3.6-5 3.6z" fill="#e8710a" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></g>`; return; }
     if(a.t==='ink'){
       let d=''; const P=a.pts; for(let k=0;k<P.length;k+=2) d += (k?'L':'M')+P[k].toFixed(2)+' '+P[k+1].toFixed(2);
@@ -1273,7 +1274,7 @@ async function buildPdf(list, opt={}){
       const jpg=await canvasJpg(c, opt.q||0.85); const e=await out.embedJpg(jpg);
       const v=vp1(p); page=out.addPage([v.width,v.height]); page.drawImage(e,{x:0,y:0,width:v.width,height:v.height});
       if(opt.numbers) drawNumber(page, helv, i+1, N, v.width, v.height, 0, null);
-      p.ann.filter(a=>a.t==='kp').forEach(a=>{ const d=v.convertToViewportPoint(a.x,a.y); marks.push({page, x:0, y:v.height-d[1]+24, label:a.label, dy:d[1]}); });
+      p.ann.filter(a=>a.t==='kp').forEach(a=>{ const d=v.convertToViewportPoint(a.x,a.y); marks.push({page, x:0, y:v.height-d[1]+24, label:a.label, imp:a.imp, lvl:a.lvl, ord:a.ord}); });
       continue;
     }
     let cp=pre.get(p);
@@ -1302,20 +1303,37 @@ async function buildPdf(list, opt={}){
       }
     }
     if(opt.numbers){ const v=vp1(p); drawNumber(page, helv, i+1, N, v.width, v.height, R, v); }
-    { const v=vp1(p); p.ann.filter(a=>a.t==='kp').map(a=>({a,dy:v.convertToViewportPoint(a.x,a.y)[1]})).sort((x,y)=>x.dy-y.dy).forEach(({a})=>marks.push({page, x:R%180?a.x:null, y:R%180?null:a.y+24, label:a.label})); }
+    { const v=vp1(p); p.ann.filter(a=>a.t==='kp').map(a=>({a,dy:v.convertToViewportPoint(a.x,a.y)[1]})).sort((x,y)=>x.dy-y.dy).forEach(({a})=>marks.push({page, x:R%180?a.x:null, y:R%180?null:a.y+24, label:a.label, imp:a.imp, lvl:a.lvl, ord:a.ord})); }
   }
   if(marks.length && !opt.noOutline) writeOutline(out, marks);
   busy(true, opt.label||'Saving…', 1);
   return new Uint8Array(await out.save());
 }
 function writeOutline(doc, marks){
-  const ctx=doc.context; const root=ctx.nextRef(); const refs=marks.map(()=>ctx.nextRef());
-  marks.forEach((m,i)=>{
-    const d={Title:PDFLib.PDFHexString.fromText(m.label||'Key point'), Parent:root, Dest:ctx.obj([m.page.ref, PDFName.of('XYZ'), m.x==null?null:m.x, m.y==null?null:Math.round(m.y), null])};
-    if(i>0) d.Prev=refs[i-1]; if(i<marks.length-1) d.Next=refs[i+1];
-    ctx.assign(refs[i], ctx.obj(d));
-  });
-  ctx.assign(root, ctx.obj({Type:'Outlines', First:refs[0], Last:refs[refs.length-1], Count:marks.length}));
+  const ctx=doc.context;
+  const toc=marks.filter(m=>m.imp).sort((a,b)=>(a.ord||0)-(b.ord||0)), mine=marks.filter(m=>!m.imp);
+  // build a tree from levels
+  const roots=[]; const stack=[];
+  for(const m of toc){ const node={m,kids:[]}; const lvl=Math.max(0,m.lvl||0);
+    while(stack.length>lvl) stack.pop();
+    if(stack.length && lvl>0) stack[stack.length-1].kids.push(node); else roots.push(node);
+    stack.push(node); }
+  if(mine.length) roots.push({m:{label:'★ My key points', page:mine[0].page, x:mine[0].x, y:mine[0].y}, kids:mine.map(m=>({m,kids:[]})), open:true});
+  if(!roots.length) return;
+  const root=ctx.nextRef();
+  const write=(nodes,parent)=>{
+    const refs=nodes.map(()=>ctx.nextRef()); let total=0;
+    nodes.forEach((n,i)=>{
+      const m=n.m; const d={Title:PDFLib.PDFHexString.fromText(m.label||'Key point'), Parent:parent, Dest:ctx.obj([m.page.ref, PDFName.of('XYZ'), m.x==null?null:m.x, m.y==null?null:Math.round(m.y), null])};
+      if(i>0) d.Prev=refs[i-1]; if(i<nodes.length-1) d.Next=refs[i+1];
+      if(n.kids.length){ const sub=write(n.kids, refs[i]); d.First=sub.first; d.Last=sub.last; d.Count = n.open ? sub.count : -n.kids.length; total += n.open ? sub.count : 0; }
+      total++;
+      ctx.assign(refs[i], ctx.obj(d));
+    });
+    return {first:refs[0], last:refs[refs.length-1], count:total};
+  };
+  const top=write(roots, root);
+  ctx.assign(root, ctx.obj({Type:'Outlines', First:top.first, Last:top.last, Count:top.count}));
   doc.catalog.set(PDFName.of('Outlines'), root);
 }
 function drawNumber(page, font, n, N, vw, vh, R, v){
@@ -1949,8 +1967,12 @@ function kpSheet(p, a, isNew){
 }
 async function importOutline(srcId, pages){
   const doc=S.sources[srcId].doc; const ol=await doc.getOutline(); if(!ol||!ol.length) return;
-  const flat=[]; const walk=(arr,depth)=>{ for(const it of arr){ if(flat.length>=400) return; flat.push({it,depth}); if(it.items&&it.items.length) walk(it.items,depth+1); } }; walk(ol,0);
-  for(const {it} of flat){
+  const flat=[]; const walk=(arr,depth,mine)=>{ for(const it of arr){ if(flat.length>=600) return;
+      const isFolder = depth===0 && (it.title||'').trim()==='★ My key points';
+      if(isFolder){ if(it.items) walk(it.items,0,true); continue; }
+      flat.push({it,depth,mine}); if(it.items&&it.items.length) walk(it.items,depth+1,mine); } }; walk(ol,0,false);
+  const base=(S.srcCount||1)*100000;
+  for(const [n,{it,depth,mine}] of flat.entries()){
     try{
       let dest=it.dest; if(typeof dest==='string') dest=await doc.getDestination(dest); if(!Array.isArray(dest)||!dest[0]) continue;
       const idx = typeof dest[0]==='number' ? dest[0] : await doc.getPageIndex(dest[0]);
@@ -1960,7 +1982,7 @@ async function importOutline(srcId, pages){
       let x=view[0]+14, y=view[3]-14;
       if(kind==='XYZ'){ if(typeof dest[2]==='number') x=Math.max(view[0]+14,dest[2]+14); if(typeof dest[3]==='number') y=Math.min(view[3]-14, dest[3]-12); }
       else if(kind==='FitH'||kind==='FitBH'){ if(typeof dest[2]==='number') y=Math.min(view[3]-14,dest[2]-12); }
-      pg.ann.push({t:'kp', x, y, label:(it.title||'').trim()||'Bookmark', imp:1});
+      pg.ann.push(mine ? {t:'kp', x, y, label:(it.title||'').trim()||'Bookmark'} : {t:'kp', x, y, label:(it.title||'').trim()||'Section', imp:1, lvl:depth, ord:base+n});
     }catch(e){}
   }
 }
@@ -1974,17 +1996,19 @@ function allMarks(){
   out.sort((x,y)=>x.pi-y.pi || x.dy-y.dy || x.dx-y.dx);
   return out;
 }
-function updateKpCount(){ const n=S.pages.reduce((s,p)=>s+p.ann.filter(a=>a.t==='kp').length,0); const b=$('#kpCount'); if(!b) return; b.textContent=n; b.classList.toggle('hidden',!n); }
+function updateKpCount(){ const n=S.pages.reduce((s,p)=>s+p.ann.filter(a=>a.t==='kp'&&!a.imp).length,0); const b=$('#kpCount'); if(!b) return; b.textContent=n; b.classList.toggle('hidden',!n); }
 function toggleKp(force){ const el=$('#kpPanel'); const show = force!=null ? force : el.classList.contains('hidden'); if(show && S.view!=='mark') setView('mark'); el.classList.toggle('hidden',!show); $('.main').classList.toggle('kp-open',show); $('#bKp').classList.toggle('on',show); if(show) renderKp(); }
 let kpSeq=0;
 async function renderKp(){
   const el=$('#kpPanel'); if(!el || el.classList.contains('hidden')) return;
-  const seq=++kpSeq; const marks=allMarks().filter(m=>kpFilter==='all' || (kpFilter==='kp'?m.a.t==='kp':m.a.t!=='kp'));
+  const seq=++kpSeq; const all=allMarks(); const hasToc=all.some(m=>m.a.imp); $('#kpToc').classList.toggle('hidden',!hasToc); if(!hasToc && kpFilter==='toc') kpFilter='all';
+  let marks = kpFilter==='toc' ? all.filter(m=>m.a.imp).sort((x,y)=>(x.a.ord||0)-(y.a.ord||0)) : all.filter(m=>!m.a.imp && (kpFilter==='all' || (kpFilter==='kp'?m.a.t==='kp':m.a.t!=='kp')));
   $$('#kpPanel [data-kf]').forEach(b=>b.classList.toggle('on',b.dataset.kf===kpFilter));
   const list=$('#kpList');
   if(!marks.length){ list.innerHTML=`<div class="kpe">${kpFilter==='hl'?'No boxes yet.':'Nothing marked yet.<br>Pick the <b>bookmark</b> tool in the bottom bar and tap the page to mark a key point. Boxes show up here too.'}</div>`; return; }
   const rows=await Promise.all(marks.map(async m=>{
     let title, sub='Page '+(m.pi+1);
+    if(m.a.imp){ return `<div class="kpi" data-go="${m.p.id}:${m.i}" role="button" tabindex="0" style="padding-left:${8+Math.min(4,m.a.lvl||0)*14}px"><span class="tx"><b style="font-weight:${m.a.lvl?500:600}">${esc(m.a.label)}</b><small>Page ${m.pi+1}</small></span></div>`; }
     if(m.a.t==='kp'){ title=m.a.label||'Key point'; }
     else { let t=''; try{ t=await textUnder(m.p,m.a); }catch(e){} const kind=m.a.t==='box'?'box':'highlight'; title=t ? (t.length>110?t.slice(0,110)+'…':t) : (m.a.t==='box'?'Marked box':'Highlight'); sub+=' · '+kind; }
     const mk = m.a.t==='kp' ? '<svg class="i" style="width:16px;height:16px;color:#e8710a"><use href="#i-kp"/></svg>' : m.a.t==='box' ? `<i style="width:14px;height:12px;border-radius:2px;border:1.5px solid ${m.a.c};background:${m.a.c}26"></i>` : `<i style="background:${m.a.c}"></i>`;
@@ -2008,6 +2032,7 @@ function goToMark(pid, i){
   scroller.scrollTo({top:Math.max(0,top), left:Math.max(0,left), behavior:'smooth'});
   if(window.innerWidth<=640) toggleKp(false);
   if(S.tool!=='hand') setTool('hand');
+  if(p.ann[i].imp) return;
   selectAnn(pid,i);
   setTimeout(()=>{ const g=r.svg.querySelector(`[data-i="${i}"]`); const sel=r.svg.querySelector('rect[stroke-dasharray]'); [g,sel].forEach(x=>{ if(x){ x.classList.remove('kpflash'); void x.getBBox; x.classList.add('kpflash'); } }); }, 350);
 }
