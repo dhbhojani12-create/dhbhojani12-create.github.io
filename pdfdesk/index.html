@@ -341,6 +341,14 @@ body.has-lib .openrow .btn{height:auto;padding:0 18px}
   .pp:last-child{break-after:auto;page-break-after:auto}
   .pp img{max-width:100%;max-height:100vh;display:block}
 }
+#docname{flex:0 1 auto;width:auto;max-width:300px;field-sizing:content;min-width:4ch}
+.sstate{display:flex;align-items:center;gap:5px;height:28px;padding:0 9px;border-radius:8px;font-size:12px;color:var(--muted);white-space:nowrap;flex:none}
+.sstate i{width:7px;height:7px;border-radius:50%;background:#7aa58f;flex:none}
+.sstate.saving i{background:#c79a1e;animation:kpflash 1s infinite}
+.sstate.unsaved{color:#b8620c;cursor:pointer}
+.sstate.unsaved i{background:#e8710a}
+.sstate.unsaved:hover{background:#fdf1e4}
+@media (max-width:640px){.sstate span{display:none}.sstate{padding:0 4px}}
 #toast{position:fixed;left:50%;top:66px;transform:translateX(-50%) translateY(-8px);background:var(--ink);color:#fff;padding:9px 15px;border-radius:11px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:40;max-width:90%;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #busy{position:fixed;inset:0;background:rgba(244,241,234,.7);z-index:30;display:flex;align-items:center;justify-content:center}
@@ -442,6 +450,7 @@ body.has-lib .openrow .btn{height:auto;padding:0 18px}
   <div class="top">
     <button class="iconbtn" id="bHome" title="Back to start"><svg class="i"><use href="#i-back"/></svg></button>
     <input id="docname" spellcheck="false" aria-label="File name">
+    <button id="saveState" class="sstate hidden" type="button"></button>
     <div class="seg" role="tablist">
       <button id="vMark" class="on" title="Read and mark (M)"><svg class="i"><use href="#i-hl"/></svg><span class="lbl">Mark</span></button>
       <button id="vPages" title="Pages: merge, extract, reorder (G)"><svg class="i"><use href="#i-grid"/></svg><span class="lbl">Pages</span></button>
@@ -671,7 +680,7 @@ const DB = (()=>{
 let saveT;
 function persist(){ if(typeof renderKpSoon==='function') renderKpSoon(); clearTimeout(saveT); saveT=setTimeout(()=>{
   const used = new Set(S.pages.map(p=>p.src));
-  DB.set('session',{ name:S.name, pages:S.pages, images:S.images, srcs:[...used].map(id=>({id,name:S.sources[id].name,color:S.sources[id].color,origin:S.sources[id].origin||null})), t:Date.now() });
+  DB.set('session',{ name:S.name, pages:S.pages, images:S.images, srcs:[...used].map(id=>({id,name:S.sources[id].name,color:S.sources[id].color,origin:S.sources[id].origin||null})), t:Date.now(), clean:S.rev===S.savedRev, savedSig:S.savedSig });
 }, 600); }
 function lsGet(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
 function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
@@ -744,8 +753,9 @@ async function addFiles(input, atIndex){
   if(atIndex==null) S.pages.push(...added); else S.pages.splice(atIndex,0,...added);
   showWork();
   if(!wasEmpty) toast(`Added ${added.length} page${added.length>1?'s':''} at the end`);
+  if(wasEmpty && S.view!=='mark'){ S.view='mark'; $('#vMark').classList.add('on'); $('#vPages').classList.remove('on'); $('#scroller').classList.remove('hidden'); $('#pagesview').classList.add('hidden'); $('#zoomBox').style.visibility='visible'; }
   refreshAll(wasEmpty);
-  if(wasEmpty) restorePos();
+  if(wasEmpty){ restorePos(); markClean(); }
   persist();
 }
 
@@ -1130,7 +1140,7 @@ function updatePills(){
   $('#pillSel').classList.toggle('hidden', !mark || !o);
   $('#pillPages').classList.toggle('hidden', mark);
   if(o){ $('#sEdit').classList.toggle('hidden', o.a.t!=='text' && o.a.t!=='kp'); $('#sEdit .lbl').textContent = o.a.t==='kp'?'Rename':'Edit text'; $('#sSmall').classList.toggle('hidden', o.a.t==='kp'); $('#sBig').classList.toggle('hidden', o.a.t==='kp'); }
-  updateKpCount();
+  updateKpCount(); if(typeof updateSaveState==='function') updateSaveState();
   $('#bUndo').disabled=$('#pUndo').disabled=!undoStack.length;
   const rp=canReplace(); $('#bSave').title = rp ? 'Save back to '+docOrigin().name+' (Ctrl S)' : 'Save (Ctrl S)'; $('#bRedo').disabled=!redoStack.length;
   const n=S.sel.size;
@@ -1182,10 +1192,11 @@ function togglePop(t){
 async function fileToPngUrl(f, max){ const url=URL.createObjectURL(f); const im=await new Promise((res,rej)=>{const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=url;}); const k=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight)); const c=document.createElement('canvas'); c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k); c.getContext('2d').drawImage(im,0,0,c.width,c.height); URL.revokeObjectURL(url); return /png|gif|webp/.test(f.type) ? c.toDataURL('image/png') : c.toDataURL('image/jpeg',0.9); }
 
 /* ---------- history ---------- */
-function pushHist(snap){ undoStack.push(snap || JSON.stringify(S.pages)); if(undoStack.length>80) undoStack.shift(); redoStack=[]; updatePills(); }
+function pushHist(snap){ S.rev=(S.rev||0)+1; askEditPermission(); autoSaveSoon(); undoStack.push(snap || JSON.stringify(S.pages)); if(undoStack.length>80) undoStack.shift(); redoStack=[]; updatePills(); }
 function undo(){ if(!undoStack.length) return; closeEditor(); redoStack.push(JSON.stringify(S.pages)); restoreSnap(undoStack.pop()); }
 function redo(){ if(!redoStack.length) return; undoStack.push(JSON.stringify(S.pages)); restoreSnap(redoStack.pop()); }
 function restoreSnap(js){
+  S.rev=(S.rev||0)+1; setTimeout(autoSaveSoon,0);
   const before = S.pages.map(p=>p.id+':'+p.rot).join('|');
   S.pages=JSON.parse(js); S.selAnn=null;
   const ids=new Set(S.pages.map(p=>p.id)); S.sel.forEach(id=>{ if(!ids.has(id)) S.sel.delete(id); });
@@ -1281,7 +1292,7 @@ window.addEventListener('dragenter',e=>{ if(e.dataTransfer && [...e.dataTransfer
 window.addEventListener('dragleave',()=>{ dragDepth=Math.max(0,dragDepth-1); if(!dragDepth){ $('#dropov').classList.add('hidden'); $('#dropzone').classList.remove('over'); } });
 window.addEventListener('dragover',e=>{ if(e.dataTransfer && [...e.dataTransfer.types].includes('Files')) e.preventDefault(); });
 window.addEventListener('drop',async e=>{ if(!e.dataTransfer || !e.dataTransfer.files.length) return; e.preventDefault(); dragDepth=0; $('#dropov').classList.add('hidden'); $('#dropzone').classList.remove('over'); const homeOpen=!$('#home').classList.contains('hidden'); if(homeOpen && S.pages.length) resetDoc(); await addFiles(e.dataTransfer.files); });
-function resetDoc(){ Object.values(S.sources).forEach(s=>{ try{s.doc.destroy();}catch(e){} }); Object.keys(S.sources).forEach(id=>DB.del('src:'+id)); DB.del('session'); S.sources={}; S.pages=[]; S.images={}; S.sel.clear(); S.selAnn=null; S.blankId=null; S.srcCount=0; S.lastDest=null; S.pdDest=null; undoStack=[]; redoStack=[]; vpCache.clear(); stackDirty=true; }
+function resetDoc(){ Object.values(S.sources).forEach(s=>{ try{s.doc.destroy();}catch(e){} }); Object.keys(S.sources).forEach(id=>DB.del('src:'+id)); DB.del('session'); S.sources={}; S.pages=[]; S.images={}; S.sel.clear(); S.selAnn=null; S.blankId=null; S.srcCount=0; S.lastDest=null; S.pdDest=null; S._permAsked=false; S._asErr=null; S.rev=0; S.savedRev=0; undoStack=[]; redoStack=[]; vpCache.clear(); stackDirty=true; }
 
 $('#dropzone').addEventListener('click',e=>{ if(FSA && e.target.id!=='fileHome'){ e.preventDefault(); pickFromDevice('new'); } });
 $('#devBtn').onclick=()=>pickFromDevice('new');
@@ -1307,6 +1318,7 @@ $('#resGo').onclick=async()=>{
     for(const s of ses.srcs){ const rec=await DB.get('src:'+s.id); if(rec) await addSource(rec.bytes, rec.name, {id:s.id, color:rec.color, restore:true, origin:rec.origin||s.origin||null}); if(rec && rec.name==='Blank page') S.blankId=s.id; }
     S.srcCount=ses.srcs.length;
     S.pages=ses.pages.filter(p=>S.sources[p.src] && S.sources[p.src].pages[p.idx]); S.images=ses.images||{}; S.name=ses.name;
+    S.savedSig=ses.savedSig||structSig(); S.rev=1; S.savedRev=ses.clean?1:0;
     busy(false); showWork(); setView('mark'); refreshAll(true); restorePos();
   }catch(e){ console.error(e); busy(false); toast('Could not reopen that session'); }
 };
@@ -1358,7 +1370,7 @@ async function buildPdf(list, opt={}){
   }
   const marks=[]; // bookmarks -> PDF outline
   for(let i=0;i<N;i++){
-    const p=list[i]; busy(true, opt.label||'Saving…', i/N); if(i%4===0) await nextFrame();
+    const p=list[i]; if(!opt.silent) busy(true, opt.label||'Saving…', i/N); if(i%4===0) await nextFrame();
     const src=S.sources[p.src];
     let page, R=totalRot(p);
     if(opt.raster || src.encrypted){
@@ -1398,7 +1410,7 @@ async function buildPdf(list, opt={}){
     { const v=vp1(p); p.ann.filter(a=>a.t==='kp').map(a=>({a,dy:v.convertToViewportPoint(a.x,a.y)[1]})).sort((x,y)=>x.dy-y.dy).forEach(({a})=>marks.push({page, x:R%180?a.x:null, y:R%180?null:a.y+24, label:a.label, imp:a.imp, lvl:a.lvl, ord:a.ord})); }
   }
   if(marks.length && !opt.noOutline) writeOutline(out, marks);
-  busy(true, opt.label||'Saving…', 1);
+  if(!opt.silent) busy(true, opt.label||'Saving…', 1);
   return new Uint8Array(await out.save());
 }
 function writeOutline(doc, marks){
@@ -1487,6 +1499,7 @@ function openSave(mode){
       ${nsel?`<label class="radio"><input type="radio" name="w" value="sel" ${mode==='sel'?'checked':''}> Selected ${nsel} page${nsel>1?'s':''} <span class="muted">(${rangesLabel(selNums)})</span></label>`:''}
       <label class="radio"><input type="radio" name="w" value="rng"> Pages <span class="field" style="height:34px"><input id="svRng" placeholder="e.g. 1-3, 7" inputmode="text"></span></label>
       <label class="toggle" style="margin-top:6px"><input type="checkbox" id="svNum"> Add page numbers</label>
+      ${TOP?`<label class="toggle"><input type="checkbox" id="svAuto" ${S.autosave?'checked':''}> Auto-save marks into the file I opened</label>`:''}
     </div>
     <div class="acts">
       <button class="btn primary" data-a="pdf"><svg class="i"><use href="#i-save"/></svg><span id="svMain">Save PDF</span><small>keeps text sharp</small></button>
@@ -1519,6 +1532,7 @@ function openSave(mode){
   rng.addEventListener('focus',()=>{ scrim.querySelector('input[value=rng]').checked=true; info(); });
   scrim.querySelectorAll('input[name=w]').forEach(r=>r.addEventListener('change',info));
   scrim.addEventListener('keydown',e=>e.stopPropagation());
+  const au=scrim.querySelector('#svAuto'); if(au) au.onchange=()=>{ S.autosave=au.checked; lsSet('pdfdesk:autosave',S.autosave); toast(S.autosave?'Auto-save is on':'Auto-save is off'); autoSaveSoon(); };
   scrim.addEventListener('click',async e=>{
     if(e.target===scrim){ scrim.remove(); return; }
     const dd=e.target.closest('[data-d]'); if(dd){ choice=dd.dataset.d; info(); return; }
@@ -1537,6 +1551,7 @@ function openSave(mode){
   });
 }
 async function doExport(act, list, name, numbers, dest){
+  S._saveRev = (dest && dest.kind==='replace' && list===S.pages) ? S.rev : null; S._saveSig=structSig();
   if(act==='print') return printPages(list);
   const fname=outName(act,name);
   dest = dest || {kind:'download'};
@@ -2034,7 +2049,7 @@ async function saveOut(filename, data, dest){
       const o=dest.origin;
       if(o.kind==='local'){ await writeLocal(o.handle, blob); toast('Saved to '+o.name, 2600); }
       else { busy(true,'Saving to PoolDrive…',0.9); await PD.replace(PD.acc(o.email), o.id, blob, 'application/pdf'); busy(false); toast('Saved to '+o.name+' in PoolDrive. Older versions stay in Drive’s version history.', 3600); }
-      S.sources[S.pages[0].src].savedAt=Date.now(); libAdd(o); return true;
+      S.sources[S.pages[0].src].savedAt=Date.now(); if(S._saveRev!=null){ S.savedRev=S._saveRev; S.savedSig=S._saveSig; } updateSaveState(); libAdd(o); return true;
     }
     if(dest.kind==='local-dir'){
       if(!(await ensurePerm(dest.handle,'readwrite'))){ toast('Permission needed to save there'); return false; }
@@ -2438,6 +2453,72 @@ document.addEventListener('keydown', e=>{
     printPages(list);
   }
 }, true);
+
+/* ---------- auto-save into the opened file ---------- */
+S.autosave = lsGet('pdfdesk:autosave', true);
+// ask for edit permission during the first marking tap, while the browser still counts it as a user action
+function askEditPermission(){
+  if(S._permAsked || !S.autosave || !TOP) return; const o=docOrigin(); if(!o || o.kind!=='local' || !o.handle.requestPermission || !canReplace()) return;
+  S._permAsked=true;
+  o.handle.queryPermission({mode:'readwrite'}).then(st=>{ if(st!=='granted') return o.handle.requestPermission({mode:'readwrite'}); }).then(()=>autoSaveSoon()).catch(()=>{});
+}
+function structSig(){ return S.pages.map(p=>p.src+':'+p.idx+':'+p.rot).join('|'); }
+function markClean(){ S.rev=(S.rev||0)+1; S.savedRev=S.rev; S.savedSig=structSig(); updateSaveState(); }
+function isDirty(){ return S.pages.length>0 && S.rev!==S.savedRev; }
+// auto-save only when the doc is one PDF that can be written back, and only marks changed (pages not deleted, moved or rotated)
+function autoSaveReason(){
+  if(!S.autosave) return 'off';
+  if(!canReplace()) return 'nohome';
+  if(structSig()!==S.savedSig) return 'pages';
+  return '';
+}
+let asT=null, asBusy=false, asNeedPerm=false;
+function autoSaveSoon(){ clearTimeout(asT); updateSaveState(); asT=setTimeout(()=>autoSave(), 1500); }
+async function autoSave(fromClick){
+  if(asBusy){ autoSaveSoon(); return; }
+  if(!isDirty() || autoSaveReason()) { updateSaveState(); return; }
+  if(gesture || editor){ autoSaveSoon(); return; }
+  const o=docOrigin();
+  if(o.kind==='local'){
+    let st='granted'; try{ st=await o.handle.queryPermission({mode:'readwrite'}); }catch(e){}
+    if(st!=='granted'){
+      if(fromClick){ if(!(await ensurePerm(o.handle,'readwrite'))){ asNeedPerm=true; updateSaveState(); return; } }
+      else { asNeedPerm=true; updateSaveState(); return; }
+    }
+  }
+  asNeedPerm=false; asBusy=true; const rev=S.rev, sig=structSig(); updateSaveState();
+  try{
+    const bytes=await buildPdf(S.pages,{silent:true});
+    if(o.kind==='local') await writeLocal(o.handle, new Blob([bytes],{type:'application/pdf'}));
+    else await PD.replace(PD.acc(o.email), o.id, new Blob([bytes],{type:'application/pdf'}), 'application/pdf');
+    S.savedRev=rev; S.savedSig=sig; persist();
+    if(!S._thumbT || Date.now()-S._thumbT>60000){ S._thumbT=Date.now(); libAdd(o); }
+  }catch(e){ console.warn('autosave',e); S._asErr = e instanceof PDAuth ? 'PoolDrive sign-in expired' : 'Could not save'; }
+  finally{ asBusy=false; updateSaveState(); if(S.rev!==S.savedRev && !S._asErr) autoSaveSoon(); }
+}
+function updateSaveState(){
+  const b=$('#saveState'); if(!b) return;
+  if(!S.pages.length || !TOP){ b.className='sstate hidden'; return; }
+  const dirty=isDirty(), why=autoSaveReason();
+  let cls='sstate', txt='', tip='';
+  if(asBusy){ cls+=' saving'; txt='Saving…'; }
+  else if(!dirty){ if(docOrigin() && !why){ txt='Saved'; tip='Changes save into the file automatically'; } else { cls+=' hidden'; } }
+  else if(S._asErr){ cls+=' unsaved'; txt=S._asErr; tip='Click to try again'; }
+  else if(why==='' && asNeedPerm){ cls+=' unsaved'; txt='Click to turn on auto-save'; tip='Your browser needs permission to edit this file'; }
+  else if(why===''){ cls+=' saving'; txt='Saving…'; }
+  else { cls+=' unsaved'; txt='Not saved'; tip = why==='pages' ? 'Pages were added, removed, moved or rotated. Click to save.' : why==='off' ? 'Auto-save is off. Click to save.' : 'This document has no file to save into yet. Click to save it.'; }
+  b.className=cls; b.innerHTML = cls.includes('hidden') ? '' : `<i></i><span>${txt}</span>`; b.title=tip;
+}
+$('#saveState').onclick=()=>{
+  const why=autoSaveReason();
+  if(S._asErr){ S._asErr=null; autoSave(true); return; }
+  if(why==='' && isDirty()){ autoSave(true); return; }
+  if(isDirty()) $('#bSave').click();
+};
+window.addEventListener('beforeunload', e=>{
+  if(isDirty()){ if(!autoSaveReason() && !asNeedPerm){ autoSave(); } e.preventDefault(); e.returnValue=''; }
+});
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden' && isDirty() && !autoSaveReason()) autoSave(); });
 
 /* ---------- keyboard ---------- */
 document.addEventListener('keydown',e=>{
