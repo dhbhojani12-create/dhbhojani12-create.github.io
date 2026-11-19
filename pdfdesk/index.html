@@ -833,7 +833,6 @@ function endGesture(e, cancel){
     if(cancel){ g.p.ann.splice(g.p.ann.indexOf(g.a),1); drawAnn(g.p); return; }
     if(!g.line) simplify(g.a);
     pushHist(g.snap); persist(); refreshThumb(g.p);
-    if(g.line) snapToText(g.p, g.a).then(ch=>{ if(ch){ drawAnn(g.p); persist(); refreshThumb(g.p); } });
   } else if(g.kind==='er'){ if(g.did){ pushHist(g.snap); persist(); refreshThumb(g.p); } }
   else if(g.kind==='wo'){
     if(cancel || g.a.w<2 || g.a.h<2){ g.p.ann.splice(g.p.ann.indexOf(g.a),1); drawAnn(g.p); if(!cancel && g.a.w<2) toast(g.a.t==='wo'?'Drag to draw a white box':'Drag to draw a box'); return; }
@@ -1022,7 +1021,7 @@ function togglePop(t){
   if(t==='hl'){
     pop.innerHTML = `<div class="row"><span>Colour</span>${dots(HL_COLORS,S.hl.c,'c')}</div>
       <div class="row"><span>Size</span>${[9,13,18].map(w=>`<button class="chip ${S.hl.w===w?'on':''}" data-w="${w}">${w===9?'S':w===13?'M':'L'}</button>`).join('')}</div>
-      <label class="toggle"><input type="checkbox" id="stOn" ${S.hl.straight?'checked':''}> Straight lines, lined up with the text (off = freehand)</label>`;
+      <label class="toggle"><input type="checkbox" id="stOn" ${S.hl.straight?'checked':''}> Straight lines (off = freehand)</label>`;
   } else if(t==='pen'){
     pop.innerHTML = `<div class="row"><span>Colour</span>${dots(INK_COLORS,S.pen.c,'c')}</div>
       <div class="row"><span>Size</span>${[1.2,2,3.5].map(w=>`<button class="chip ${S.pen.w===w?'on':''}" data-w="${w}">${w===1.2?'Fine':w===2?'Med':'Bold'}</button>`).join('')}</div>`;
