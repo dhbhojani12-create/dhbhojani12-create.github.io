@@ -244,6 +244,19 @@ body.t-kp #stack{cursor:copy}
 .kph,.kpf{padding-right:12px}
 #bSearch.on,#bKp.on{background:var(--accent-soft);color:var(--accent)}
 @media (max-width:640px){#docname{min-width:30px}}
+#stack{-webkit-user-select:none;user-select:none}
+.tlwrap{position:absolute;left:0;top:0;transform-origin:0 0}
+.textLayer{position:absolute;left:0;top:0;overflow:hidden;line-height:1;-webkit-text-size-adjust:none;text-size-adjust:none;forced-color-adjust:none;transform-origin:0 0;-webkit-user-select:text;user-select:text}
+.textLayer span,.textLayer br{color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0% 0%}
+.textLayer span.markedContent{top:0;height:0}
+.textLayer ::selection{background:rgba(31,111,209,.28)}
+.textLayer br::selection{background:transparent}
+.textLayer .endOfContent{display:block;position:absolute;inset:100% 0 0;z-index:-1;cursor:default;-webkit-user-select:none;user-select:none}
+.textLayer.selecting .endOfContent{top:0}
+.textLayer[data-main-rotation="90"]{transform:rotate(90deg) translateY(-100%)}
+.textLayer[data-main-rotation="180"]{transform:rotate(180deg) translate(-100%,-100%)}
+.textLayer[data-main-rotation="270"]{transform:rotate(270deg) translateX(-100%)}
+body:not(.t-hand) .textLayer{pointer-events:none;-webkit-user-select:none;user-select:none}
 #toast{position:fixed;left:50%;top:66px;transform:translateX(-50%) translateY(-8px);background:var(--ink);color:#fff;padding:9px 15px;border-radius:11px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:40;max-width:90%;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #busy{position:fixed;inset:0;background:rgba(244,241,234,.7);z-index:30;display:flex;align-items:center;justify-content:center}
@@ -382,6 +395,12 @@ body.t-kp #stack{cursor:copy}
       <span class="sep"></span>
       <button class="tb" id="bUndo" title="Undo (Ctrl Z)"><svg class="i"><use href="#i-undo"/></svg></button>
       <button class="tb" id="bRedo" title="Redo (Ctrl Y)"><svg class="i"><use href="#i-redo"/></svg></button>
+    </div>
+    <div class="pill hidden" id="pillTxt">
+      <button class="tw" id="tCopy"><svg class="i"><use href="#i-copy"/></svg><span class="lbl">Copy</span></button>
+      <button class="tw" id="tHl"><svg class="i"><use href="#i-hl"/></svg><span class="lbl">Highlight</span></button>
+      <span class="sep"></span>
+      <button class="tw" id="tX" title="Clear selection"><svg class="i"><use href="#i-x"/></svg></button>
     </div>
     <div class="pill hidden" id="pillSel">
       <button class="tw" id="sEdit"><svg class="i"><use href="#i-edit"/></svg><span class="lbl">Edit text</span></button>
@@ -709,7 +728,7 @@ function buildStack(){
   stack.innerHTML=''; pgEls.clear(); visible.clear();
   if(io) io.disconnect(); if(ioFar) ioFar.disconnect();
   io = new IntersectionObserver(es=>{ es.forEach(e=>{ const id=e.target.dataset.id; if(e.isIntersecting){ visible.add(id); queueRender(id); } else visible.delete(id); }); }, {root:scroller, rootMargin:'700px 0px'});
-  ioFar = new IntersectionObserver(es=>{ es.forEach(e=>{ if(!e.isIntersecting){ const r=pgEls.get(e.target.dataset.id); if(r && r.rendered){ r.canvas.width=0; r.canvas.height=0; r.rendered=false; } } }); }, {root:scroller, rootMargin:'2600px 0px'});
+  ioFar = new IntersectionObserver(es=>{ es.forEach(e=>{ if(!e.isIntersecting){ const r=pgEls.get(e.target.dataset.id); if(r && r.rendered){ r.canvas.width=0; r.canvas.height=0; r.rendered=false; if(r.tl){ r.tl.remove(); r.tl=null; } } } }); }, {root:scroller, rootMargin:'2600px 0px'});
   if(!S.pages.length){ stack.innerHTML='<div class="empty">No pages left. Add files from the Pages view.</div>'; return; }
   S.pages.forEach((p,i)=>{
     const el=document.createElement('div'); el.className='pg'; el.dataset.id=p.id;
@@ -722,7 +741,7 @@ function buildStack(){
     io.observe(el); ioFar.observe(el);
   });
 }
-function sizePage(p){ const r=pgEls.get(p.id); if(!r) return; const v=vp1(p); r.el.style.width=(v.width*S.scale)+'px'; r.el.style.height=(v.height*S.scale)+'px'; r.svg.setAttribute('viewBox',`0 0 ${v.width} ${v.height}`); }
+function sizePage(p){ const r=pgEls.get(p.id); if(!r) return; const v=vp1(p); r.el.style.width=(v.width*S.scale)+'px'; r.el.style.height=(v.height*S.scale)+'px'; if(r.tl) r.tl.style.transform=`scale(${S.scale})`; r.svg.setAttribute('viewBox',`0 0 ${v.width} ${v.height}`); }
 function drawAnn(p){ const r=pgEls.get(p.id); if(!r) return; const sel = S.selAnn && S.selAnn.pid===p.id ? S.selAnn.i : null; r.svg.innerHTML = (typeof searchMarkup==='function'?searchMarkup(p):'') + annMarkup(p,{interactive:true, selIdx:sel}); }
 function pageById(id){ return S.pages.find(p=>p.id===id); }
 const rq=[]; let rendering=0;
@@ -748,7 +767,19 @@ async function renderPage(p, r){
   const cur = pgEls.get(p.id);
   const old = cur.canvas; c.style.cssText = old.style.cssText; cur.el.replaceChild(c, old); old.width=0;
   cur.canvas = c; cur.rendered=true; cur.rs=scale;
+  if(!cur.tl) buildTextLayer(p, cur);
   if(scale!==S.scale && visible.has(p.id)) queueRender(p.id);
+}
+// invisible, selectable text over the page (pdf.js text layer), built at scale 1 and zoomed with CSS
+async function buildTextLayer(p, r){
+  const wrap=document.createElement('div'); wrap.className='tlwrap'; const v=vp1(p);
+  wrap.style.width=v.width+'px'; wrap.style.height=v.height+'px'; wrap.style.transform=`scale(${S.scale})`;
+  const tl=document.createElement('div'); tl.className='textLayer'; tl.style.setProperty('--scale-factor','1');
+  wrap.appendChild(tl); r.tl=wrap; r.el.insertBefore(wrap, r.svg);
+  try{
+    const pr=proxyOf(p); const tc=await pr.getTextContent();
+    await pdfjsLib.renderTextLayer({textContentSource:tc, container:tl, viewport:pr.getViewport({scale:1, rotation:totalRot(p)})}).promise;
+  }catch(e){ console.warn('text layer',e); }
 }
 function fitScale(){ const avail = scroller.clientWidth - 24; const maxW = Math.max(...S.pages.map(p=>vp1(p).width), 100); return Math.max(0.2, Math.min(Math.min(avail,880)/maxW, 1.6)); }
 let zoomT;
@@ -1000,7 +1031,9 @@ function updateSwatches(){ $('#swHl').style.background=S.hl.c; $('#swPen').style
 function updatePills(){
   const mark = S.view==='mark';
   const o = selObj();
-  $('#pillMark').classList.toggle('hidden', !mark || !!o);
+  const ts = mark && !o && S.textSel;
+  $('#pillMark').classList.toggle('hidden', !mark || !!o || ts);
+  $('#pillTxt').classList.toggle('hidden', !ts);
   $('#pillSel').classList.toggle('hidden', !mark || !o);
   $('#pillPages').classList.toggle('hidden', mark);
   if(o){ $('#sEdit').classList.toggle('hidden', o.a.t!=='text' && o.a.t!=='kp'); $('#sEdit .lbl').textContent = o.a.t==='kp'?'Rename':'Edit text'; $('#sSmall').classList.toggle('hidden', o.a.t==='kp'); $('#sBig').classList.toggle('hidden', o.a.t==='kp'); }
@@ -2098,6 +2131,46 @@ if(PWA){
     });
   }
 }
+
+/* ---------- select & copy text ---------- */
+function stackSelection(){ const sel=getSelection(); if(!sel||sel.isCollapsed||!sel.rangeCount) return null; const n=sel.anchorNode; return n && stack.contains(n) ? sel : null; }
+document.addEventListener('mouseup',()=>{ document.querySelectorAll('.textLayer.selecting').forEach(t=>t.classList.remove('selecting')); });
+document.addEventListener('selectionchange',()=>{ const had=!!S.textSel; S.textSel=!!stackSelection(); if(had!==S.textSel) updatePills(); });
+$('#tCopy').onclick=async()=>{
+  const sel=stackSelection(); if(!sel) return; const txt=sel.toString().replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+  try{ await navigator.clipboard.writeText(txt); }catch(e){ try{ document.execCommand('copy'); }catch(e2){} }
+  toast('Copied '+(txt.length>40?txt.length+' characters':'“'+txt+'”'));
+};
+$('#tX').onclick=()=>{ const s=getSelection(); if(s) s.removeAllRanges(); };
+$('#tHl').onclick=()=>{
+  const sel=stackSelection(); if(!sel) return;
+  const rects=[...sel.getRangeAt(0).getClientRects()].filter(r=>r.width>1&&r.height>1);
+  if(!rects.length) return;
+  let made=0; const snap=JSON.stringify(S.pages);
+  pgEls.forEach((r,pid)=>{
+    const p=pageById(pid); if(!p) return; const box=r.el.getBoundingClientRect();
+    const mine=rects.filter(q=>{ const cx=q.left+q.width/2, cy=q.top+q.height/2; return cx>=box.left&&cx<=box.right&&cy>=box.top&&cy<=box.bottom; });
+    if(!mine.length) return;
+    const vert = totalRot(p)%180!==0; const lines=[];
+    mine.sort((a,b)=>vert?a.left-b.left:a.top-b.top).forEach(q=>{
+      const L=lines[lines.length-1];
+      if(L && (vert ? Math.abs((q.left+q.right)/2-(L.left+L.right)/2) < Math.min(q.width,L.right-L.left)*0.5 : Math.abs((q.top+q.bottom)/2-(L.top+L.bottom)/2) < Math.min(q.height,L.bottom-L.top)*0.5)){
+        L.left=Math.min(L.left,q.left); L.right=Math.max(L.right,q.right); L.top=Math.min(L.top,q.top); L.bottom=Math.max(L.bottom,q.bottom);
+      } else lines.push({left:q.left,right:q.right,top:q.top,bottom:q.bottom});
+    });
+    for(const L of lines){
+      let a,b,th;
+      if(!vert){ const y=(L.top+L.bottom)/2; a={clientX:L.left,clientY:y}; b={clientX:L.right,clientY:y}; th=(L.bottom-L.top); }
+      else { const x=(L.left+L.right)/2; a={clientX:x,clientY:L.top}; b={clientX:x,clientY:L.bottom}; th=(L.right-L.left); }
+      const A=toPdf(p,r.el,a), B=toPdf(p,r.el,b);
+      p.ann.push({t:'ink', k:'hl', c:S.hl.c, w:Math.max(4,Math.min(40,th/S.scale*0.95)), o:0.38, pts:[A.x,A.y,B.x,B.y]});
+      made++;
+    }
+    drawAnn(p); refreshThumb(p);
+  });
+  if(made){ pushHist(snap); persist(); }
+  const s2=getSelection(); if(s2) s2.removeAllRanges();
+};
 
 /* ---------- keyboard ---------- */
 document.addEventListener('keydown',e=>{
