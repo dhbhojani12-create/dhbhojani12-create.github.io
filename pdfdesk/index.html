@@ -83,6 +83,7 @@ body.t-text #stack{cursor:text}
 body.t-wo #stack{cursor:crosshair}
 body.t-er #stack{cursor:cell}
 body.t-sign #stack{cursor:copy}
+body.t-kp #stack{cursor:copy}
 .hit{fill:none;stroke:transparent}
 .texted{position:absolute;z-index:3;border:1.5px dashed var(--accent);background:rgba(255,255,255,.85);outline:none;resize:none;overflow:hidden;white-space:pre;padding:0 2px;margin:0;font-family:Helvetica,Arial,sans-serif;line-height:1.2;min-width:40px}
 
@@ -206,6 +207,29 @@ body.t-sign #stack{cursor:copy}
 .savegrp{display:flex}
 .savegrp .btn:first-child{border-radius:9px 0 0 9px}
 .savegrp .btn+.btn{border-radius:0 9px 9px 0;padding:0 7px;border-left:1px solid rgba(255,255,255,.25)}
+@media (max-width:640px){#zoomBox{display:none!important}}
+.kpbtn{position:relative}
+.kpbtn .badge{position:absolute;top:3px;right:2px;min-width:16px;height:16px;border-radius:8px;background:#e8710a;color:#fff;font-size:10px;font-weight:700;line-height:16px;padding:0 4px;text-align:center}
+#kpPanel{position:absolute;top:0;right:0;bottom:0;width:330px;background:var(--surface);border-left:1px solid var(--line);z-index:8;display:flex;flex-direction:column;box-shadow:-8px 0 24px rgba(40,32,20,.06)}
+@media (max-width:640px){#kpPanel{position:fixed;top:auto;left:0;width:auto;height:66vh;border-left:0;border-radius:18px 18px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.18);padding-bottom:env(safe-area-inset-bottom)}}
+.kph{display:flex;align-items:center;gap:8px;padding:12px 12px 8px 16px}
+.kph h3{margin:0;font-size:16px;flex:1}
+.kpf{display:flex;gap:6px;padding:0 16px 10px}
+.kpl{flex:1;overflow:auto;padding:0 8px 16px}
+.kpi{display:flex;align-items:flex-start;gap:10px;width:100%;padding:9px 8px;border-radius:10px;text-align:left}
+.kpi:hover{background:var(--bg)}
+.kpi .mk{flex:none;width:18px;height:18px;margin-top:1px;display:grid;place-items:center}
+.kpi .mk i{display:block;width:6px;height:16px;border-radius:3px}
+.kpi .tx{flex:1;min-width:0}
+.kpi .tx b{display:block;font-weight:600;font-size:13.5px;line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.kpi .tx small{color:var(--muted);font-size:11.5px}
+.kpi .ed{flex:none;color:var(--muted);width:28px;height:28px;border-radius:8px;display:grid;place-items:center}
+.kpi .ed:hover{background:var(--line)}
+.kpi .ed svg{width:16px;height:16px}
+.kpe{padding:30px 18px;color:var(--muted);text-align:center;font-size:13px;line-height:1.5}
+.kpn{font-size:11.5px;color:var(--muted);padding:8px 16px 12px;border-top:1px solid var(--line)}
+@keyframes kpflash{0%,100%{opacity:1}50%{opacity:.25}}
+.kpflash{animation:kpflash .45s ease 3}
 #toast{position:fixed;left:50%;top:66px;transform:translateX(-50%) translateY(-8px);background:var(--ink);color:#fff;padding:9px 15px;border-radius:11px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:40;max-width:90%;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #busy{position:fixed;inset:0;background:rgba(244,241,234,.7);z-index:30;display:flex;align-items:center;justify-content:center}
@@ -252,6 +276,8 @@ body.t-sign #stack{cursor:copy}
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-1 5 3 3v2H7v-2l3-3z"/><path d="M12 14v6"/></symbol>
   <symbol id="i-down" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
+  <symbol id="i-kp" viewBox="0 0 24 24"><path d="M6.5 3.5h11a1 1 0 0 1 1 1v16l-6.5-4.5-6.5 4.5v-16a1 1 0 0 1 1-1z"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" stroke-width="2.6"/></symbol>
   <symbol id="i-big" viewBox="0 0 24 24"><path d="M4 12h16M12 4v16" /></symbol>
 </svg>
 
@@ -304,6 +330,7 @@ body.t-sign #stack{cursor:copy}
       <span id="zVal">100%</span>
       <button class="iconbtn" id="zIn" title="Zoom in (Ctrl +)"><svg class="i"><use href="#i-plus"/></svg></button>
     </div>
+    <button class="iconbtn kpbtn" id="bKp" title="Key points (K to add, L for the list)"><svg class="i"><use href="#i-list"/></svg><span class="badge hidden" id="kpCount"></span></button>
     <label class="btn small hide-sm" title="Add more files (merge)"><svg class="i"><use href="#i-plus"/></svg>Add files<input type="file" id="fileAdd" accept="application/pdf,.pdf,image/*" multiple hidden></label>
     <div class="savegrp"><button class="btn small primary" id="bSave" title="Save (Ctrl S)"><svg class="i"><use href="#i-save"/></svg><span class="hide-sm">Save</span></button><button class="btn small primary" id="bSaveMore" title="More ways to save"><svg class="i" style="width:16px;height:16px"><use href="#i-down"/></svg></button></div>
   </div>
@@ -326,6 +353,7 @@ body.t-sign #stack{cursor:copy}
       <button class="tb" data-tool="text" title="Text (T) — tap again for size"><svg class="i"><use href="#i-text"/></svg></button>
       <button class="tb" data-tool="wo" title="Whiteout: drag a box to cover (W)"><svg class="i"><use href="#i-wo"/></svg></button>
       <button class="tb" data-tool="sign" title="Signature (S)"><svg class="i"><use href="#i-sign"/></svg></button>
+      <button class="tb" data-tool="kp" title="Key point: tap the page to bookmark it (K)"><svg class="i"><use href="#i-kp"/></svg></button>
       <button class="tb" data-tool="er" title="Eraser (E)"><svg class="i"><use href="#i-er"/></svg></button>
       <span class="sep"></span>
       <button class="tb" id="bUndo" title="Undo (Ctrl Z)"><svg class="i"><use href="#i-undo"/></svg></button>
@@ -351,6 +379,10 @@ body.t-sign #stack{cursor:copy}
       <button class="tw acc" id="pExt" title="Save only the selected pages"><svg class="i"><use href="#i-out"/></svg><span class="lbl">Extract</span></button>
     </div>
     <div class="pop hidden" id="pop"></div>
+    <aside id="kpPanel" class="hidden"><div class="kph"><svg class="i" style="color:#e8710a"><use href="#i-kp"/></svg><h3>Key points</h3><button class="iconbtn" id="kpClose" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+      <div class="kpf"><button class="chip on" data-kf="all">All</button><button class="chip" data-kf="kp">Bookmarks</button><button class="chip" data-kf="hl">Highlights</button></div>
+      <div class="kpl" id="kpList"></div>
+      <div class="kpn">Bookmarks are saved inside the PDF, so they come back next time and show in other PDF apps too.</div></aside>
   </div>
 </section>
 
@@ -504,7 +536,7 @@ const DB = (()=>{
   };
 })();
 let saveT;
-function persist(){ clearTimeout(saveT); saveT=setTimeout(()=>{
+function persist(){ if(typeof renderKpSoon==='function') renderKpSoon(); clearTimeout(saveT); saveT=setTimeout(()=>{
   const used = new Set(S.pages.map(p=>p.src));
   DB.set('session',{ name:S.name, pages:S.pages, images:S.images, srcs:[...used].map(id=>({id,name:S.sources[id].name,color:S.sources[id].color,origin:S.sources[id].origin||null})), t:Date.now() });
 }, 600); }
@@ -563,7 +595,9 @@ async function addFiles(input, atIndex){
       const isImg = /^image\//.test(f.type);
       const bytes = isImg ? await imageToPdfBytes(f) : new Uint8Array(await f.arrayBuffer());
       const id = await addSource(bytes, f.name, {origin: items[i].origin||null});
-      S.sources[id].pages.forEach((_,k)=>added.push({id:uid(), src:id, idx:k, rot:0, ann:[]}));
+      const newPages = S.sources[id].pages.map((_,k)=>({id:uid(), src:id, idx:k, rot:0, ann:[]}));
+      try{ await importOutline(id, newPages); }catch(e){ console.warn('outline',e); }
+      added.push(...newPages);
     }catch(e){ console.error(e); fails++; }
   }
   busy(false);
@@ -590,6 +624,7 @@ function rotPt(x,y,deg){ const r=deg*Math.PI/180, c=Math.cos(r), s=Math.sin(r); 
 function annBox(a){ // PDF-space bbox [x0,y0,x1,y1]
   if(a.t==='ink'){ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; for(let i=0;i<a.pts.length;i+=2){ const x=a.pts[i],y=a.pts[i+1]; if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; } const h=a.w/2; return [x0-h,y0-h,x1+h,y1+h]; }
   if(a.t==='wo') return [a.x,a.y,a.x+a.w,a.y+a.h];
+  if(a.t==='kp') return [a.x-9,a.y-9,a.x+9,a.y+9];
   let lx0,ly0,lx1,ly1;
   if(a.t==='text'){ const n=a.txt.split('\n').length; lx0=-1; lx1=textW(a.txt,a.s)+1; ly1=a.s*0.95; ly0=-(n-1)*a.s*1.2-a.s*0.25; }
   else { lx0=0; ly0=0; lx1=a.w; ly1=a.h; }
@@ -611,6 +646,8 @@ function annMarkup(p, opts={}){
   p.ann.forEach((a,i)=>{
     const di = opts.interactive ? ` data-i="${i}"` : '';
     if(a._hide) return;
+    if(a.t==='kp'){ if(opts.print) return; const R=totalRot(p);
+      s += `<g${di} transform="translate(${a.x} ${a.y}) rotate(${R}) scale(1 -1)"><title>${esc(a.label||'Key point')}</title><circle r="10" fill="#fff" stroke="#e8710a" stroke-width="1.2"/><path d="M-4 -6h8v12l-4-3-4 3z" fill="#e8710a"/></g>`; return; }
     if(a.t==='ink'){
       let d=''; const P=a.pts; for(let k=0;k<P.length;k+=2) d += (k?'L':'M')+P[k].toFixed(2)+' '+P[k+1].toFixed(2);
       if(P.length===2) d += 'l0.01 0';
@@ -739,6 +776,8 @@ stack.addEventListener('pointerdown', e=>{
     const a={t:'wo',x:pt.x,y:pt.y,w:0,h:0};
     gesture={kind:'wo',p:hit.p,el:hit.el,a,x0:pt.x,y0:pt.y,pointer:e.pointerId,snap:JSON.stringify(S.pages)};
     hit.p.ann.push(a); drawAnn(hit.p); stack.setPointerCapture(e.pointerId);
+  } else if(tool==='kp'){
+    addKeyPoint(hit.p, pt);
   } else if(tool==='sign'){
     if(!S.sig){ openSign(); return; }
     placeImage(hit.p, pt.dx, pt.dy, S.sig);
@@ -800,7 +839,7 @@ function straighten(a){
 const textCache=new Map();
 async function textItems(p){
   const k=p.src+':'+p.idx; if(textCache.has(k)) return textCache.get(k);
-  const pr=(async()=>{ try{ const tc=await proxyOf(p).getTextContent(); return tc.items.filter(it=>it.str && it.str.trim()).map(it=>{ const [a,b,c,d,e,f]=it.transform; return {a,b,c,d,e,f,w:it.width,h:Math.hypot(c,d)||it.height||10}; }); }catch(e){ return []; } })();
+  const pr=(async()=>{ try{ const tc=await proxyOf(p).getTextContent(); return tc.items.filter(it=>it.str && it.str.trim()).map(it=>{ const [a,b,c,d,e,f]=it.transform; return {a,b,c,d,e,f,w:it.width,h:Math.hypot(c,d)||it.height||10,str:it.str}; }); }catch(e){ return []; } })();
   textCache.set(k,pr); return pr;
 }
 // line a highlight up with the line of text under it (same height and centre as the text)
@@ -869,7 +908,7 @@ function resizeSel(f){ const o=selObj(); if(!o) return; pushHist(); const a=o.a;
   else if(a.t==='wo'){ const cx=a.x+a.w/2, cy=a.y+a.h/2; a.w*=f; a.h*=f; a.x=cx-a.w/2; a.y=cy-a.h/2; }
   drawAnn(o.p); persist(); }
 $('#sBig').onclick=()=>resizeSel(1.15); $('#sSmall').onclick=()=>resizeSel(1/1.15);
-$('#sEdit').onclick=()=>{ const o=selObj(); if(!o||o.a.t!=='text') return; const r=pgEls.get(o.p.id); const v=vp1(o.p); const b=annBox(o.a); const tl=v.convertToViewportPoint(b[0],b[3]); const br=v.convertToViewportPoint(b[2],b[1]); openEditor(o.p, r.el, Math.min(tl[0],br[0]), Math.min(tl[1],br[1]), S.selAnn.i); };
+$('#sEdit').onclick=()=>{ const o=selObj(); if(o&&o.a.t==='kp'){ kpSheet(o.p,o.a); return; } if(!o||o.a.t!=='text') return; const r=pgEls.get(o.p.id); const v=vp1(o.p); const b=annBox(o.a); const tl=v.convertToViewportPoint(b[0],b[3]); const br=v.convertToViewportPoint(b[2],b[1]); openEditor(o.p, r.el, Math.min(tl[0],br[0]), Math.min(tl[1],br[1]), S.selAnn.i); };
 
 /* text editor */
 let editor=null;
@@ -937,7 +976,8 @@ function updatePills(){
   $('#pillMark').classList.toggle('hidden', !mark || !!o);
   $('#pillSel').classList.toggle('hidden', !mark || !o);
   $('#pillPages').classList.toggle('hidden', mark);
-  if(o){ $('#sEdit').classList.toggle('hidden', o.a.t!=='text'); }
+  if(o){ $('#sEdit').classList.toggle('hidden', o.a.t!=='text' && o.a.t!=='kp'); $('#sEdit .lbl').textContent = o.a.t==='kp'?'Rename':'Edit text'; $('#sSmall').classList.toggle('hidden', o.a.t==='kp'); $('#sBig').classList.toggle('hidden', o.a.t==='kp'); }
+  updateKpCount();
   $('#bUndo').disabled=$('#pUndo').disabled=!undoStack.length;
   const rp=canReplace(); $('#bSave').title = rp ? 'Save back to '+docOrigin().name+' (Ctrl S)' : 'Save (Ctrl S)'; $('#bRedo').disabled=!redoStack.length;
   const n=S.sel.size;
@@ -1054,7 +1094,7 @@ function setView(v){
   $('#vMark').classList.toggle('on',v==='mark'); $('#vPages').classList.toggle('on',v==='pages');
   $('#scroller').classList.toggle('hidden',v!=='mark'); $('#pagesview').classList.toggle('hidden',v!=='pages');
   $('#zoomBox').style.visibility = v==='mark'?'visible':'hidden';
-  if(v==='pages'){ selectAnn(null); buildGrid(); }
+  if(v==='pages'){ selectAnn(null); buildGrid(); $('#kpPanel').classList.add('hidden'); $('#bKp').classList.remove('on'); }
   else { if(stackDirty){ buildStack(); stackDirty=false; } }
   updatePills();
 }
@@ -1131,7 +1171,7 @@ async function rasterPage(p, scale, withAnn=true){
   await pr.render({canvasContext:x, viewport:v}).promise;
   if(withAnn && p.ann.length){
     const v1=vp1(p);
-    const svg=`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${c.width}" height="${c.height}" viewBox="0 0 ${v1.width} ${v1.height}">${annMarkup(p).replace(/<image href=/g,'<image xlink:href=')}</svg>`;
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${c.width}" height="${c.height}" viewBox="0 0 ${v1.width} ${v1.height}">${annMarkup(p,{print:true}).replace(/<image href=/g,'<image xlink:href=')}</svg>`;
     const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
     try{ const im=await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=url; }); x.drawImage(im,0,0,c.width,c.height); }catch(e){ console.warn('ann raster',e); }
     URL.revokeObjectURL(url);
@@ -1158,6 +1198,7 @@ async function buildPdf(list, opt={}){
     const copied=await out.copyPages(libs[sid], first.map(p=>p.idx));
     first.forEach((p,k)=>pre.set(p,copied[k]));
   }
+  const marks=[]; // bookmarks -> PDF outline
   for(let i=0;i<N;i++){
     const p=list[i]; busy(true, opt.label||'Saving…', i/N); if(i%4===0) await nextFrame();
     const src=S.sources[p.src];
@@ -1167,6 +1208,7 @@ async function buildPdf(list, opt={}){
       const jpg=await canvasJpg(c, opt.q||0.85); const e=await out.embedJpg(jpg);
       const v=vp1(p); page=out.addPage([v.width,v.height]); page.drawImage(e,{x:0,y:0,width:v.width,height:v.height});
       if(opt.numbers) drawNumber(page, helv, i+1, N, v.width, v.height, 0, null);
+      p.ann.filter(a=>a.t==='kp').forEach(a=>{ const d=v.convertToViewportPoint(a.x,a.y); marks.push({page, x:0, y:v.height-d[1]+24, label:a.label, dy:d[1]}); });
       continue;
     }
     let cp=pre.get(p);
@@ -1193,9 +1235,21 @@ async function buildPdf(list, opt={}){
       }
     }
     if(opt.numbers){ const v=vp1(p); drawNumber(page, helv, i+1, N, v.width, v.height, R, v); }
+    { const v=vp1(p); p.ann.filter(a=>a.t==='kp').map(a=>({a,dy:v.convertToViewportPoint(a.x,a.y)[1]})).sort((x,y)=>x.dy-y.dy).forEach(({a})=>marks.push({page, x:R%180?a.x:null, y:R%180?null:a.y+24, label:a.label})); }
   }
+  if(marks.length && !opt.noOutline) writeOutline(out, marks);
   busy(true, opt.label||'Saving…', 1);
   return new Uint8Array(await out.save());
+}
+function writeOutline(doc, marks){
+  const ctx=doc.context; const root=ctx.nextRef(); const refs=marks.map(()=>ctx.nextRef());
+  marks.forEach((m,i)=>{
+    const d={Title:PDFLib.PDFHexString.fromText(m.label||'Key point'), Parent:root, Dest:ctx.obj([m.page.ref, PDFName.of('XYZ'), m.x==null?null:m.x, m.y==null?null:Math.round(m.y), null])};
+    if(i>0) d.Prev=refs[i-1]; if(i<marks.length-1) d.Next=refs[i+1];
+    ctx.assign(refs[i], ctx.obj(d));
+  });
+  ctx.assign(root, ctx.obj({Type:'Outlines', First:refs[0], Last:refs[refs.length-1], Count:marks.length}));
+  doc.catalog.set(PDFName.of('Outlines'), root);
 }
 function drawNumber(page, font, n, N, vw, vh, R, v){
   const txt=String(n), size=10, tw=font.widthOfTextAtSize(txt,size);
@@ -1777,6 +1831,120 @@ function showResumeTap(p){ // browsers need a tap before giving folder access ag
 }
 window.addEventListener('hashchange', routeHash);
 
+/* ================= Key points: bookmarks + highlights list ================= */
+let kpT; function renderKpSoon(){ clearTimeout(kpT); kpT=setTimeout(()=>{ updateKpCount(); renderKp(); },250); }
+async function lineTextAt(p, x, y){
+  const items=await textItems(p); let best=null;
+  for(const it of items){
+    if(Math.abs(it.b)<0.01 && Math.abs(it.c)<0.01){ if(y<it.f-it.h*0.4||y>it.f+it.h*1.1) continue; const d=Math.abs(it.f+it.h*0.35-y); if(!best||d<best.d-0.5) best={d,f:it.f,h:it.h,mode:'h'}; }
+    else if(Math.abs(it.a)<0.01 && Math.abs(it.d)<0.01){ const dir=Math.sign(it.b)||1; const c=it.e-dir*it.h*0.35; const d=Math.abs(c-x); if(d>it.h) continue; if(!best||d<best.d-0.5) best={d,e:it.e,h:it.h,mode:'v',dir}; }
+  }
+  if(!best) return '';
+  const line = best.mode==='h'
+    ? items.filter(it=>Math.abs(it.b)<0.01&&Math.abs(it.c)<0.01&&Math.abs(it.f-best.f)<best.h*0.5).sort((a,b)=>a.e-b.e)
+    : items.filter(it=>Math.abs(it.a)<0.01&&Math.abs(it.d)<0.01&&Math.abs(it.e-best.e)<best.h*0.5).sort((a,b)=>(a.f-b.f)*best.dir);
+  return line.map(it=>it.str).join(' ').replace(/\s+/g,' ').trim();
+}
+async function textUnder(p, a){
+  const b=annBox(a); const items=await textItems(p); const hits=[];
+  for(const it of items){
+    let x0,x1,y0,y1;
+    if(Math.abs(it.b)<0.01&&Math.abs(it.c)<0.01){ x0=it.e; x1=it.e+it.w; y0=it.f-it.h*0.2; y1=it.f+it.h*0.8; }
+    else if(Math.abs(it.a)<0.01&&Math.abs(it.d)<0.01){ const dir=Math.sign(it.b)||1; x0=Math.min(it.e,it.e-dir*it.h); x1=Math.max(it.e,it.e-dir*it.h); y0=Math.min(it.f,it.f+dir*it.w); y1=Math.max(it.f,it.f+dir*it.w); }
+    else continue;
+    const ox=Math.min(x1,b[2])-Math.max(x0,b[0]), oy=Math.min(y1,b[3])-Math.max(y0,b[1]);
+    if(ox>1 && oy>(Math.min(y1-y0,b[3]-b[1])*0.3) || (oy>1 && ox>(Math.min(x1-x0,b[2]-b[0])*0.3) && !(Math.abs(it.b)<0.01))) hits.push(it);
+  }
+  return hits.map(it=>it.str).join(' ').replace(/\s+/g,' ').trim();
+}
+async function addKeyPoint(p, pt){
+  const m=dispToPdf(p, 13, pt.dy); // flag sits in the left margin of that line, not on the words
+  const a={t:'kp', x:m.x, y:m.y, label:''};
+  pushHist(); p.ann.push(a); drawAnn(p);
+  let guess=''; try{ guess=await lineTextAt(p, pt.x, pt.y); }catch(e){}
+  a.label = guess ? (guess.length>70?guess.slice(0,70).replace(/\s+\S*$/,'')+'…':guess) : 'Page '+(S.pages.indexOf(p)+1);
+  persist(); updateKpCount(); refreshThumb(p);
+  kpSheet(p, a, true);
+}
+function kpSheet(p, a, isNew){
+  const s=document.createElement('div'); s.className='scrim';
+  s.innerHTML=`<div class="sheet"><h3>${isNew?'Key point added':'Rename key point'}</h3>
+    <div class="field"><input id="kpName" value="${esc(a.label||'')}" placeholder="What is here?"></div>
+    <p class="muted">Page ${S.pages.indexOf(p)+1}. Find it again from the list button at the top.</p>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn small ghost" data-k="del" style="color:var(--danger)">Remove</button><span class="spacer" style="flex:1"></span><button class="btn small primary" data-k="ok">Done</button></div></div>`;
+  document.body.appendChild(s);
+  const inp=s.querySelector('#kpName'); setTimeout(()=>{ inp.focus(); inp.select(); },30);
+  const done=()=>{ const v=inp.value.trim(); if(v && v!==a.label){ if(!isNew) pushHist(); a.label=v; persist(); } s.remove(); renderKp(); };
+  inp.addEventListener('keydown',e=>{ e.stopPropagation(); if(e.key==='Enter') done(); if(e.key==='Escape') s.remove(); });
+  s.addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(e.target===s){ done(); return; } if(!b) return;
+    if(b.dataset.k==='ok') done();
+    else { const i=p.ann.indexOf(a); if(i>=0){ pushHist(); p.ann.splice(i,1); if(S.selAnn&&S.selAnn.pid===p.id) S.selAnn=null; drawAnn(p); persist(); updatePills(); refreshThumb(p); } s.remove(); renderKp(); } });
+}
+async function importOutline(srcId, pages){
+  const doc=S.sources[srcId].doc; const ol=await doc.getOutline(); if(!ol||!ol.length) return;
+  const flat=[]; const walk=(arr,depth)=>{ for(const it of arr){ if(flat.length>=400) return; flat.push({it,depth}); if(it.items&&it.items.length) walk(it.items,depth+1); } }; walk(ol,0);
+  for(const {it} of flat){
+    try{
+      let dest=it.dest; if(typeof dest==='string') dest=await doc.getDestination(dest); if(!Array.isArray(dest)||!dest[0]) continue;
+      const idx = typeof dest[0]==='number' ? dest[0] : await doc.getPageIndex(dest[0]);
+      const pg=pages[idx]; if(!pg) continue;
+      const pr=S.sources[srcId].pages[idx]; const view=pr.view; // [x0,y0,x1,y1]
+      const kind=dest[1]&&dest[1].name;
+      let x=view[0]+14, y=view[3]-14;
+      if(kind==='XYZ'){ if(typeof dest[2]==='number') x=Math.max(view[0]+14,dest[2]+14); if(typeof dest[3]==='number') y=Math.min(view[3]-14, dest[3]-12); }
+      else if(kind==='FitH'||kind==='FitBH'){ if(typeof dest[2]==='number') y=Math.min(view[3]-14,dest[2]-12); }
+      pg.ann.push({t:'kp', x, y, label:(it.title||'').trim()||'Bookmark', imp:1});
+    }catch(e){}
+  }
+}
+/* ---- panel ---- */
+let kpFilter='all';
+function allMarks(){
+  const out=[];
+  S.pages.forEach((p,pi)=>{ const v=vp1(p); p.ann.forEach((a,i)=>{
+    if(a.t==='kp' || (a.t==='ink' && a.k==='hl')){ const b=annBox(a); const c=v.convertToViewportPoint((b[0]+b[2])/2,(b[1]+b[3])/2); out.push({p,pi,a,i,dy:c[1],dx:c[0]}); }
+  }); });
+  out.sort((x,y)=>x.pi-y.pi || x.dy-y.dy || x.dx-y.dx);
+  return out;
+}
+function updateKpCount(){ const n=S.pages.reduce((s,p)=>s+p.ann.filter(a=>a.t==='kp').length,0); const b=$('#kpCount'); if(!b) return; b.textContent=n; b.classList.toggle('hidden',!n); }
+function toggleKp(force){ const el=$('#kpPanel'); const show = force!=null ? force : el.classList.contains('hidden'); if(show && S.view!=='mark') setView('mark'); el.classList.toggle('hidden',!show); $('#bKp').classList.toggle('on',show); if(show) renderKp(); }
+let kpSeq=0;
+async function renderKp(){
+  const el=$('#kpPanel'); if(!el || el.classList.contains('hidden')) return;
+  const seq=++kpSeq; const marks=allMarks().filter(m=>kpFilter==='all' || (kpFilter==='kp'?m.a.t==='kp':m.a.t==='ink'));
+  $$('#kpPanel [data-kf]').forEach(b=>b.classList.toggle('on',b.dataset.kf===kpFilter));
+  const list=$('#kpList');
+  if(!marks.length){ list.innerHTML=`<div class="kpe">${kpFilter==='hl'?'No highlights yet.':'Nothing marked yet.<br>Pick the <b>bookmark</b> tool in the bottom bar and tap the page to mark a key point. Highlights show up here too.'}</div>`; return; }
+  const rows=await Promise.all(marks.map(async m=>{
+    let title, sub='Page '+(m.pi+1);
+    if(m.a.t==='kp'){ title=m.a.label||'Key point'; }
+    else { let t=''; try{ t=await textUnder(m.p,m.a); }catch(e){} title=t ? (t.length>110?t.slice(0,110)+'…':t) : 'Highlight'; sub+=' · highlight'; }
+    const mk = m.a.t==='kp' ? '<svg class="i" style="width:16px;height:16px;color:#e8710a"><use href="#i-kp"/></svg>' : `<i style="background:${m.a.c}"></i>`;
+    return `<div class="kpi" data-go="${m.p.id}:${m.i}" role="button" tabindex="0"><span class="mk">${mk}</span><span class="tx"><b>${esc(title)}</b><small>${sub}</small></span>${m.a.t==='kp'?`<button class="ed" data-ren="${m.p.id}:${m.i}" title="Rename"><svg class="i"><use href="#i-edit"/></svg></button>`:''}</div>`;
+  }));
+  if(seq!==kpSeq) return;
+  list.innerHTML=rows.join('');
+}
+$('#bKp').onclick=()=>toggleKp();
+$('#kpClose').onclick=()=>toggleKp(false);
+$('#kpPanel').addEventListener('click',e=>{
+  const f=e.target.closest('[data-kf]'); if(f){ kpFilter=f.dataset.kf; renderKp(); return; }
+  const r=e.target.closest('[data-ren]'); if(r){ const [pid,i]=r.dataset.ren.split(':'); const p=pageById(pid); if(p&&p.ann[+i]) kpSheet(p,p.ann[+i]); return; }
+  const g=e.target.closest('[data-go]'); if(g){ const [pid,i]=g.dataset.go.split(':'); goToMark(pid,+i); }
+});
+function goToMark(pid, i){
+  const p=pageById(pid); const r=pgEls.get(pid); if(!p||!r||!p.ann[i]) return;
+  const v=vp1(p); const b=annBox(p.ann[i]); const c=v.convertToViewportPoint((b[0]+b[2])/2,(b[1]+b[3])/2);
+  const top = r.el.offsetTop + c[1]*S.scale - scroller.clientHeight*0.3;
+  const left = r.el.offsetLeft + c[0]*S.scale - scroller.clientWidth/2;
+  scroller.scrollTo({top:Math.max(0,top), left:Math.max(0,left), behavior:'smooth'});
+  if(window.innerWidth<=640) toggleKp(false);
+  if(S.tool!=='hand') setTool('hand');
+  selectAnn(pid,i);
+  setTimeout(()=>{ const g=r.svg.querySelector(`[data-i="${i}"]`); const sel=r.svg.querySelector('rect[stroke-dasharray]'); [g,sel].forEach(x=>{ if(x){ x.classList.remove('kpflash'); void x.getBBox; x.classList.add('kpflash'); } }); }, 350);
+}
+
 /* ---------- keyboard ---------- */
 document.addEventListener('keydown',e=>{
   if(e.target.closest && e.target.closest('input,textarea,.scrim')) return;
@@ -1794,7 +1962,8 @@ document.addEventListener('keydown',e=>{
   if(k==='delete'||k==='backspace'){ if(S.view==='mark' && S.selAnn){ $('#sDel').click(); } else if(S.view==='pages' && S.sel.size){ $('#pDel').click(); } return; }
   if(k==='m') return setView('mark'); if(k==='g') return setView('pages');
   if(S.view==='pages'){ if(k==='r' && S.sel.size) $('#pRot').click(); return; }
-  const map={v:'hand',h:'hl',p:'pen',t:'text',w:'wo',s:'sign',e:'er'}; if(map[k] && S.tool!==map[k]) setTool(map[k]);
+  if(k==='l'){ toggleKp(); return; }
+  const map={v:'hand',h:'hl',p:'pen',t:'text',w:'wo',s:'sign',e:'er',k:'kp'}; if(map[k] && S.tool!==map[k]) setTool(map[k]);
 });
 
 /* ---------- init ---------- */
