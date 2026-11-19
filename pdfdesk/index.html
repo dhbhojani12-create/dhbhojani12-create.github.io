@@ -404,7 +404,7 @@ body.t-kp #stack{cursor:copy}
     </div>
     <div class="pop hidden" id="pop"></div>
     <aside id="kpPanel" class="hidden"><div class="kph"><svg class="i" style="color:#e8710a"><use href="#i-kp"/></svg><h3>Key points</h3><button class="iconbtn" id="kpClose" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
-      <div class="kpf"><button class="chip on" data-kf="all">All</button><button class="chip" data-kf="kp">Bookmarks</button><button class="chip" data-kf="hl">Highlights &amp; boxes</button></div>
+      <div class="kpf"><button class="chip on" data-kf="all">All</button><button class="chip" data-kf="kp">Bookmarks</button><button class="chip" data-kf="hl">Boxes</button></div>
       <div class="kpl" id="kpList"></div>
       <div class="kpn">Bookmarks are saved inside the PDF, so they come back next time and show in other PDF apps too.</div></aside>
   </div>
@@ -833,6 +833,7 @@ function endGesture(e, cancel){
     if(cancel){ g.p.ann.splice(g.p.ann.indexOf(g.a),1); drawAnn(g.p); return; }
     if(!g.line) simplify(g.a);
     pushHist(g.snap); persist(); refreshThumb(g.p);
+    if(g.line) snapToText(g.p, g.a).then(ch=>{ if(ch){ drawAnn(g.p); persist(); refreshThumb(g.p); } });
   } else if(g.kind==='er'){ if(g.did){ pushHist(g.snap); persist(); refreshThumb(g.p); } }
   else if(g.kind==='wo'){
     if(cancel || g.a.w<2 || g.a.h<2){ g.p.ann.splice(g.p.ann.indexOf(g.a),1); drawAnn(g.p); if(!cancel && g.a.w<2) toast(g.a.t==='wo'?'Drag to draw a white box':'Drag to draw a box'); return; }
@@ -1021,7 +1022,7 @@ function togglePop(t){
   if(t==='hl'){
     pop.innerHTML = `<div class="row"><span>Colour</span>${dots(HL_COLORS,S.hl.c,'c')}</div>
       <div class="row"><span>Size</span>${[9,13,18].map(w=>`<button class="chip ${S.hl.w===w?'on':''}" data-w="${w}">${w===9?'S':w===13?'M':'L'}</button>`).join('')}</div>
-      <label class="toggle"><input type="checkbox" id="stOn" ${S.hl.straight?'checked':''}> Straight lines (off = freehand)</label>`;
+      <label class="toggle"><input type="checkbox" id="stOn" ${S.hl.straight?'checked':''}> Straight lines, lined up with the text (off = freehand)</label>`;
   } else if(t==='pen'){
     pop.innerHTML = `<div class="row"><span>Colour</span>${dots(INK_COLORS,S.pen.c,'c')}</div>
       <div class="row"><span>Size</span>${[1.2,2,3.5].map(w=>`<button class="chip ${S.pen.w===w?'on':''}" data-w="${w}">${w===1.2?'Fine':w===2?'Med':'Bold'}</button>`).join('')}</div>`;
@@ -1935,7 +1936,7 @@ let kpFilter='all';
 function allMarks(){
   const out=[];
   S.pages.forEach((p,pi)=>{ const v=vp1(p); p.ann.forEach((a,i)=>{
-    if(a.t==='kp' || a.t==='box' || (a.t==='ink' && a.k==='hl')){ const b=annBox(a); const c=v.convertToViewportPoint((b[0]+b[2])/2,(b[1]+b[3])/2); out.push({p,pi,a,i,dy:c[1],dx:c[0]}); }
+    if(a.t==='kp' || a.t==='box'){ const b=annBox(a); const c=v.convertToViewportPoint((b[0]+b[2])/2,(b[1]+b[3])/2); out.push({p,pi,a,i,dy:c[1],dx:c[0]}); }
   }); });
   out.sort((x,y)=>x.pi-y.pi || x.dy-y.dy || x.dx-y.dx);
   return out;
@@ -1948,7 +1949,7 @@ async function renderKp(){
   const seq=++kpSeq; const marks=allMarks().filter(m=>kpFilter==='all' || (kpFilter==='kp'?m.a.t==='kp':m.a.t!=='kp'));
   $$('#kpPanel [data-kf]').forEach(b=>b.classList.toggle('on',b.dataset.kf===kpFilter));
   const list=$('#kpList');
-  if(!marks.length){ list.innerHTML=`<div class="kpe">${kpFilter==='hl'?'No highlights yet.':'Nothing marked yet.<br>Pick the <b>bookmark</b> tool in the bottom bar and tap the page to mark a key point. Highlights show up here too.'}</div>`; return; }
+  if(!marks.length){ list.innerHTML=`<div class="kpe">${kpFilter==='hl'?'No boxes yet.':'Nothing marked yet.<br>Pick the <b>bookmark</b> tool in the bottom bar and tap the page to mark a key point. Boxes show up here too.'}</div>`; return; }
   const rows=await Promise.all(marks.map(async m=>{
     let title, sub='Page '+(m.pi+1);
     if(m.a.t==='kp'){ title=m.a.label||'Key point'; }
