@@ -349,6 +349,13 @@ body.has-lib .openrow .btn{height:auto;padding:0 18px}
 .sstate.unsaved i{background:#e8710a}
 .sstate.unsaved:hover{background:#fdf1e4}
 @media (max-width:640px){.sstate span{display:none}.sstate{padding:0 4px}}
+.zval{width:52px;height:30px;border-radius:8px;text-align:center;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.zval:hover{background:var(--bg);color:var(--ink)}
+.zmenu{position:fixed;z-index:30;width:150px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:5px;display:flex;flex-direction:column}
+.zmenu button{text-align:left;padding:7px 10px;border-radius:8px;font-size:13px}
+.zmenu button:hover{background:var(--bg)}
+.zmenu button.on{font-weight:700;color:var(--accent)}
+.zmenu hr{border:0;border-top:1px solid var(--line);margin:4px 2px}
 #toast{position:fixed;left:50%;top:66px;transform:translateX(-50%) translateY(-8px);background:var(--ink);color:#fff;padding:9px 15px;border-radius:11px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:40;max-width:90%;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #busy{position:fixed;inset:0;background:rgba(244,241,234,.7);z-index:30;display:flex;align-items:center;justify-content:center}
@@ -458,7 +465,7 @@ body.has-lib .openrow .btn{height:auto;padding:0 18px}
     <div class="spacer hide-sm"></div>
     <div class="zoom" id="zoomBox">
       <button class="iconbtn" id="zOut" title="Zoom out (Ctrl −)"><svg class="i"><use href="#i-minus"/></svg></button>
-      <span id="zVal">100%</span>
+      <button id="zVal" class="zval" title="Zoom options">100%</button>
       <button class="iconbtn" id="zIn" title="Zoom in (Ctrl +)"><svg class="i"><use href="#i-plus"/></svg></button>
     </div>
     <button class="iconbtn" id="bSearch" title="Search in the PDF (Ctrl F)"><svg class="i"><use href="#i-search"/></svg></button>
@@ -888,16 +895,29 @@ let zoomT;
 function setScale(s, ax, ay){
   s = Math.max(0.2, Math.min(5, s)); if(Math.abs(s-S.scale)<1e-4) return;
   const rect = scroller.getBoundingClientRect();
-  ax = ax==null ? rect.width/2 : ax-rect.left; ay = ay==null ? rect.height/2 : ay-rect.top;
-  const cx = scroller.scrollLeft+ax, cy = scroller.scrollTop+ay, ratio = s/S.scale;
+  if(ax==null){ ax=rect.left+rect.width/2; ay=rect.top+rect.height/2; }
+  // remember which point of which page is under the anchor (mouse, fingers or screen centre)
+  let anchor=null, best=1e9;
+  for(const p of S.pages){ const r=pgEls.get(p.id); if(!r) continue; const b=r.el.getBoundingClientRect();
+    const d = ay<b.top ? b.top-ay : ay>b.bottom ? ay-b.bottom : 0;
+    if(d<best){ best=d; anchor={el:r.el, fx:(ax-b.left)/b.width, fy:(ay-b.top)/b.height}; if(d===0) break; }
+    if(b.top>ay && d>best) break; }
   S.scale = s;
   S.pages.forEach(sizePage);
-  scroller.scrollLeft = cx*ratio-ax; scroller.scrollTop = cy*ratio-ay;
+  if(anchor){ const b=anchor.el.getBoundingClientRect(); scroller.scrollLeft += (b.left+anchor.fx*b.width)-ax; scroller.scrollTop += (b.top+anchor.fy*b.height)-ay; }
   $('#zVal').textContent = Math.round(s*100)+'%';
   savePos();
   clearTimeout(zoomT); zoomT=setTimeout(()=>{ S.pages.forEach(p=>{ if((S.selAnn&&S.selAnn.pid===p.id) || p.ann.some(a=>a.t==='kp'||a.t==='ink')) drawAnn(p); }); visible.forEach(queueRender); }, 180);
 }
-
+function fitPageScale(){
+  const H=scroller.clientHeight-36, W=scroller.clientWidth-24;
+  const p=currentPage()||S.pages[0]; const v=vp1(p); return Math.max(0.2, Math.min(W/v.width, H/v.height));
+}
+function currentPage(){ const top=scroller.scrollTop+scroller.clientHeight*0.3; for(const p of S.pages){ const r=pgEls.get(p.id); if(r && r.el.offsetTop+r.el.offsetHeight>top) return p; } return S.pages[S.pages.length-1]; }
+function zoomTo(s, keepPage){
+  const p=currentPage(); setScale(s);
+  if(keepPage && p){ const r=pgEls.get(p.id); if(r) scroller.scrollTop=r.el.offsetTop-14; }
+}
 /* ---------- pointer interaction in mark view ---------- */
 let gesture=null; // {kind, pid, ...}
 let touchCount=0;
@@ -1050,7 +1070,12 @@ scroller.addEventListener('touchmove', e=>{
   }
 },{passive:false});
 scroller.addEventListener('touchend', e=>{ touchCount=e.touches.length; if(e.touches.length<2) pinch=null; });
-scroller.addEventListener('wheel', e=>{ if(e.ctrlKey||e.metaKey){ e.preventDefault(); setScale(S.scale*Math.exp(-e.deltaY*0.0022), e.clientX, e.clientY); } },{passive:false});
+scroller.addEventListener('wheel', e=>{
+  if(!(e.ctrlKey||e.metaKey)) return; e.preventDefault();
+  const dy = e.deltaMode===1 ? e.deltaY*33 : e.deltaMode===2 ? e.deltaY*400 : e.deltaY;
+  const f = Math.min(1.12, Math.max(1/1.12, Math.exp(-dy*0.0025)));   // ~12% per mouse-wheel notch, smooth for touchpad pinch
+  setScale(S.scale*f, e.clientX, e.clientY);
+},{passive:false});
 
 /* selection */
 function selectAnn(pid, i){
@@ -1276,6 +1301,17 @@ function refreshAll(fit){
 }
 $('#vMark').onclick=()=>setView('mark'); $('#vPages').onclick=()=>setView('pages');
 $('#zIn').onclick=()=>setScale(S.scale*1.2); $('#zOut').onclick=()=>setScale(S.scale/1.2);
+$('#zVal').onclick=e=>{
+  e.stopPropagation(); let m=$('#zMenu'); if(m){ m.remove(); return; }
+  m=document.createElement('div'); m.id='zMenu'; m.className='zmenu';
+  m.innerHTML=[['fitw','Fit width'],['fitp','Whole page'],['','—'],[0.5,'50%'],[0.75,'75%'],[1,'100%'],[1.25,'125%'],[1.5,'150%'],[2,'200%'],[3,'300%']]
+    .map(([k,l])=>l==='—'?'<hr>':`<button data-z="${k}" class="${typeof k==='number'&&Math.abs(k-S.scale)<0.01?'on':''}">${l}</button>`).join('');
+  const b=$('#zVal').getBoundingClientRect(); m.style.left=(b.left+b.width/2-75)+'px'; m.style.top=(b.bottom+6)+'px';
+  document.body.appendChild(m);
+  m.onclick=ev=>{ const z=ev.target.closest('[data-z]'); if(!z) return; const k=z.dataset.z; m.remove();
+    if(k==='fitw') zoomTo(fitScale(), false); else if(k==='fitp') zoomTo(fitPageScale(), true); else setScale(+k); };
+  setTimeout(()=>document.addEventListener('click',function off(){ const mm=$('#zMenu'); if(mm) mm.remove(); document.removeEventListener('click',off); }),0);
+};
 $('#docname').addEventListener('input',e=>{ S.name=e.target.value.trim()||'Document'; persist(); });
 $('#docname').addEventListener('keydown',e=>{ if(e.key==='Enter') e.target.blur(); e.stopPropagation(); });
 
