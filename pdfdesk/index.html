@@ -729,7 +729,7 @@ stack.addEventListener('pointerdown', e=>{
   if(tool==='pen'||tool==='hl'){
     const o = tool==='hl' ? S.hl : S.pen;
     const a={t:'ink', k:tool, c:o.c, w:tool==='hl'?o.w:o.w, o:tool==='hl'?0.38:1, pts:[pt.x,pt.y]};
-    gesture={kind:'ink',p:hit.p,el:hit.el,a,pointer:e.pointerId,snap:JSON.stringify(S.pages)};
+    gesture={kind:'ink',p:hit.p,el:hit.el,a,pointer:e.pointerId,snap:JSON.stringify(S.pages),sdx:pt.dx,sdy:pt.dy,line:tool==='hl'&&S.hl.straight};
     hit.p.ann.push(a); drawAnn(hit.p);
     stack.setPointerCapture(e.pointerId);
   } else if(tool==='er'){
@@ -747,7 +747,13 @@ stack.addEventListener('pointerdown', e=>{
 stack.addEventListener('pointermove', e=>{
   if(!gesture || e.pointerId!==gesture.pointer) return;
   const g=gesture; const pt=toPdf(g.p,g.el,e);
-  if(g.kind==='ink'){
+  if(g.kind==='ink' && g.line){
+    // straight highlighter: always a straight line from where you started, snapping flat or upright
+    let dx=pt.dx-g.sdx, dy=pt.dy-g.sdy; const t=Math.tan(18*Math.PI/180);
+    if(Math.abs(dy) <= Math.abs(dx)*t) dy=0; else if(Math.abs(dx) <= Math.abs(dy)*t) dx=0;
+    const q=dispToPdf(g.p, g.sdx+dx, g.sdy+dy); const P=g.a.pts;
+    g.a.pts=[P[0],P[1],q.x,q.y]; drawAnn(g.p);
+  } else if(g.kind==='ink'){
     const P=g.a.pts; const lx=P[P.length-2], ly=P[P.length-1];
     if(Math.hypot(pt.x-lx,pt.y-ly) > 0.7/S.scale){ P.push(pt.x,pt.y); drawAnn(g.p); }
   } else if(g.kind==='er'){ eraseAt(g.p,g.el,e); }
@@ -759,9 +765,9 @@ function endGesture(e, cancel){
   const g=gesture; gesture=null;
   if(g.kind==='ink'){
     if(cancel){ g.p.ann.splice(g.p.ann.indexOf(g.a),1); drawAnn(g.p); return; }
-    if(g.a.k==='hl' && S.hl.straight) straighten(g.a);
-    simplify(g.a);
+    if(!g.line) simplify(g.a);
     pushHist(g.snap); persist(); refreshThumb(g.p);
+    if(g.line) snapToText(g.p, g.a).then(ch=>{ if(ch){ drawAnn(g.p); persist(); refreshThumb(g.p); } });
   } else if(g.kind==='er'){ if(g.did){ pushHist(g.snap); persist(); refreshThumb(g.p); } }
   else if(g.kind==='wo'){
     if(cancel || g.a.w<2 || g.a.h<2){ g.p.ann.splice(g.p.ann.indexOf(g.a),1); drawAnn(g.p); if(!cancel && g.a.w<2) toast('Drag to draw a white box'); return; }
@@ -790,6 +796,36 @@ function straighten(a){
     const q=v.convertToPdfPoint(e1[0],e1[1]);
     a.pts=[x0,y0,q[0],q[1]];
   }
+}
+const textCache=new Map();
+async function textItems(p){
+  const k=p.src+':'+p.idx; if(textCache.has(k)) return textCache.get(k);
+  const pr=(async()=>{ try{ const tc=await proxyOf(p).getTextContent(); return tc.items.filter(it=>it.str && it.str.trim()).map(it=>{ const [a,b,c,d,e,f]=it.transform; return {a,b,c,d,e,f,w:it.width,h:Math.hypot(c,d)||it.height||10}; }); }catch(e){ return []; } })();
+  textCache.set(k,pr); return pr;
+}
+// line a highlight up with the line of text under it (same height and centre as the text)
+async function snapToText(p, a){
+  const P=a.pts; if(P.length!==4) return false;
+  const [x0,y0,x1,y1]=P; const horiz=Math.abs(y1-y0)<0.5, vert=Math.abs(x1-x0)<0.5;
+  if(!horiz && !vert) return false;
+  const items=await textItems(p); if(!items.length) return false;
+  let best=null;
+  for(const it of items){
+    if(horiz && Math.abs(it.b)<0.01 && Math.abs(it.c)<0.01 && it.a>0){
+      const lo=it.f-it.h*0.25, hi=it.f+it.h*0.85, xa=it.e, xb=it.e+it.w;
+      if(y0<lo-2||y0>hi+2) continue; if(Math.max(x0,x1)<xa-4||Math.min(x0,x1)>xb+4) continue;
+      const c=it.f+it.h*0.32; const dist=Math.abs(c-y0); if(!best||dist<best.dist) best={dist,c,h:it.h};
+    } else if(vert && Math.abs(it.a)<0.01 && Math.abs(it.d)<0.01){
+      // text running up/down the page (sideways pages)
+      const dir=Math.sign(it.b)||1; const c=it.e - dir*it.h*0.32; const lo=Math.min(it.e, it.e-dir*it.h*0.85)-2, hi=Math.max(it.e, it.e-dir*it.h*0.85)+2;
+      if(x0<lo||x0>hi) continue; const ya=it.f, yb=it.f+dir*it.w; if(Math.max(y0,y1)<Math.min(ya,yb)-4||Math.min(y0,y1)>Math.max(ya,yb)+4) continue;
+      const dist=Math.abs(c-x0); if(!best||dist<best.dist) best={dist,c,h:it.h};
+    }
+  }
+  if(!best) return false;
+  if(horiz){ a.pts=[x0,best.c,x1,best.c]; } else { a.pts=[best.c,y0,best.c,y1]; }
+  a.w=Math.max(5, Math.min(40, best.h*1.15));
+  return true;
 }
 function currentPidOf(a){ const p=S.pages.find(p=>p.ann.includes(a)); return p&&p.id; }
 function simplify(a){ const P=a.pts; if(P.length<=4) return; const out=[P[0],P[1]]; const tol=0.35/S.scale; for(let i=2;i<P.length-2;i+=2){ const lx=out[out.length-2],ly=out[out.length-1]; if(Math.hypot(P[i]-lx,P[i+1]-ly)>tol) out.push(P[i],P[i+1]); } out.push(P[P.length-2],P[P.length-1]); a.pts=out.map(n=>Math.round(n*100)/100); }
@@ -919,7 +955,7 @@ function togglePop(t){
   if(t==='hl'){
     pop.innerHTML = `<div class="row"><span>Colour</span>${dots(HL_COLORS,S.hl.c,'c')}</div>
       <div class="row"><span>Size</span>${[9,13,18].map(w=>`<button class="chip ${S.hl.w===w?'on':''}" data-w="${w}">${w===9?'S':w===13?'M':'L'}</button>`).join('')}</div>
-      <label class="toggle"><input type="checkbox" id="stOn" ${S.hl.straight?'checked':''}> Straighten lines automatically</label>`;
+      <label class="toggle"><input type="checkbox" id="stOn" ${S.hl.straight?'checked':''}> Straight lines, lined up with the text (off = freehand)</label>`;
   } else if(t==='pen'){
     pop.innerHTML = `<div class="row"><span>Colour</span>${dots(INK_COLORS,S.pen.c,'c')}</div>
       <div class="row"><span>Size</span>${[1.2,2,3.5].map(w=>`<button class="chip ${S.pen.w===w?'on':''}" data-w="${w}">${w===1.2?'Fine':w===2?'Med':'Bold'}</button>`).join('')}</div>`;
