@@ -122,7 +122,7 @@ body.t-kp #stack{cursor:copy}
 .pill .tw:disabled{opacity:.3}
 .pill .tw.danger{color:var(--danger)}
 .pill .tw.acc{background:var(--accent);color:#fff}
-@media (max-width:640px){.pill .tw .lbl{display:none}.pill .tw{padding:0 10px}.pill .tb{width:36px;height:38px}.pill .sep{margin:0 2px}.pill{padding:4px}}
+@media (max-width:640px){.pill .tw .lbl{display:none}.pill .tw{padding:0 10px}.pill .tb{width:34px;height:38px}.pill .sep{margin:0 2px}.pill{padding:4px}}
 @media (min-width:641px){.show-sm{display:none!important}}
 .pop{position:absolute;left:50%;bottom:calc(78px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px;z-index:7;display:flex;flex-direction:column;gap:10px;min-width:220px}
 .pop .row{display:flex;align-items:center;gap:8px}
@@ -278,6 +278,7 @@ body.t-kp #stack{cursor:copy}
   <symbol id="i-down" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
   <symbol id="i-kp" viewBox="0 0 24 24"><path d="M6.5 3.5h11a1 1 0 0 1 1 1v16l-6.5-4.5-6.5 4.5v-16a1 1 0 0 1 1-1z"/></symbol>
   <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" stroke-width="2.6"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="13" rx="2"/><rect x="7" y="8.5" width="10" height="7" rx="1" fill="currentColor" stroke="none" opacity=".18"/></symbol>
   <symbol id="i-big" viewBox="0 0 24 24"><path d="M4 12h16M12 4v16" /></symbol>
 </svg>
 
@@ -351,7 +352,7 @@ body.t-kp #stack{cursor:copy}
       <button class="tb" data-tool="hl" title="Highlighter (H) — tap again for colours"><svg class="i"><use href="#i-hl"/></svg><span class="sw" id="swHl"></span></button>
       <button class="tb" data-tool="pen" title="Pen (P) — tap again for colours"><svg class="i"><use href="#i-pen"/></svg><span class="sw" id="swPen"></span></button>
       <button class="tb" data-tool="text" title="Text (T) — tap again for size"><svg class="i"><use href="#i-text"/></svg></button>
-      <button class="tb" data-tool="wo" title="Whiteout: drag a box to cover (W)"><svg class="i"><use href="#i-wo"/></svg></button>
+      <button class="tb" data-tool="wo" title="Box: drag to mark an area. Tap again for colours or white cover (B)"><svg class="i"><use href="#i-box"/></svg><span class="sw" id="swBox"></span></button>
       <button class="tb" data-tool="sign" title="Signature (S)"><svg class="i"><use href="#i-sign"/></svg></button>
       <button class="tb" data-tool="kp" title="Key point: tap the page to bookmark it (K)"><svg class="i"><use href="#i-kp"/></svg></button>
       <button class="tb" data-tool="er" title="Eraser (E)"><svg class="i"><use href="#i-er"/></svg></button>
@@ -380,7 +381,7 @@ body.t-kp #stack{cursor:copy}
     </div>
     <div class="pop hidden" id="pop"></div>
     <aside id="kpPanel" class="hidden"><div class="kph"><svg class="i" style="color:#e8710a"><use href="#i-kp"/></svg><h3>Key points</h3><button class="iconbtn" id="kpClose" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
-      <div class="kpf"><button class="chip on" data-kf="all">All</button><button class="chip" data-kf="kp">Bookmarks</button><button class="chip" data-kf="hl">Highlights</button></div>
+      <div class="kpf"><button class="chip on" data-kf="all">All</button><button class="chip" data-kf="kp">Bookmarks</button><button class="chip" data-kf="hl">Highlights &amp; boxes</button></div>
       <div class="kpl" id="kpList"></div>
       <div class="kpn">Bookmarks are saved inside the PDF, so they come back next time and show in other PDF apps too.</div></aside>
   </div>
@@ -491,10 +492,11 @@ const {PDFDocument, rgb, degrees, StandardFonts, LineCapStyle, BlendMode, PDFNam
 const PALETTE = ['#c79a1e','#4a7c9b','#b0574d','#5b8a5b','#8a5ca8','#3d8b8b'];
 const HL_COLORS = ['#ffd84a','#8ee08e','#ff9ec4','#8fd0ff','#ffb067'];
 const INK_COLORS = ['#1d1d1f','#1f5fd1','#d0342c','#188038'];
+const BOX_COLORS = ['#e0a100','#2e9e5b','#1f6fd1','#d6336c','#7b4fd6','#e8710a'];
 const S = {
   sources:{}, pages:[], images:{}, name:'Document', view:'mark', tool:'hand',
   scale:1, sel:new Set(), selAnn:null, srcCount:0,
-  hl:{c:HL_COLORS[0], w:13, straight:true}, pen:{c:INK_COLORS[0], w:2}, text:{c:INK_COLORS[0], s:12},
+  hl:{c:HL_COLORS[0], w:13, straight:true}, pen:{c:INK_COLORS[0], w:2}, text:{c:INK_COLORS[0], s:12}, box:{c:'#1f6fd1'},
   sig:null
 };
 let undoStack=[], redoStack=[];
@@ -623,7 +625,7 @@ function textW(txt, size){ const c = textW.c || (textW.c=document.createElement(
 function rotPt(x,y,deg){ const r=deg*Math.PI/180, c=Math.cos(r), s=Math.sin(r); return [x*c-y*s, x*s+y*c]; }
 function annBox(a){ // PDF-space bbox [x0,y0,x1,y1]
   if(a.t==='ink'){ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; for(let i=0;i<a.pts.length;i+=2){ const x=a.pts[i],y=a.pts[i+1]; if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; } const h=a.w/2; return [x0-h,y0-h,x1+h,y1+h]; }
-  if(a.t==='wo') return [a.x,a.y,a.x+a.w,a.y+a.h];
+  if(a.t==='wo'||a.t==='box') return [a.x,a.y,a.x+a.w,a.y+a.h];
   if(a.t==='kp') return [a.x-9,a.y-9,a.x+9,a.y+9];
   let lx0,ly0,lx1,ly1;
   if(a.t==='text'){ const n=a.txt.split('\n').length; lx0=-1; lx1=textW(a.txt,a.s)+1; ly1=a.s*0.95; ly0=-(n-1)*a.s*1.2-a.s*0.25; }
@@ -656,6 +658,8 @@ function annMarkup(p, opts={}){
       if(opts.interactive) s += `<path${di} class="hit" d="${d}" stroke-width="${Math.max(a.w, 14/S.scale)}" stroke-linecap="round" stroke-linejoin="round"/>`;
     } else if(a.t==='wo'){
       s += `<rect${di} x="${a.x}" y="${a.y}" width="${a.w}" height="${a.h}" fill="#fff"/>`;
+    } else if(a.t==='box'){
+      s += `<rect${di} x="${a.x}" y="${a.y}" width="${a.w}" height="${a.h}" rx="1.5" fill="${a.c}" fill-opacity="0.15" stroke="${a.c}" stroke-opacity="0.9" stroke-width="1.4"/>`;
     } else if(a.t==='text'){
       const lines=a.txt.split('\n');
       s += `<g${di} transform="translate(${a.x} ${a.y}) rotate(${a.rot||0}) scale(1 -1)"><text font-family="Helvetica, Arial, sans-serif" font-size="${a.s}" fill="${a.c}" style="white-space:pre">` +
@@ -773,7 +777,7 @@ stack.addEventListener('pointerdown', e=>{
     gesture={kind:'er',p:hit.p,el:hit.el,pointer:e.pointerId,snap:JSON.stringify(S.pages),did:false};
     eraseAt(hit.p,hit.el,e); stack.setPointerCapture(e.pointerId);
   } else if(tool==='wo'){
-    const a={t:'wo',x:pt.x,y:pt.y,w:0,h:0};
+    const a = S.box.c==='white' ? {t:'wo',x:pt.x,y:pt.y,w:0,h:0} : {t:'box',x:pt.x,y:pt.y,w:0,h:0,c:S.box.c};
     gesture={kind:'wo',p:hit.p,el:hit.el,a,x0:pt.x,y0:pt.y,pointer:e.pointerId,snap:JSON.stringify(S.pages)};
     hit.p.ann.push(a); drawAnn(hit.p); stack.setPointerCapture(e.pointerId);
   } else if(tool==='kp'){
@@ -809,7 +813,7 @@ function endGesture(e, cancel){
     if(g.line) snapToText(g.p, g.a).then(ch=>{ if(ch){ drawAnn(g.p); persist(); refreshThumb(g.p); } });
   } else if(g.kind==='er'){ if(g.did){ pushHist(g.snap); persist(); refreshThumb(g.p); } }
   else if(g.kind==='wo'){
-    if(cancel || g.a.w<2 || g.a.h<2){ g.p.ann.splice(g.p.ann.indexOf(g.a),1); drawAnn(g.p); if(!cancel && g.a.w<2) toast('Drag to draw a white box'); return; }
+    if(cancel || g.a.w<2 || g.a.h<2){ g.p.ann.splice(g.p.ann.indexOf(g.a),1); drawAnn(g.p); if(!cancel && g.a.w<2) toast(g.a.t==='wo'?'Drag to draw a white box':'Drag to draw a box'); return; }
     pushHist(g.snap); persist(); refreshThumb(g.p);
   } else if(g.kind==='move'){ if(g.moved){ persist(); refreshThumb(g.p); } }
 }
@@ -905,7 +909,7 @@ function resizeSel(f){ const o=selObj(); if(!o) return; pushHist(); const a=o.a;
   if(a.t==='text') a.s=Math.max(5,Math.min(96,a.s*f));
   else if(a.t==='img'){ a.w*=f; a.h*=f; }
   else if(a.t==='ink'){ a.w=Math.max(0.5,a.w*f); }
-  else if(a.t==='wo'){ const cx=a.x+a.w/2, cy=a.y+a.h/2; a.w*=f; a.h*=f; a.x=cx-a.w/2; a.y=cy-a.h/2; }
+  else if(a.t==='wo'||a.t==='box'){ const cx=a.x+a.w/2, cy=a.y+a.h/2; a.w*=f; a.h*=f; a.x=cx-a.w/2; a.y=cy-a.h/2; }
   drawAnn(o.p); persist(); }
 $('#sBig').onclick=()=>resizeSel(1.15); $('#sSmall').onclick=()=>resizeSel(1/1.15);
 $('#sEdit').onclick=()=>{ const o=selObj(); if(o&&o.a.t==='kp'){ kpSheet(o.p,o.a); return; } if(!o||o.a.t!=='text') return; const r=pgEls.get(o.p.id); const v=vp1(o.p); const b=annBox(o.a); const tl=v.convertToViewportPoint(b[0],b[3]); const br=v.convertToViewportPoint(b[2],b[1]); openEditor(o.p, r.el, Math.min(tl[0],br[0]), Math.min(tl[1],br[1]), S.selAnn.i); };
@@ -961,7 +965,7 @@ function hashStr(s){ let h=0; for(let i=0;i<s.length;i+=7) h=(h*31+s.charCodeAt(
 
 /* ---------- tools & pills ---------- */
 function setTool(t){
-  if(S.tool===t && ['hl','pen','text','sign'].includes(t)){ togglePop(t); return; }
+  if(S.tool===t && ['hl','pen','text','sign','wo'].includes(t)){ togglePop(t); return; }
   closePop(); closeEditor();
   S.tool=t; document.body.className='t-'+t;
   $$('#pillMark .tb[data-tool]').forEach(b=>b.classList.toggle('on', b.dataset.tool===t));
@@ -969,7 +973,7 @@ function setTool(t){
   if(t==='sign' && !S.sig) openSign();
 }
 $$('#pillMark .tb[data-tool]').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
-function updateSwatches(){ $('#swHl').style.background=S.hl.c; $('#swPen').style.background=S.pen.c; }
+function updateSwatches(){ $('#swHl').style.background=S.hl.c; $('#swPen').style.background=S.pen.c; const sb=$('#swBox'); sb.style.background = S.box.c==='white'?'#fff':S.box.c; sb.style.boxShadow = S.box.c==='white'?'inset 0 0 0 1px #aaa':''; }
 function updatePills(){
   const mark = S.view==='mark';
   const o = selObj();
@@ -999,6 +1003,10 @@ function togglePop(t){
   } else if(t==='pen'){
     pop.innerHTML = `<div class="row"><span>Colour</span>${dots(INK_COLORS,S.pen.c,'c')}</div>
       <div class="row"><span>Size</span>${[1.2,2,3.5].map(w=>`<button class="chip ${S.pen.w===w?'on':''}" data-w="${w}">${w===1.2?'Fine':w===2?'Med':'Bold'}</button>`).join('')}</div>`;
+  } else if(t==='wo'){
+    pop.innerHTML = `<div class="row"><span>Colour</span>${dots(BOX_COLORS,S.box.c,'c')}</div>
+      <div class="row"><span></span><button class="chip ${S.box.c==='white'?'on':''}" data-c="white" style="white-space:nowrap">White cover</button></div>
+      <div class="muted">Drag on the page to draw a box. White cover hides what’s under it.</div>`;
   } else if(t==='text'){
     pop.innerHTML = `<div class="row"><span>Colour</span>${dots(INK_COLORS,S.text.c,'c')}</div>
       <div class="row"><span>Size</span>${[9,12,16,22].map(w=>`<button class="chip ${S.text.s===w?'on':''}" data-w="${w}">${w}</button>`).join('')}</div>
@@ -1011,15 +1019,15 @@ function togglePop(t){
   }
   pop.onclick = ev=>{
     const b=ev.target.closest('button'); if(!b) return;
-    const o = t==='hl'?S.hl : t==='pen'?S.pen : S.text;
+    const o = t==='hl'?S.hl : t==='pen'?S.pen : t==='wo'?S.box : S.text;
     if(b.dataset.c){ o.c=b.dataset.c; }
     else if(b.dataset.w){ if(t==='text') o.s=+b.dataset.w; else o.w=+b.dataset.w; }
     else if(b.dataset.si!=null){ S.sig=lsGet('pdfdesk:sigs',[])[+b.dataset.si]; closePop(); toast('Tap where it should go'); return; }
     else if(b.id==='sigNew'){ closePop(); openSign(true); return; }
     else return;
-    updateSwatches(); lsSet('pdfdesk:tools',{hl:S.hl,pen:S.pen,text:S.text}); pop.dataset.for=''; togglePop(t);
+    updateSwatches(); lsSet('pdfdesk:tools',{hl:S.hl,pen:S.pen,text:S.text,box:S.box}); pop.dataset.for=''; togglePop(t);
   };
-  const st=$('#stOn'); if(st) st.onchange=()=>{ S.hl.straight=st.checked; lsSet('pdfdesk:tools',{hl:S.hl,pen:S.pen,text:S.text}); };
+  const st=$('#stOn'); if(st) st.onchange=()=>{ S.hl.straight=st.checked; lsSet('pdfdesk:tools',{hl:S.hl,pen:S.pen,text:S.text,box:S.box}); };
   const si=$('#stampIn'); if(si) si.onchange=async()=>{ const f=si.files[0]; if(!f) return; S.sig = await fileToPngUrl(f, 900); closePop(); toast('Tap where it should go'); };
 }
 async function fileToPngUrl(f, max){ const url=URL.createObjectURL(f); const im=await new Promise((res,rej)=>{const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=url;}); const k=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight)); const c=document.createElement('canvas'); c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k); c.getContext('2d').drawImage(im,0,0,c.width,c.height); URL.revokeObjectURL(url); return /png|gif|webp/.test(f.type) ? c.toDataURL('image/png') : c.toDataURL('image/jpeg',0.9); }
@@ -1225,6 +1233,8 @@ async function buildPdf(list, opt={}){
         page.drawSvgPath(d,o);
       } else if(a.t==='wo'){
         page.drawRectangle({x:a.x,y:a.y,width:a.w,height:a.h,color:rgb(1,1,1)});
+      } else if(a.t==='box'){
+        page.drawRectangle({x:a.x,y:a.y,width:a.w,height:a.h,color:hexRgb(a.c),opacity:0.15,borderColor:hexRgb(a.c),borderWidth:1.4,borderOpacity:0.9});
       } else if(a.t==='text'){
         const lines=a.txt.split('\n'); const r=(a.rot||0)*Math.PI/180; const lh=a.s*1.2;
         lines.forEach((l,k)=>{ if(!l) return; page.drawText(safeText(helv,l),{x:a.x+k*lh*Math.sin(r), y:a.y-k*lh*Math.cos(r), size:a.s, font:helv, color:hexRgb(a.c), rotate:degrees(a.rot||0)}); });
@@ -1902,7 +1912,7 @@ let kpFilter='all';
 function allMarks(){
   const out=[];
   S.pages.forEach((p,pi)=>{ const v=vp1(p); p.ann.forEach((a,i)=>{
-    if(a.t==='kp' || (a.t==='ink' && a.k==='hl')){ const b=annBox(a); const c=v.convertToViewportPoint((b[0]+b[2])/2,(b[1]+b[3])/2); out.push({p,pi,a,i,dy:c[1],dx:c[0]}); }
+    if(a.t==='kp' || a.t==='box' || (a.t==='ink' && a.k==='hl')){ const b=annBox(a); const c=v.convertToViewportPoint((b[0]+b[2])/2,(b[1]+b[3])/2); out.push({p,pi,a,i,dy:c[1],dx:c[0]}); }
   }); });
   out.sort((x,y)=>x.pi-y.pi || x.dy-y.dy || x.dx-y.dx);
   return out;
@@ -1912,15 +1922,15 @@ function toggleKp(force){ const el=$('#kpPanel'); const show = force!=null ? for
 let kpSeq=0;
 async function renderKp(){
   const el=$('#kpPanel'); if(!el || el.classList.contains('hidden')) return;
-  const seq=++kpSeq; const marks=allMarks().filter(m=>kpFilter==='all' || (kpFilter==='kp'?m.a.t==='kp':m.a.t==='ink'));
+  const seq=++kpSeq; const marks=allMarks().filter(m=>kpFilter==='all' || (kpFilter==='kp'?m.a.t==='kp':m.a.t!=='kp'));
   $$('#kpPanel [data-kf]').forEach(b=>b.classList.toggle('on',b.dataset.kf===kpFilter));
   const list=$('#kpList');
   if(!marks.length){ list.innerHTML=`<div class="kpe">${kpFilter==='hl'?'No highlights yet.':'Nothing marked yet.<br>Pick the <b>bookmark</b> tool in the bottom bar and tap the page to mark a key point. Highlights show up here too.'}</div>`; return; }
   const rows=await Promise.all(marks.map(async m=>{
     let title, sub='Page '+(m.pi+1);
     if(m.a.t==='kp'){ title=m.a.label||'Key point'; }
-    else { let t=''; try{ t=await textUnder(m.p,m.a); }catch(e){} title=t ? (t.length>110?t.slice(0,110)+'…':t) : 'Highlight'; sub+=' · highlight'; }
-    const mk = m.a.t==='kp' ? '<svg class="i" style="width:16px;height:16px;color:#e8710a"><use href="#i-kp"/></svg>' : `<i style="background:${m.a.c}"></i>`;
+    else { let t=''; try{ t=await textUnder(m.p,m.a); }catch(e){} const kind=m.a.t==='box'?'box':'highlight'; title=t ? (t.length>110?t.slice(0,110)+'…':t) : (m.a.t==='box'?'Marked box':'Highlight'); sub+=' · '+kind; }
+    const mk = m.a.t==='kp' ? '<svg class="i" style="width:16px;height:16px;color:#e8710a"><use href="#i-kp"/></svg>' : m.a.t==='box' ? `<i style="width:14px;height:12px;border-radius:2px;border:1.5px solid ${m.a.c};background:${m.a.c}26"></i>` : `<i style="background:${m.a.c}"></i>`;
     return `<div class="kpi" data-go="${m.p.id}:${m.i}" role="button" tabindex="0"><span class="mk">${mk}</span><span class="tx"><b>${esc(title)}</b><small>${sub}</small></span>${m.a.t==='kp'?`<button class="ed" data-ren="${m.p.id}:${m.i}" title="Rename"><svg class="i"><use href="#i-edit"/></svg></button>`:''}</div>`;
   }));
   if(seq!==kpSeq) return;
@@ -1963,11 +1973,11 @@ document.addEventListener('keydown',e=>{
   if(k==='m') return setView('mark'); if(k==='g') return setView('pages');
   if(S.view==='pages'){ if(k==='r' && S.sel.size) $('#pRot').click(); return; }
   if(k==='l'){ toggleKp(); return; }
-  const map={v:'hand',h:'hl',p:'pen',t:'text',w:'wo',s:'sign',e:'er',k:'kp'}; if(map[k] && S.tool!==map[k]) setTool(map[k]);
+  const map={v:'hand',h:'hl',p:'pen',t:'text',w:'wo',b:'wo',s:'sign',e:'er',k:'kp'}; if(map[k] && S.tool!==map[k]) setTool(map[k]);
 });
 
 /* ---------- init ---------- */
-const tl=lsGet('pdfdesk:tools',null); if(tl){ Object.assign(S.hl,tl.hl||{}); Object.assign(S.pen,tl.pen||{}); Object.assign(S.text,tl.text||{}); }
+const tl=lsGet('pdfdesk:tools',null); if(tl){ Object.assign(S.hl,tl.hl||{}); Object.assign(S.pen,tl.pen||{}); Object.assign(S.text,tl.text||{}); Object.assign(S.box,tl.box||{}); }
 updateSwatches(); checkResume(); renderHomeLists(); routeHash();
 window.addEventListener('resize',()=>{ if(S.view==='mark' && S.pages.length && !pinch){ /* keep zoom */ } });
 window.__pdfdesk = S; // for debugging
