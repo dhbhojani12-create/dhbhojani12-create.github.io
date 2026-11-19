@@ -230,6 +230,13 @@ body.t-kp #stack{cursor:copy}
 .kpn{font-size:11.5px;color:var(--muted);padding:8px 16px 12px;border-top:1px solid var(--line)}
 @keyframes kpflash{0%,100%{opacity:1}50%{opacity:.25}}
 .kpflash{animation:kpflash .45s ease 3}
+#srBar{position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;gap:6px;padding:0 8px 0 14px;background:var(--surface);border-bottom:1px solid var(--line);z-index:7}
+#srBar input{flex:1;min-width:60px;border:0;outline:none;background:transparent;font-size:15px;height:100%}
+#srBar input::-webkit-search-cancel-button{display:none}
+#srCount{font-size:12.5px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.main.searching #scroller{top:50px}
+#bSearch.on,#bKp.on{background:var(--accent-soft);color:var(--accent)}
+@media (max-width:640px){#docname{min-width:30px}}
 #toast{position:fixed;left:50%;top:66px;transform:translateX(-50%) translateY(-8px);background:var(--ink);color:#fff;padding:9px 15px;border-radius:11px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:40;max-width:90%;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #busy{position:fixed;inset:0;background:rgba(244,241,234,.7);z-index:30;display:flex;align-items:center;justify-content:center}
@@ -279,6 +286,8 @@ body.t-kp #stack{cursor:copy}
   <symbol id="i-kp" viewBox="0 0 24 24"><path d="M6.5 3.5h11a1 1 0 0 1 1 1v16l-6.5-4.5-6.5 4.5v-16a1 1 0 0 1 1-1z"/></symbol>
   <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" stroke-width="2.6"/></symbol>
   <symbol id="i-box" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="13" rx="2"/><rect x="7" y="8.5" width="10" height="7" rx="1" fill="currentColor" stroke="none" opacity=".18"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.4-4.4"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol>
   <symbol id="i-big" viewBox="0 0 24 24"><path d="M4 12h16M12 4v16" /></symbol>
 </svg>
 
@@ -331,11 +340,13 @@ body.t-kp #stack{cursor:copy}
       <span id="zVal">100%</span>
       <button class="iconbtn" id="zIn" title="Zoom in (Ctrl +)"><svg class="i"><use href="#i-plus"/></svg></button>
     </div>
+    <button class="iconbtn" id="bSearch" title="Search in the PDF (Ctrl F)"><svg class="i"><use href="#i-search"/></svg></button>
     <button class="iconbtn kpbtn" id="bKp" title="Key points (K to add, L for the list)"><svg class="i"><use href="#i-list"/></svg><span class="badge hidden" id="kpCount"></span></button>
     <label class="btn small hide-sm" title="Add more files (merge)"><svg class="i"><use href="#i-plus"/></svg>Add files<input type="file" id="fileAdd" accept="application/pdf,.pdf,image/*" multiple hidden></label>
     <div class="savegrp"><button class="btn small primary" id="bSave" title="Save (Ctrl S)"><svg class="i"><use href="#i-save"/></svg><span class="hide-sm">Save</span></button><button class="btn small primary" id="bSaveMore" title="More ways to save"><svg class="i" style="width:16px;height:16px"><use href="#i-down"/></svg></button></div>
   </div>
   <div class="main">
+    <div id="srBar" class="hidden"><svg class="i" style="color:var(--muted)"><use href="#i-search"/></svg><input id="srIn" type="search" placeholder="Search in this PDF" autocomplete="off" spellcheck="false"><span id="srCount"></span><button class="iconbtn" id="srPrev" title="Previous (Shift Enter)" disabled><svg class="i"><use href="#i-up"/></svg></button><button class="iconbtn" id="srNext" title="Next (Enter)" disabled><svg class="i"><use href="#i-down"/></svg></button><button class="iconbtn" id="srX" title="Close (Esc)"><svg class="i"><use href="#i-x"/></svg></button></div>
     <div id="scroller"><div id="stack"></div></div>
     <div id="pagesview" class="hidden">
       <div class="gridbar">
@@ -700,7 +711,7 @@ function buildStack(){
   });
 }
 function sizePage(p){ const r=pgEls.get(p.id); if(!r) return; const v=vp1(p); r.el.style.width=(v.width*S.scale)+'px'; r.el.style.height=(v.height*S.scale)+'px'; r.svg.setAttribute('viewBox',`0 0 ${v.width} ${v.height}`); }
-function drawAnn(p){ const r=pgEls.get(p.id); if(!r) return; const sel = S.selAnn && S.selAnn.pid===p.id ? S.selAnn.i : null; r.svg.innerHTML = annMarkup(p,{interactive:true, selIdx:sel}); }
+function drawAnn(p){ const r=pgEls.get(p.id); if(!r) return; const sel = S.selAnn && S.selAnn.pid===p.id ? S.selAnn.i : null; r.svg.innerHTML = (typeof searchMarkup==='function'?searchMarkup(p):'') + annMarkup(p,{interactive:true, selIdx:sel}); }
 function pageById(id){ return S.pages.find(p=>p.id===id); }
 const rq=[]; let rendering=0;
 function queueRender(id){ if(!rq.includes(id)) rq.push(id); pump(); }
@@ -1102,11 +1113,12 @@ function setView(v){
   $('#vMark').classList.toggle('on',v==='mark'); $('#vPages').classList.toggle('on',v==='pages');
   $('#scroller').classList.toggle('hidden',v!=='mark'); $('#pagesview').classList.toggle('hidden',v!=='pages');
   $('#zoomBox').style.visibility = v==='mark'?'visible':'hidden';
-  if(v==='pages'){ selectAnn(null); buildGrid(); $('#kpPanel').classList.add('hidden'); $('#bKp').classList.remove('on'); }
+  if(v==='pages'){ if(!$('#srBar').classList.contains('hidden')) closeSearch(); selectAnn(null); buildGrid(); $('#kpPanel').classList.add('hidden'); $('#bKp').classList.remove('on'); }
   else { if(stackDirty){ buildStack(); stackDirty=false; } }
   updatePills();
 }
 function refreshAll(fit){
+  if(typeof searchReset==='function') setTimeout(searchReset,0);
   vpCache.clear();
   if(fit) S.scale = fitScale();
   $('#zVal').textContent=Math.round(S.scale*100)+'%';
@@ -1119,7 +1131,7 @@ $('#docname').addEventListener('input',e=>{ S.name=e.target.value.trim()||'Docum
 $('#docname').addEventListener('keydown',e=>{ if(e.key==='Enter') e.target.blur(); e.stopPropagation(); });
 
 function showWork(){ $('#home').classList.add('hidden'); $('#work').classList.remove('hidden'); $('#docname').value=S.name; }
-function showHome(){ closeEditor(); closePop(); $('#work').classList.add('hidden'); $('#home').classList.remove('hidden'); checkResume(); }
+function showHome(){ closeEditor(); closePop(); if(!$('#srBar').classList.contains('hidden')) closeSearch(); $('#work').classList.add('hidden'); $('#home').classList.remove('hidden'); checkResume(); }
 $('#bHome').onclick=showHome;
 
 /* ---------- files in ---------- */
@@ -1955,6 +1967,106 @@ function goToMark(pid, i){
   setTimeout(()=>{ const g=r.svg.querySelector(`[data-i="${i}"]`); const sel=r.svg.querySelector('rect[stroke-dasharray]'); [g,sel].forEach(x=>{ if(x){ x.classList.remove('kpflash'); void x.getBBox; x.classList.add('kpflash'); } }); }, 350);
 }
 
+/* ================= Search inside the PDF ================= */
+const SR={q:'', hits:[], byPage:new Map(), cur:-1, seq:0, done:true, scanned:0};
+const lineCache=new Map();
+// one searchable string per page, with a map from each character back to its text item
+async function pageText(p){
+  const k=p.src+':'+p.idx; if(lineCache.has(k)) return lineCache.get(k);
+  const items=await textItems(p); let str=''; const map=[]; // map[i] = [itemIndex, charOffset] or null for inserted spaces
+  let prev=null;
+  items.forEach((it,ii)=>{
+    if(prev){
+      let sep=' ';
+      const sameLine = Math.abs(prev.b)<0.01 && Math.abs(it.b)<0.01 ? Math.abs(prev.f-it.f) < prev.h*0.5 : Math.abs(prev.a)<0.01 && Math.abs(it.a)<0.01 ? Math.abs(prev.e-it.e) < prev.h*0.5 : false;
+      if(sameLine){ const gap = Math.abs(prev.b)<0.01 ? it.e-(prev.e+prev.w) : Math.abs(it.f-(prev.f+(Math.sign(prev.b)||1)*prev.w)); if(gap < prev.h*0.12) sep=''; }
+      if(sep && !/\s$/.test(str)){ str+=' '; map.push(null); }
+    }
+    for(let c=0;c<it.str.length;c++){ const ch=it.str[c]; if(/\s/.test(ch)){ if(/\s$/.test(str)||!str) continue; str+=' '; map.push([ii,c]); } else { str+=ch.toLowerCase(); map.push([ii,c]); } }
+    prev=it;
+  });
+  const r={str,map,items}; lineCache.set(k,r); return r;
+}
+function hitRects(pt, s, e){
+  // rectangles (PDF space) covering characters s..e-1, one per text item touched
+  const per=new Map();
+  for(let i=s;i<e;i++){ const m=pt.map[i]; if(!m) continue; const [ii,c]=m; const r=per.get(ii)||[c,c]; r[0]=Math.min(r[0],c); r[1]=Math.max(r[1],c); per.set(ii,r); }
+  const out=[];
+  per.forEach(([c0,c1],ii)=>{
+    const it=pt.items[ii]; const n=Math.max(1,it.str.length); const f0=c0/n, f1=(c1+1)/n;
+    const L=Math.hypot(it.a,it.b)||1, ux=it.a/L, uy=it.b/L; const U=Math.hypot(it.c,it.d)||1, vx=it.c/U, vy=it.d/U;
+    const pts=[[f0*it.w,-0.22*it.h],[f1*it.w,-0.22*it.h],[f0*it.w,0.88*it.h],[f1*it.w,0.88*it.h]].map(([s1,t1])=>[it.e+ux*s1+vx*t1, it.f+uy*s1+vy*t1]);
+    const xs=pts.map(q=>q[0]), ys=pts.map(q=>q[1]); out.push([Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)]);
+  });
+  return out;
+}
+function searchMarkup(p){
+  const list=SR.byPage.get(p.id); if(!list||!list.length) return '';
+  const m=vp1(p).transform; let s=`<g transform="matrix(${m.join(',')})" style="pointer-events:none">`;
+  for(const h of list){ const on = SR.hits[SR.cur]===h; for(const r of h.rects) s+=`<rect x="${r[0]}" y="${r[1]}" width="${r[2]-r[0]}" height="${r[3]-r[1]}" rx="1" fill="${on?'#ff8a00':'#ffc94d'}" fill-opacity="${on?0.55:0.4}" style="mix-blend-mode:multiply"${on?' stroke="#e06d00" stroke-width="0.8"':''}/>`; }
+  return s+'</g>';
+}
+async function runSearch(q){
+  const seq=++SR.seq; const norm=q.toLowerCase().replace(/\s+/g,' ').trim();
+  const old=new Set(SR.byPage.keys());
+  SR.q=norm; SR.hits=[]; SR.byPage=new Map(); SR.cur=-1; SR.done=false; SR.scanned=0;
+  old.forEach(id=>{ const p=pageById(id); if(p) drawAnn(p); });
+  srInfo();
+  if(!norm){ SR.done=true; srInfo(); return; }
+  let anyText=false;
+  for(let pi=0; pi<S.pages.length; pi++){
+    const p=S.pages[pi]; let pt;
+    try{ pt=await pageText(p); }catch(e){ continue; }
+    if(seq!==SR.seq) return;
+    if(pt.str.length) anyText=true;
+    let from=0, idx; const list=[];
+    while((idx=pt.str.indexOf(norm,from))!==-1){ const h={pid:p.id, pi, rects:hitRects(pt,idx,idx+norm.length)}; if(h.rects.length){ list.push(h); SR.hits.push(h); } from=idx+Math.max(1,norm.length); }
+    if(list.length){ SR.byPage.set(p.id,list); drawAnn(p); }
+    SR.scanned=pi+1;
+    if(SR.cur<0 && SR.hits.length){ SR.cur=0; srGo(); }
+    if(pi%8===0){ srInfo(); await nextFrame(); if(seq!==SR.seq) return; }
+  }
+  SR.done=true; SR.noText=!anyText; srInfo();
+}
+function srInfo(){
+  const el=$('#srCount'); if(!el) return;
+  const n=SR.hits.length;
+  if(!SR.q) el.textContent='';
+  else if(!SR.done) el.textContent = n ? `${SR.cur+1} of ${n}+` : `Searching… ${SR.scanned}/${S.pages.length}`;
+  else if(!n) el.textContent = SR.noText ? 'No text in this PDF (scanned pages)' : 'Not found';
+  else el.textContent = `${SR.cur+1} of ${n} · p.${SR.hits[SR.cur].pi+1}`;
+  $('#srPrev').disabled=$('#srNext').disabled=!n;
+}
+function srGo(){
+  const h=SR.hits[SR.cur]; if(!h) return;
+  const prevOn=document.querySelectorAll('#stack svg.ann'); // redraw pages touched by old/new current
+  SR.byPage.forEach((_,id)=>{ const p=pageById(id); if(p) drawAnn(p); });
+  const p=pageById(h.pid); const r=pgEls.get(h.pid); if(!p||!r) return;
+  const v=vp1(p); const b=h.rects[0]; const c=v.convertToViewportPoint((b[0]+b[2])/2,(b[1]+b[3])/2);
+  const y=r.el.offsetTop + c[1]*S.scale, x=r.el.offsetLeft + c[0]*S.scale;
+  const H=scroller.clientHeight, W=scroller.clientWidth;
+  if(y < scroller.scrollTop+60 || y > scroller.scrollTop+H-120) scroller.scrollTo({top:Math.max(0,y-H*0.35), behavior:'smooth'});
+  if(x < scroller.scrollLeft+20 || x > scroller.scrollLeft+W-20) scroller.scrollTo({left:Math.max(0,x-W/2), behavior:'smooth'});
+  srInfo();
+}
+function srStep(d){ const n=SR.hits.length; if(!n) return; SR.cur=(SR.cur+d+n)%n; srGo(); }
+function openSearch(){
+  if(S.view!=='mark') setView('mark');
+  const bar=$('#srBar'); bar.classList.remove('hidden'); $('.main').classList.add('searching'); $('#bSearch').classList.add('on');
+  const inp=$('#srIn'); inp.focus(); inp.select();
+}
+function closeSearch(){
+  $('#srBar').classList.add('hidden'); $('.main').classList.remove('searching'); $('#bSearch').classList.remove('on');
+  SR.seq++; const ids=[...SR.byPage.keys()]; SR.q=''; SR.hits=[]; SR.byPage=new Map(); SR.cur=-1; ids.forEach(id=>{ const p=pageById(id); if(p) drawAnn(p); });
+  $('#srIn').value=''; srInfo();
+}
+function searchReset(){ lineCache.clear(); if(SR.q){ const q=$('#srIn').value; runSearch(q); } }
+let srT;
+$('#srIn').addEventListener('input',e=>{ clearTimeout(srT); const q=e.target.value; srT=setTimeout(()=>runSearch(q), q.length<3?450:220); });
+$('#srIn').addEventListener('keydown',e=>{ e.stopPropagation(); if(e.key==='Enter'){ e.preventDefault(); if(SR.q!==e.target.value.toLowerCase().replace(/\s+/g,' ').trim()){ clearTimeout(srT); runSearch(e.target.value); } else srStep(e.shiftKey?-1:1); } if(e.key==='Escape') closeSearch(); });
+$('#srPrev').onclick=()=>srStep(-1); $('#srNext').onclick=()=>srStep(1); $('#srX').onclick=closeSearch;
+$('#bSearch').onclick=()=>{ if($('#srBar').classList.contains('hidden')) openSearch(); else closeSearch(); };
+
 /* ---------- keyboard ---------- */
 document.addEventListener('keydown',e=>{
   if(e.target.closest && e.target.closest('input,textarea,.scrim')) return;
@@ -1963,12 +2075,13 @@ document.addEventListener('keydown',e=>{
   if(mod && k==='z'){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
   if(mod && k==='y'){ e.preventDefault(); redo(); return; }
   if(mod && k==='s'){ e.preventDefault(); $('#bSave').click(); return; }
+  if(mod && k==='f'){ e.preventDefault(); openSearch(); return; }
   if(mod && (k==='='||k==='+')){ e.preventDefault(); setScale(S.scale*1.2); return; }
   if(mod && k==='-'){ e.preventDefault(); setScale(S.scale/1.2); return; }
   if(mod && k==='0'){ e.preventDefault(); setScale(fitScale()); return; }
   if(mod && k==='a' && S.view==='pages'){ e.preventDefault(); S.pages.forEach(p=>S.sel.add(p.id)); syncSel(); return; }
   if(mod) return;
-  if(k==='escape'){ if(S.selAnn) selectAnn(null); else if(pop.dataset.for) closePop(); else if(S.view==='pages'&&S.sel.size){ S.sel.clear(); syncSel(); } else setTool('hand'); return; }
+  if(k==='escape'){ if(!$('#srBar').classList.contains('hidden')){ closeSearch(); return; } if(S.selAnn) selectAnn(null); else if(pop.dataset.for) closePop(); else if(S.view==='pages'&&S.sel.size){ S.sel.clear(); syncSel(); } else setTool('hand'); return; }
   if(k==='delete'||k==='backspace'){ if(S.view==='mark' && S.selAnn){ $('#sDel').click(); } else if(S.view==='pages' && S.sel.size){ $('#pDel').click(); } return; }
   if(k==='m') return setView('mark'); if(k==='g') return setView('pages');
   if(S.view==='pages'){ if(k==='r' && S.sel.size) $('#pRot').click(); return; }
