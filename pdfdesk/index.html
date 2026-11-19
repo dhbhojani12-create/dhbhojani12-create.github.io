@@ -700,13 +700,44 @@ async function loadPdfJs(bytes, name){
   };
   return task.promise;
 }
+// find PDF Desk's own marks inside a saved file, take them off the pages and return them as editable marks
+function hasDeskMarks(bytes){ const pat=[47,80,68,70,68,101,115,107,65,110,110]; /* "/PDFDeskAnn" */ outer: for(let i=0;i<bytes.length-pat.length;i++){ if(bytes[i]!==47) continue; for(let k=1;k<pat.length;k++) if(bytes[i+k]!==pat[k]) continue outer; return true; } return false; }
+async function liftDeskMarks(bytes){
+  if(!hasDeskMarks(bytes)) return null;
+  try{
+    const d=await PDFDocument.load(bytes,{ignoreEncryption:true, updateMetadata:false}); if(d.isEncrypted) return null;
+    const out={pages:{}, images:{}}; let found=0;
+    d.getPages().forEach((pg,idx)=>{
+      const meta=pg.node.lookupMaybe(PDFName.of('PDFDeskAnn'), PDFLib.PDFDict); if(!meta) return;
+      const sref=meta.get(PDFName.of('S')); const D=meta.lookup(PDFName.of('D'));
+      try{ const j=JSON.parse(D.decodeText()); out.pages[idx]=j.a||[]; Object.assign(out.images, j.i||{}); found++; }catch(e){ return; }
+      const cont=pg.node.get(PDFName.of('Contents')); const arr=d.context.lookup(cont);
+      if(arr instanceof PDFLib.PDFArray){ for(let k=arr.size()-1;k>=0;k--){ const it=arr.get(k); if(it && sref && it.toString()===sref.toString()){ arr.remove(k); continue; }
+        }
+        // drop the save/restore wrappers that earlier saves added around the page (pdf-lib adds fresh ones on every save)
+        const kind=it=>{ try{ const st=d.context.lookup(it); if(!st || !st.contents || st.contents.length>64) return ''; let b=st.contents; try{ if(st.dict && st.dict.get(PDFName.of('Filter'))) b=PDFLib.decodePDFRawStream(st).decode(); }catch(e){ return ''; } const t=String.fromCharCode(...b).replace(/%PDFDesk/,'').trim(); return t==='q'||t==='Q'?t:''; }catch(e){ return ''; } };
+        const qs=[], Qs=[]; for(let k=0;k<arr.size();k++){ const t=kind(arr.get(k)); if(t==='q') qs.push(k); else if(t==='Q') Qs.push(k); }
+        const n=Math.min(qs.length, Qs.length); const drop=new Set([...qs.slice(0,n), ...Qs.slice(Qs.length-n)]);
+        [...drop].sort((a,b)=>b-a).forEach(k=>arr.remove(k));
+      }
+      // remove the fonts / images / transparency settings that only the marks used
+      try{ const RR=meta.lookup(PDFName.of('R')); const names=RR?RR.decodeText().split('\n').filter(Boolean):[]; const R=pg.node.Resources();
+        if(R) names.forEach(n=>{ const [sub,key]=n.split('/'); const dd=R.lookupMaybe(PDFName.of(sub), PDFLib.PDFDict); if(dd) dd.delete(PDFName.of(key)); }); }catch(e){}
+      pg.node.delete(PDFName.of('PDFDeskAnn'));
+    });
+    if(!found) return null;
+    out.bytes=new Uint8Array(await d.save({useObjectStreams:false}));
+    return out;
+  }catch(e){ console.warn('lift marks', e); return null; }
+}
 async function addSource(bytes, name, opts={}){
   const id = opts.id || uid();
+  if(!opts.restore){ const lifted=await liftDeskMarks(bytes); if(lifted){ bytes=lifted.bytes; Object.assign(S.images, lifted.images); opts._marks=lifted.pages; } }
   const doc = await loadPdfJs(bytes, name);
   const pages = [];
   for(let i=1;i<=doc.numPages;i++) pages.push(await doc.getPage(i));
   const color = opts.color || PALETTE[S.srcCount++ % PALETTE.length];
-  S.sources[id] = {id, name, bytes, doc, pages, color, encrypted:false, origin:opts.origin||null};
+  S.sources[id] = {id, name, bytes, doc, pages, color, encrypted:false, origin:opts.origin||null, marks:opts._marks||null};
   if(!opts.restore) DB.set('src:'+id, {name, bytes, color, origin:opts.origin||null});
   return id;
 }
@@ -745,7 +776,8 @@ async function addFiles(input, atIndex){
       const bytes = isImg ? await imageToPdfBytes(f) : new Uint8Array(await f.arrayBuffer());
       const id = await addSource(bytes, f.name, {origin: items[i].origin||null});
       items[i].srcId = id;
-      const newPages = S.sources[id].pages.map((_,k)=>({id:uid(), src:id, idx:k, rot:0, ann:[]}));
+      const mk=S.sources[id].marks||{};
+      const newPages = S.sources[id].pages.map((_,k)=>({id:uid(), src:id, idx:k, rot:0, ann:(mk[k]||[]).slice()}));
       try{ await importOutline(id, newPages); }catch(e){ console.warn('outline',e); }
       added.push(...newPages);
     }catch(e){ console.error(e); fails++; }
@@ -1365,7 +1397,7 @@ const FONT_MAP={'₹':'Rs.','–':'-','—':'-','…':'...'};
 function safeText(font, s){ let out=''; for(const ch of s){ try{ font.encodeText(ch); out+=ch; }catch(e){ out += FONT_MAP[ch] || '?'; } } return out; }
 function wrapContents(doc, page){
   const ctx=doc.context; const node=page.node; const cur=node.get(PDFName.of('Contents')); if(!cur) return;
-  const q=ctx.register(ctx.stream('q')), Q=ctx.register(ctx.stream('Q'));
+  const q=ctx.register(ctx.stream('q %PDFDesk')), Q=ctx.register(ctx.stream('Q %PDFDesk'));
   let items=[]; const res=ctx.lookup(cur);
   if(res instanceof PDFLib.PDFArray) items=res.asArray(); else items=[cur];
   node.set(PDFName.of('Contents'), ctx.obj([q,...items,Q]));
@@ -1421,7 +1453,11 @@ async function buildPdf(list, opt={}){
     if(!cp){ [cp]=await out.copyPages(libs[p.src],[p.idx]); } else pre.delete(p);
     page=out.addPage(cp);
     page.setRotation(degrees(R));
-    if(p.ann.length || opt.numbers) wrapContents(out, page);
+    if(opt.numbers){ const v=vp1(p); drawNumber(page, helv, i+1, N, v.width, v.height, R, v); }
+    const drawable=p.ann.filter(a=>a.t!=='kp');
+    const resKeys=()=>{ const out=new Set(); try{ const R=page.node.Resources(); if(R) ['Font','XObject','ExtGState'].forEach(sub=>{ const d=R.lookupMaybe(PDFName.of(sub), PDFLib.PDFDict); if(d) d.keys().forEach(k=>out.add(sub+'/'+k.asString().slice(1))); }); }catch(e){} return out; };
+    const resBefore = drawable.length ? resKeys() : null;
+    if(drawable.length){ page.contentStream=undefined; page.contentStreamRef=undefined; }
     for(const a of p.ann){
       if(a.t==='ink'){
         const P=a.pts; let d=''; for(let k=0;k<P.length;k+=2) d+=(k?'L':'M')+P[k].toFixed(2)+','+(-P[k+1]).toFixed(2);
@@ -1442,12 +1478,18 @@ async function buildPdf(list, opt={}){
         page.drawImage(imgCache[a.ref],{x:a.x,y:a.y,width:a.w,height:a.h,rotate:degrees(a.rot||0)});
       }
     }
-    if(opt.numbers){ const v=vp1(p); drawNumber(page, helv, i+1, N, v.width, v.height, R, v); }
+    if(drawable.length && page.contentStreamRef){
+      // keep an editable copy of the marks with the page, so PDF Desk can lift them off again next time
+      const imgs={}; drawable.forEach(a=>{ if(a.t==='img' && S.images[a.ref]) imgs[a.ref]=S.images[a.ref]; });
+      const data=JSON.stringify({v:1, a:drawable.map(a=>{ const c=Object.assign({},a); delete c._hide; return c; }), i:imgs});
+      const added=[...resKeys()].filter(k=>!resBefore.has(k));
+      page.node.set(PDFName.of('PDFDeskAnn'), out.context.obj({S:page.contentStreamRef, D:PDFLib.PDFHexString.fromText(data), R:PDFLib.PDFHexString.fromText(added.join('\n'))}));
+    }
     { const v=vp1(p); p.ann.filter(a=>a.t==='kp').map(a=>({a,dy:v.convertToViewportPoint(a.x,a.y)[1]})).sort((x,y)=>x.dy-y.dy).forEach(({a})=>marks.push({page, x:R%180?a.x:null, y:R%180?null:a.y+24, label:a.label, imp:a.imp, lvl:a.lvl, ord:a.ord})); }
   }
   if(marks.length && !opt.noOutline) writeOutline(out, marks);
   if(!opt.silent) busy(true, opt.label||'Saving…', 1);
-  return new Uint8Array(await out.save());
+  return new Uint8Array(await out.save({useObjectStreams:false}));
 }
 function writeOutline(doc, marks){
   const ctx=doc.context;
