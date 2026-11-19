@@ -158,6 +158,54 @@ body.t-sign #stack{cursor:copy}
 .sigs .s .x{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:12px;line-height:20px;text-align:center}
 .muted{color:var(--muted);font-size:13px}
 
+.openrow{display:flex;gap:8px;margin-top:10px}
+.openrow .btn{flex:1;height:44px}
+.sec{margin-top:22px}
+.sech{display:flex;align-items:center;justify-content:space-between;margin:0 2px 8px}
+.sech b{font-size:13px;letter-spacing:.02em;color:var(--muted);text-transform:uppercase}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.li{display:flex;align-items:center;border-top:1px solid var(--line);padding-right:4px}
+.li:first-child{border-top:0}
+.lmain{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:11px 14px;text-align:left}
+.lmain:hover{background:#faf8f3}
+.lmain span{min-width:0}
+.lmain b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lmain small{color:var(--muted);font-size:12px}
+.li .iconbtn{width:34px;height:34px;color:var(--muted)}
+.sheet.br{max-width:520px;display:flex;flex-direction:column;height:min(640px,calc(100% - 20px));padding:16px 16px 12px}
+@media (max-width:640px){.sheet.br{height:88vh}}
+.brh{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.brh h3{margin:0}
+.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:13px;margin:2px 2px 8px;color:var(--muted)}
+.crumbs button{color:var(--accent);font-weight:600}
+.crumbs b{color:var(--ink)}
+.brl{flex:1;overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+.brit{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-top:1px solid #f0ece3;text-align:left}
+.brit:first-child{border-top:0}
+.brit:hover{background:#faf8f3}
+.brit:disabled{opacity:.45;cursor:default}
+.brit .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brit small{color:var(--muted);font-size:12px;flex:none}
+.brit .ft{font-size:9.5px;font-weight:700;letter-spacing:.04em;color:#fff;background:#b0574d;border-radius:4px;padding:3px 4px;flex:none}
+.brit .ft:not(:empty)+.nm{}
+.brit .ck{width:22px;height:22px;border-radius:50%;border:1.5px solid #cfc7b6;display:grid;place-items:center;color:#fff;flex:none}
+.brit .ck svg{width:14px;height:14px;stroke-width:2.6;opacity:0}
+.brit.on{background:var(--accent-soft)}
+.brit.on .ck{background:var(--accent);border-color:var(--accent)}
+.brit.on .ck svg{opacity:1}
+.brmsg{padding:40px 16px;text-align:center;color:var(--muted)}
+.brf{display:flex;align-items:center;gap:8px;margin-top:10px}
+.pddead{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12.5px;color:var(--danger);margin:0 2px 8px}
+.dest{margin:14px 0 4px}
+.dest .chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px}
+.dest .chips .chip{height:34px;display:flex;align-items:center;gap:6px;font-weight:600}
+.dest .chips .chip svg{width:16px;height:16px}
+.destinfo{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);min-height:20px}
+.destinfo b{color:var(--ink);font-weight:600}
+.destinfo button{color:var(--accent);font-weight:600;margin-left:auto}
+.savegrp{display:flex}
+.savegrp .btn:first-child{border-radius:9px 0 0 9px}
+.savegrp .btn+.btn{border-radius:0 9px 9px 0;padding:0 7px;border-left:1px solid rgba(255,255,255,.25)}
 #toast{position:fixed;left:50%;top:66px;transform:translateX(-50%) translateY(-8px);background:var(--ink);color:#fff;padding:9px 15px;border-radius:11px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:40;max-width:90%;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #busy{position:fixed;inset:0;background:rgba(244,241,234,.7);z-index:30;display:flex;align-items:center;justify-content:center}
@@ -198,6 +246,12 @@ body.t-sign #stack{cursor:copy}
   <symbol id="i-zip" viewBox="0 0 24 24"><path d="M14 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M11 6h1.5M11 9h1.5M11 12h1.5M10.5 15h2.5v3h-2.5z"/></symbol>
   <symbol id="i-small" viewBox="0 0 24 24"><path d="M4 9h5V4M20 15h-5v5M9 9 4 4M15 15l5 5"/></symbol>
   <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/></symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18.5h10a4.5 4.5 0 0 0 .6-8.96A6.5 6.5 0 0 0 5.2 9.6 4.5 4.5 0 0 0 7 18.5z"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.5A2 2 0 0 1 5.5 5.5h3.6l2 2h7.4a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-1 5 3 3v2H7v-2l3-3z"/><path d="M12 14v6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
   <symbol id="i-big" viewBox="0 0 24 24"><path d="M4 12h16M12 4v16" /></symbol>
 </svg>
 
@@ -212,12 +266,17 @@ body.t-sign #stack{cursor:copy}
       <span>Pick several at once to merge them. Photos become PDF pages.</span>
       <input type="file" id="fileHome" accept="application/pdf,.pdf,image/*" multiple hidden>
     </label>
+    <div class="openrow">
+      <button class="btn" id="devBtn"><svg class="i"><use href="#i-doc"/></svg>This device</button>
+      <button class="btn" id="pdBtn"><svg class="i" style="color:#4a7c9b"><use href="#i-cloud"/></svg>PoolDrive</button>
+    </div>
     <div id="resume" class="resume hidden">
       <svg class="i" style="color:var(--accent)"><use href="#i-doc"/></svg>
       <div class="t"><b id="resName"></b><span id="resInfo"></span></div>
       <button class="btn small ghost" id="resDrop">Discard</button>
       <button class="btn small primary" id="resGo">Continue</button>
     </div>
+    <div id="places"></div>
     <div class="feats">
       <div class="feat"><svg class="i"><use href="#i-hl"/></svg><div><b>Highlight &amp; write</b><span>Highlighter, pen, text boxes</span></div></div>
       <div class="feat"><svg class="i"><use href="#i-sign"/></svg><div><b>Sign</b><span>Draw once, reuse anywhere</span></div></div>
@@ -246,7 +305,7 @@ body.t-sign #stack{cursor:copy}
       <button class="iconbtn" id="zIn" title="Zoom in (Ctrl +)"><svg class="i"><use href="#i-plus"/></svg></button>
     </div>
     <label class="btn small hide-sm" title="Add more files (merge)"><svg class="i"><use href="#i-plus"/></svg>Add files<input type="file" id="fileAdd" accept="application/pdf,.pdf,image/*" multiple hidden></label>
-    <button class="btn small primary" id="bSave" title="Save (Ctrl S)"><svg class="i"><use href="#i-save"/></svg><span class="hide-sm">Save</span></button>
+    <div class="savegrp"><button class="btn small primary" id="bSave" title="Save (Ctrl S)"><svg class="i"><use href="#i-save"/></svg><span class="hide-sm">Save</span></button><button class="btn small primary" id="bSaveMore" title="More ways to save"><svg class="i" style="width:16px;height:16px"><use href="#i-down"/></svg></button></div>
   </div>
   <div class="main">
     <div id="scroller"><div id="stack"></div></div>
@@ -447,7 +506,7 @@ const DB = (()=>{
 let saveT;
 function persist(){ clearTimeout(saveT); saveT=setTimeout(()=>{
   const used = new Set(S.pages.map(p=>p.src));
-  DB.set('session',{ name:S.name, pages:S.pages, images:S.images, srcs:[...used].map(id=>({id,name:S.sources[id].name,color:S.sources[id].color})), t:Date.now() });
+  DB.set('session',{ name:S.name, pages:S.pages, images:S.images, srcs:[...used].map(id=>({id,name:S.sources[id].name,color:S.sources[id].color,origin:S.sources[id].origin||null})), t:Date.now() });
 }, 600); }
 function lsGet(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
 function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
@@ -466,8 +525,8 @@ async function addSource(bytes, name, opts={}){
   const pages = [];
   for(let i=1;i<=doc.numPages;i++) pages.push(await doc.getPage(i));
   const color = opts.color || PALETTE[S.srcCount++ % PALETTE.length];
-  S.sources[id] = {id, name, bytes, doc, pages, color, encrypted:false};
-  if(!opts.restore) DB.set('src:'+id, {name, bytes, color});
+  S.sources[id] = {id, name, bytes, doc, pages, color, encrypted:false, origin:opts.origin||null};
+  if(!opts.restore) DB.set('src:'+id, {name, bytes, color, origin:opts.origin||null});
   return id;
 }
 async function imageToPdfBytes(file){
@@ -490,8 +549,10 @@ async function blankSource(){
   S.blankId = await addSource(new Uint8Array(await d.save()), 'Blank page', {color:'#bbb'});
   return S.blankId;
 }
-async function addFiles(files, atIndex){
-  files = [...files].filter(f => /pdf$/i.test(f.type) || /\.pdf$/i.test(f.name) || /^image\//.test(f.type));
+async function addFiles(input, atIndex){
+  const items = [...input].map(x => x instanceof Blob ? {file:x, origin:null} : x)
+    .filter(({file:f}) => /pdf$/i.test(f.type) || /\.pdf$/i.test(f.name) || /^image\//.test(f.type) || isOpenable(f.name));
+  const files = items.map(i=>i.file);
   if(!files.length){ toast('Pick PDF files or photos'); return; }
   const added=[]; let fails=0;
   busy(true,'Opening…',0);
@@ -501,7 +562,7 @@ async function addFiles(files, atIndex){
     try{
       const isImg = /^image\//.test(f.type);
       const bytes = isImg ? await imageToPdfBytes(f) : new Uint8Array(await f.arrayBuffer());
-      const id = await addSource(bytes, f.name);
+      const id = await addSource(bytes, f.name, {origin: items[i].origin||null});
       S.sources[id].pages.forEach((_,k)=>added.push({id:uid(), src:id, idx:k, rot:0, ann:[]}));
     }catch(e){ console.error(e); fails++; }
   }
@@ -511,6 +572,7 @@ async function addFiles(files, atIndex){
   pushHist();
   const wasEmpty = !S.pages.length;
   if(wasEmpty){ S.name = stem(files[0].name); }
+  else if(Object.keys(usedSources()).length===1 && docOrigin() && S.name===stem(docOrigin().name)){ S.name += ' (merged)'; }
   if(atIndex==null) S.pages.push(...added); else S.pages.splice(atIndex,0,...added);
   showWork();
   if(!wasEmpty) toast(`Added ${added.length} page${added.length>1?'s':''} at the end`);
@@ -840,7 +902,8 @@ function updatePills(){
   $('#pillSel').classList.toggle('hidden', !mark || !o);
   $('#pillPages').classList.toggle('hidden', mark);
   if(o){ $('#sEdit').classList.toggle('hidden', o.a.t!=='text'); }
-  $('#bUndo').disabled=$('#pUndo').disabled=!undoStack.length; $('#bRedo').disabled=!redoStack.length;
+  $('#bUndo').disabled=$('#pUndo').disabled=!undoStack.length;
+  const rp=canReplace(); $('#bSave').title = rp ? 'Save back to '+docOrigin().name+' (Ctrl S)' : 'Save (Ctrl S)'; $('#bRedo').disabled=!redoStack.length;
   const n=S.sel.size;
   ['#pRot','#pDup','#pDel','#pExt'].forEach(id=>$(id).disabled=!n);
   $('#pAllLbl').textContent = n && n===S.pages.length ? 'Clear' : 'Select all';
@@ -976,7 +1039,7 @@ function showHome(){ closeEditor(); closePop(); $('#work').classList.add('hidden
 $('#bHome').onclick=showHome;
 
 /* ---------- files in ---------- */
-$('#fileHome').onchange=async e=>{ const f=[...e.target.files]; e.target.value=''; if(S.pages.length){ resetDoc(); } await addFiles(f); };
+$('#fileHome').onchange=async e=>{ const f=[...e.target.files]; e.target.value=''; await openItems(f,'new'); };
 $('#fileAdd').onchange=async e=>{ const f=[...e.target.files]; e.target.value=''; await addFiles(f); };
 $('#fileAdd2').onchange=$('#fileAdd').onchange;
 let dragDepth=0;
@@ -984,7 +1047,15 @@ window.addEventListener('dragenter',e=>{ if(e.dataTransfer && [...e.dataTransfer
 window.addEventListener('dragleave',()=>{ dragDepth=Math.max(0,dragDepth-1); if(!dragDepth){ $('#dropov').classList.add('hidden'); $('#dropzone').classList.remove('over'); } });
 window.addEventListener('dragover',e=>{ if(e.dataTransfer && [...e.dataTransfer.types].includes('Files')) e.preventDefault(); });
 window.addEventListener('drop',async e=>{ if(!e.dataTransfer || !e.dataTransfer.files.length) return; e.preventDefault(); dragDepth=0; $('#dropov').classList.add('hidden'); $('#dropzone').classList.remove('over'); const homeOpen=!$('#home').classList.contains('hidden'); if(homeOpen && S.pages.length) resetDoc(); await addFiles(e.dataTransfer.files); });
-function resetDoc(){ Object.values(S.sources).forEach(s=>{ try{s.doc.destroy();}catch(e){} }); Object.keys(S.sources).forEach(id=>DB.del('src:'+id)); DB.del('session'); S.sources={}; S.pages=[]; S.images={}; S.sel.clear(); S.selAnn=null; S.blankId=null; S.srcCount=0; undoStack=[]; redoStack=[]; vpCache.clear(); stackDirty=true; }
+function resetDoc(){ Object.values(S.sources).forEach(s=>{ try{s.doc.destroy();}catch(e){} }); Object.keys(S.sources).forEach(id=>DB.del('src:'+id)); DB.del('session'); S.sources={}; S.pages=[]; S.images={}; S.sel.clear(); S.selAnn=null; S.blankId=null; S.srcCount=0; S.lastDest=null; S.pdDest=null; undoStack=[]; redoStack=[]; vpCache.clear(); stackDirty=true; }
+
+$('#dropzone').addEventListener('click',e=>{ if(FSA && e.target.id!=='fileHome'){ e.preventDefault(); pickFromDevice('new'); } });
+$('#devBtn').onclick=()=>pickFromDevice('new');
+$('#pdBtn').onclick=()=>{ if(PD.has()) openBrowser({kind:'pd',name:'PoolDrive',refs:null},'open'); else pdHelp(); };
+function pdHelp(){ const s=document.createElement('div'); s.className='scrim';
+  s.innerHTML=`<div class="sheet"><h3>Connect PoolDrive</h3><p class="muted">PDF Desk uses the accounts you signed in to in PoolDrive on this browser. Open PoolDrive once, sign in, then come back.</p><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn small ghost" data-k="x">Close</button><a class="btn small primary" href="../PoolDrive/" target="_blank" rel="noopener" style="text-decoration:none">Open PoolDrive</a></div></div>`;
+  document.body.appendChild(s); s.addEventListener('click',ev=>{ if(ev.target===s||ev.target.closest('[data-k]')) s.remove(); }); }
+[...document.querySelectorAll('#fileAdd,#fileAdd2')].forEach(inp=>inp.closest('label').addEventListener('click',e=>{ if(e.target===inp) return; if(TOP){ e.preventDefault(); addFromSheet(); } }));
 
 /* ---------- resume ---------- */
 async function checkResume(){
@@ -999,7 +1070,7 @@ $('#resGo').onclick=async()=>{
   const ses=await DB.get('session'); if(!ses) return;
   busy(true,'Opening…',0.2);
   try{
-    for(const s of ses.srcs){ const rec=await DB.get('src:'+s.id); if(rec) await addSource(rec.bytes, rec.name, {id:s.id, color:rec.color, restore:true}); if(rec && rec.name==='Blank page') S.blankId=s.id; }
+    for(const s of ses.srcs){ const rec=await DB.get('src:'+s.id); if(rec) await addSource(rec.bytes, rec.name, {id:s.id, color:rec.color, restore:true, origin:rec.origin||s.origin||null}); if(rec && rec.name==='Blank page') S.blankId=s.id; }
     S.srcCount=ses.srcs.length;
     S.pages=ses.pages.filter(p=>S.sources[p.src] && S.sources[p.src].pages[p.idx]); S.images=ses.images||{}; S.name=ses.name;
     busy(false); showWork(); setView('mark'); refreshAll(true);
@@ -1114,15 +1185,36 @@ async function saveFile(filename, data){
 }
 
 /* save sheet */
+const outName = (act,name) => act==='pdf'?name+'.pdf' : act==='small'?name+' (small).pdf' : act==='split'?name+' (pages).zip' : name+' (images).zip';
+// choice: 'same' | 'device' | 'pd'
+function resolveDest(choice, filename){
+  const o=docOrigin();
+  if(choice==='same' && o){
+    if(isPdfName(filename) && canReplaceWith(filename)) return {kind:'replace', origin:o};
+    if(o.kind==='pd') return {kind:'pd-parent', email:o.email, parent:o.parent, name:o.dirName||''};
+    if(o.dir) return {kind:'local-dir', handle:o.dir, name:o.dirName};
+    return {kind:'device'};
+  }
+  if(choice==='pd') return S.pdDest || {kind:'pd-dir', refs:PD.live().map(a=>({email:a.email,id:'root'})), name:'My Drive'};
+  return {kind:'device'};
+}
+function canReplaceWith(filename){ const o=docOrigin(); return !!o && isPdfName(o.name) && Object.keys(usedSources()).length===1 && filename===o.name; }
 function openSave(mode){
   closeEditor(); closePop();
   if(!S.pages.length){ toast('No pages to save'); return; }
   const nsel=S.sel.size; mode = mode || 'all';
   const selNums = S.pages.map((p,i)=>S.sel.has(p.id)?i+1:0).filter(Boolean);
+  const o=docOrigin(); const hasPd=PD.has();
+  let choice = S.lastDest && (S.lastDest!=='same'||o) && (S.lastDest!=='pd'||hasPd) ? S.lastDest : (o?'same':'device');
   const scrim=document.createElement('div'); scrim.className='scrim';
   scrim.innerHTML=`<div class="sheet" role="dialog">
     <h3>${mode==='sel'?'Extract pages':'Save'}</h3>
     <div class="field"><input id="svName" value="${esc(S.name + (mode==='sel'?` (pages ${rangesLabel(selNums)})`:''))}"><span>.pdf</span></div>
+    <div class="dest"><span class="muted">Save to</span><div class="chips">
+      ${o?`<button class="chip" data-d="same"><svg class="i"><use href="#${o.kind==='pd'?'i-cloud':'i-folder'}"/></svg>Where it came from</button>`:''}
+      <button class="chip" data-d="device"><svg class="i"><use href="#i-doc"/></svg>${FSA_SAVE?'This device…':'Downloads'}</button>
+      ${hasPd?'<button class="chip" data-d="pd"><svg class="i"><use href="#i-cloud"/></svg>PoolDrive</button>':''}
+    </div><div class="destinfo" id="svWhere"></div></div>
     <div class="opts">
       <label class="radio"><input type="radio" name="w" value="all" ${mode!=='sel'?'checked':''}> All ${S.pages.length} page${S.pages.length>1?'s':''}</label>
       ${nsel?`<label class="radio"><input type="radio" name="w" value="sel" ${mode==='sel'?'checked':''}> Selected ${nsel} page${nsel>1?'s':''} <span class="muted">(${rangesLabel(selNums)})</span></label>`:''}
@@ -1130,52 +1222,91 @@ function openSave(mode){
       <label class="toggle" style="margin-top:6px"><input type="checkbox" id="svNum"> Add page numbers</label>
     </div>
     <div class="acts">
-      <button class="btn primary" data-a="pdf"><svg class="i"><use href="#i-save"/></svg>Save PDF<small>keeps text sharp</small></button>
+      <button class="btn primary" data-a="pdf"><svg class="i"><use href="#i-save"/></svg><span id="svMain">Save PDF</span><small>keeps text sharp</small></button>
       <button class="btn" data-a="small"><svg class="i"><use href="#i-small"/></svg>Smaller file<small>for email / WhatsApp</small></button>
       <button class="btn" data-a="split"><svg class="i"><use href="#i-zip"/></svg>Each page as its own PDF<small>.zip</small></button>
       <button class="btn" data-a="jpg"><svg class="i"><use href="#i-img"/></svg>Pages as JPG images<small>.zip</small></button>
       <button class="btn ghost" data-a="x" style="justify-content:center">Cancel</button>
     </div></div>`;
   document.body.appendChild(scrim);
-  const rng=scrim.querySelector('#svRng');
-  rng.addEventListener('focus',()=>{ scrim.querySelector('input[value=rng]').checked=true; });
+  const nameIn=scrim.querySelector('#svName'), rng=scrim.querySelector('#svRng');
+  const curName=()=> (nameIn.value.trim()||S.name).replace(/[\\/:*?"<>|]+/g,'-');
+  const allPages=()=> scrim.querySelector('input[name=w]:checked').value==='all';
+  function info(){
+    scrim.querySelectorAll('[data-d]').forEach(b=>b.classList.toggle('on', b.dataset.d===choice));
+    const fn=curName()+'.pdf'; const d=resolveDest(choice, fn); const w=scrim.querySelector('#svWhere'); let h='';
+    if(d.kind==='replace'){
+      if(allPages()) h=`Replaces <b>${esc(o.name)}</b> · ${esc(originLabel(o))}`;
+      else h=`Replaces <b>${esc(o.name)}</b> with only these pages. Rename to keep the original.`;
+    }
+    else if(d.kind==='pd-parent'||d.kind==='local-dir') h=`New file next to <b>${esc(o.name)}</b>${d.name?' in '+esc(d.name):''}`;
+    else if(d.kind==='pd-dir') h=`PoolDrive › <b>${esc(d.name)}</b><button data-d2="chg">Change</button>`;
+    else if(choice==='same') h=`You’ll pick where, starting in <b>${esc(o.name)}</b>’s folder`;
+    else h = FSA_SAVE ? 'You’ll choose the folder and name' : 'Saved to your Downloads';
+    w.innerHTML=h;
+    scrim.querySelector('#svMain').textContent = d.kind==='replace' ? 'Save, replacing the original' : 'Save PDF';
+  }
+  info();
+  nameIn.addEventListener('input',info);
+  rng.addEventListener('focus',()=>{ scrim.querySelector('input[value=rng]').checked=true; info(); });
+  scrim.querySelectorAll('input[name=w]').forEach(r=>r.addEventListener('change',info));
   scrim.addEventListener('keydown',e=>e.stopPropagation());
   scrim.addEventListener('click',async e=>{
     if(e.target===scrim){ scrim.remove(); return; }
+    const dd=e.target.closest('[data-d]'); if(dd){ choice=dd.dataset.d; info(); return; }
+    if(e.target.closest('[data-d2]')){ scrim.style.display='none'; openBrowser({kind:'pd',name:'PoolDrive',refs:null},'pick',dest=>{ S.pdDest=dest; scrim.style.display=''; info(); }); const obs=setInterval(()=>{ if(!$('#br')){ clearInterval(obs); scrim.style.display=''; } },300); return; }
     const b=e.target.closest('[data-a]'); if(!b) return; const act=b.dataset.a;
     if(act==='x'){ scrim.remove(); return; }
     const w=scrim.querySelector('input[name=w]:checked').value;
     let list=S.pages;
     if(w==='sel') list=S.pages.filter(p=>S.sel.has(p.id));
     if(w==='rng'){ const nums=parseRanges(rng.value,S.pages.length); if(!nums.length){ toast('Type the pages, like 1-3, 7'); rng.focus(); return; } list=nums.map(n=>S.pages[n-1]); }
-    const name=(scrim.querySelector('#svName').value.trim()||S.name).replace(/[\\/:*?"<>|]+/g,'-');
-    const numbers=scrim.querySelector('#svNum').checked;
+    const name=curName(); const numbers=scrim.querySelector('#svNum').checked;
+    const dest=resolveDest(choice, outName(act,name));
+    S.lastDest=choice;
     scrim.remove();
-    try{ await doExport(act, list, name, numbers); }catch(err){ console.error(err); toast('Something went wrong while saving'); }
-    busy(false);
+    await doExport(act, list, name, numbers, dest);
   });
 }
-async function doExport(act, list, name, numbers){
-  if(act==='pdf'){
-    const bytes=await buildPdf(list,{numbers}); busy(false); await saveFile(name+'.pdf', bytes);
-  } else if(act==='small'){
-    const big = list.reduce((s,p)=>s+(S.sources[p.src].bytes.length/Math.max(1,S.sources[p.src].pages.length)),0);
-    const bytes=await buildPdf(list,{numbers, raster:true, rscale:1.45, q:0.62, label:'Making it smaller…'}); busy(false);
-    const pct = big ? Math.round((1-bytes.length/big)*100) : 0;
-    await saveFile(name+' (small).pdf', bytes);
-    if(pct>3) toast(`About ${pct}% smaller (${(bytes.length/1048576).toFixed(1)} MB)`, 3200);
-    else toast(`${(bytes.length/1048576).toFixed(1)} MB. This file was already compact.`, 3200);
-  } else if(act==='split'){
-    const zip=new JSZip(); const libs={}; const pad=String(list.length).length;
-    for(let i=0;i<list.length;i++){ busy(true,`Splitting… ${i+1} of ${list.length}`, i/list.length); const b=await buildPdf([list[i]],{libs, label:`Splitting… ${i+1} of ${list.length}`}); zip.file(`${name} - page ${String(S.pages.indexOf(list[i])+1).padStart(pad,'0')}.pdf`, b); }
-    busy(true,'Packing…',1); const blob=await zip.generateAsync({type:'blob'}); busy(false); await saveFile(name+' (pages).zip', blob);
-  } else if(act==='jpg'){
-    const zip=new JSZip(); const pad=String(list.length).length;
-    for(let i=0;i<list.length;i++){ busy(true,`Making images… ${i+1} of ${list.length}`, i/list.length); const c=await rasterPage(list[i], 2.2, true); zip.file(`${name} - page ${String(S.pages.indexOf(list[i])+1).padStart(pad,'0')}.jpg`, await canvasJpg(c,0.9)); c.width=0; }
-    busy(true,'Packing…',1); const blob=await zip.generateAsync({type:'blob'}); busy(false); await saveFile(name+' (images).zip', blob);
-  }
+async function doExport(act, list, name, numbers, dest){
+  const fname=outName(act,name);
+  dest = dest || {kind:'download'};
+  try{
+    // ask for any permission / save location first, while the tap still counts as a user action
+    if(dest.kind==='replace' && dest.origin.kind==='local'){ if(!(await ensurePerm(dest.origin.handle,'readwrite'))){ toast('Permission needed to save over the original'); return; } }
+    if(dest.kind==='local-dir'){ if(!(await ensurePerm(dest.handle,'readwrite'))){ toast('Permission needed to save in that folder'); return; } }
+    if(dest.kind==='device' && FSA_SAVE){
+      const o=docOrigin(); const ext=(fname.match(/\.[^.]+$/)||['.pdf'])[0];
+      const opts={suggestedName:fname, id:'pdfdesk-save', types:[{description:ext.slice(1).toUpperCase()+' file', accept:{[mimeOf(fname)]:[ext]}}]};
+      if(o && o.kind==='local'){ opts.startIn = o.dir || o.handle; }
+      let h; try{ h=await window.showSaveFilePicker(opts); }catch(e){ if(e.name==='AbortError') return; opts.startIn=undefined; h=await window.showSaveFilePicker(opts); }
+      dest={kind:'handle', handle:h};
+    }
+    let data;
+    if(act==='pdf'){ data=await buildPdf(list,{numbers}); }
+    else if(act==='small'){
+      const big = list.reduce((s,p)=>s+(S.sources[p.src].bytes.length/Math.max(1,S.sources[p.src].pages.length)),0);
+      data=await buildPdf(list,{numbers, raster:true, rscale:1.45, q:0.62, label:'Making it smaller…'});
+      const pct = big ? Math.round((1-data.length/big)*100) : 0;
+      setTimeout(()=>toast(pct>3?`About ${pct}% smaller (${(data.length/1048576).toFixed(1)} MB)`:`${(data.length/1048576).toFixed(1)} MB. This file was already compact.`, 3200), 2700);
+    } else if(act==='split'){
+      const zip=new JSZip(); const libs={}; const pad=String(list.length).length;
+      for(let i=0;i<list.length;i++){ const b=await buildPdf([list[i]],{libs, label:`Splitting… ${i+1} of ${list.length}`}); zip.file(`${name} - page ${String(S.pages.indexOf(list[i])+1).padStart(pad,'0')}.pdf`, b); }
+      busy(true,'Packing…',1); data=await zip.generateAsync({type:'blob'});
+    } else if(act==='jpg'){
+      const zip=new JSZip(); const pad=String(list.length).length;
+      for(let i=0;i<list.length;i++){ busy(true,`Making images… ${i+1} of ${list.length}`, i/list.length); const c=await rasterPage(list[i], 2.2, true); zip.file(`${name} - page ${String(S.pages.indexOf(list[i])+1).padStart(pad,'0')}.jpg`, await canvasJpg(c,0.9)); c.width=0; }
+      busy(true,'Packing…',1); data=await zip.generateAsync({type:'blob'});
+    }
+    busy(false);
+    if(dest.kind==='handle'){ await writeLocal(dest.handle, data instanceof Blob?data:new Blob([data],{type:mimeOf(fname)})); toast('Saved '+dest.handle.name, 2600); if(isPdfName(dest.handle.name)) addRecent([{kind:'local', handle:dest.handle, name:dest.handle.name}]); }
+    else await saveOut(fname, data, dest);
+  }catch(err){ console.error(err); toast('Something went wrong while saving: '+(err.message||err), 4000); }
+  busy(false);
 }
-$('#bSave').onclick=()=>openSave();
+$('#bSave').onclick=()=>{ if(canReplace()) doExport('pdf', S.pages, S.name, false, {kind:'replace', origin:docOrigin()}); else openSave(); };
+$('#bSaveMore').onclick=()=>openSave();
+
 
 /* ---------- signature modal ---------- */
 function openSign(forceNew){
@@ -1235,6 +1366,381 @@ function askPassword(name, wrong){
   });
 }
 
+/* ================= Places: this device (File System Access) + PoolDrive ================= */
+const TOP = (()=>{ try{ return window.self===window.top; }catch(e){ return false; } })();
+const FSA = TOP && typeof window.showOpenFilePicker==='function';
+const FSA_SAVE = TOP && typeof window.showSaveFilePicker==='function';
+const FSA_DIR = TOP && typeof window.showDirectoryPicker==='function';
+const PICK_TYPES = [{description:'PDFs and photos', accept:{'application/pdf':['.pdf'],'image/jpeg':['.jpg','.jpeg'],'image/png':['.png'],'image/webp':['.webp']}}];
+const isOpenable = n => /\.(pdf|jpe?g|png|webp|gif|bmp)$/i.test(n);
+const isPdfName = n => /\.pdf$/i.test(n);
+const mimeOf = n => isPdfName(n)?'application/pdf' : /\.png$/i.test(n)?'image/png' : /\.webp$/i.test(n)?'image/webp' : /\.gif$/i.test(n)?'image/gif' : /\.zip$/i.test(n)?'application/zip' : 'image/jpeg';
+const fmtSz = b => b>=1048576 ? (b/1048576).toFixed(1)+' MB' : Math.max(1,Math.round(b/1024))+' KB';
+async function ensurePerm(h, mode){
+  try{ if(!h.queryPermission) return true; if(await h.queryPermission({mode})==='granted') return true; return (await h.requestPermission({mode}))==='granted'; }catch(e){ return false; }
+}
+
+/* ---- PoolDrive (same site, so its Google sign-ins in localStorage are shared) ---- */
+const PD={K:'pooldrive.accounts.v1',C:'pooldrive.cfg.v1',API:'https://www.googleapis.com/drive/v3/',
+  UP:'https://www.googleapis.com/upload/drive/v3/files',FOLDER:'application/vnd.google-apps.folder',MARGIN:5*1024*1024};
+PD.accs=()=>{ try{ return JSON.parse(localStorage.getItem(PD.K))||[]; }catch(e){ return []; } };
+PD.cfg=()=>{ try{ return JSON.parse(localStorage.getItem(PD.C))||{}; }catch(e){ return {}; } };
+PD.has=()=>TOP && PD.accs().length>0 && !!PD.cfg().clientId;
+PD.isLive=a=>!!(a&&a.token&&a.exp>Date.now()+30000);
+PD.live=()=>PD.accs().filter(PD.isLive);
+PD.free=a=>a.limit?Math.max(0,a.limit-(a.usage||0)):Infinity;
+PD.put=a=>{ const all=PD.accs(), c=all.find(x=>x.email===a.email); if(c){ Object.assign(c,a); try{ localStorage.setItem(PD.K,JSON.stringify(all)); }catch(e){} } };
+PD.qs=o=>new URLSearchParams(o).toString();
+PD.q=s=>String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+class PDAuth extends Error{ constructor(a){ super('Sign-in expired for '+(a&&a.email)); this.acc=a; } }
+PD._rf={};
+PD.refresh=a=>{ const url=PD.cfg().authUrl; if(!a||!a.rt||!url) return Promise.resolve(null); if(PD._rf[a.email]) return PD._rf[a.email];
+  return PD._rf[a.email]=(async()=>{ try{ const j=await (await fetch(url,{method:'POST',body:JSON.stringify({op:'refresh',refresh_token:a.rt})})).json();
+    if(j.error){ if(/invalid_grant/i.test(j.error)) PD.put({email:a.email,rt:null}); return null; }
+    const t={email:a.email,token:j.access_token,exp:Date.now()+j.expires_in*1000}; if(j.refresh_token) t.rt=j.refresh_token; PD.put(t); return Object.assign(a,t); }
+    catch(e){ return null; } finally{ delete PD._rf[a.email]; } })(); };
+PD.refreshAll=async()=>{ const due=PD.accs().filter(a=>a.rt&&a.exp<Date.now()+5*60e3); if(due.length) await Promise.all(due.map(PD.refresh)); };
+PD.acc=email=>PD.accs().find(a=>a.email===email);
+PD.api=async(a,path,opts={},retry=true)=>{
+  if(!a) throw new Error('That PoolDrive account is not on this browser');
+  if(!PD.isLive(a)){ const f=await PD.refresh(a); if(!f) throw new PDAuth(a); a=f; }
+  const r=await fetch(path.startsWith('http')?path:PD.API+path, Object.assign({},opts,{headers:Object.assign({Authorization:'Bearer '+a.token},opts.headers||{})}));
+  if(r.status===401){ a.exp=0; PD.put({email:a.email,exp:0}); if(retry && await PD.refresh(a)) return PD.api(a,path,opts,false); throw new PDAuth(a); }
+  if(!r.ok){ let m='Google Drive error '+r.status; try{ m=(await r.json()).error.message||m; }catch(e){} throw new Error(m); }
+  return opts.raw ? r : (r.status===204 ? null : r.json());
+};
+PD.gis=()=>new Promise((res,rej)=>{
+  if(window.google&&google.accounts&&google.accounts.oauth2) return res();
+  let sc=document.getElementById('pdGis'); if(!sc){ sc=document.createElement('script'); sc.id='pdGis'; sc.src='https://accounts.google.com/gsi/client'; document.head.append(sc); }
+  let n=0; const t=setInterval(()=>{ if(window.google&&google.accounts&&google.accounts.oauth2){ clearInterval(t); res(); } else if(++n>80){ clearInterval(t); rej(new Error('Google sign-in could not load')); } },100);
+});
+PD.reconnect=async a=>{
+  await PD.gis(); const SC='https://www.googleapis.com/auth/drive', url=PD.cfg().authUrl;
+  let t;
+  if(url){
+    const code=await new Promise((res,rej)=>{ google.accounts.oauth2.initCodeClient({client_id:PD.cfg().clientId,scope:SC,ux_mode:'popup',hint:a.email,login_hint:a.email,
+      callback:x=>x.error?rej(new Error(x.error)):res(x.code),error_callback:e=>rej(new Error(e.type==='popup_closed'?'Sign-in window was closed':(e.message||e.type)))}).requestCode(); });
+    const j=await (await fetch(url,{method:'POST',body:JSON.stringify({op:'code',code})})).json(); if(j.error) throw new Error(j.error_description||j.error);
+    t={email:a.email,token:j.access_token,exp:Date.now()+j.expires_in*1000}; if(j.refresh_token) t.rt=j.refresh_token;
+  } else {
+    const r=await new Promise((res,rej)=>{ google.accounts.oauth2.initTokenClient({client_id:PD.cfg().clientId,scope:SC,prompt:'',hint:a.email,login_hint:a.email,
+      callback:x=>x.error?rej(new Error(x.error)):res(x),error_callback:e=>rej(new Error(e.type==='popup_closed'?'Sign-in window was closed':(e.message||e.type)))}).requestAccessToken({prompt:'',hint:a.email,login_hint:a.email}); });
+    t={email:a.email,token:r.access_token,exp:Date.now()+r.expires_in*1000};
+  }
+  const me=await PD.api(t,'about?fields=user(emailAddress),storageQuota(limit,usage)');
+  if(me.user.emailAddress!==a.email) throw new Error('You picked '+me.user.emailAddress+'. Choose '+a.email);
+  t.limit=me.storageQuota.limit?+me.storageQuota.limit:0; t.usage=+me.storageQuota.usage||0; PD.put(t); return t;
+};
+PD.list=async(a,id,extra)=>{ const out=[]; let tok;
+  do{ const p={q:"'"+id+"' in parents and trashed=false"+(extra||''),fields:'nextPageToken,files(id,name,mimeType,size,modifiedTime,parents)',pageSize:1000,orderBy:'folder,name'}; if(tok) p.pageToken=tok;
+    const r=await PD.api(a,'files?'+PD.qs(p)); out.push(...r.files); tok=r.nextPageToken; }while(tok); return out; };
+PD.multipart=(meta,blob,type)=>{ const b='pdk'+Math.random().toString(36).slice(2);
+  return {b, body:new Blob(['--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)+'\r\n--'+b+'\r\nContent-Type: '+type+'\r\n\r\n',blob,'\r\n--'+b+'--'])}; };
+PD.create=async(a,parent,name,blob,type)=>{ const m=PD.multipart({name,parents:[parent]},blob,type);
+  const r=await PD.api(a,PD.UP+'?uploadType=multipart&fields=id,name,parents',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+m.b},body:m.body});
+  PD.put({email:a.email,usage:(a.usage||0)+blob.size}); return r; };
+PD.replace=async(a,id,blob,type)=>PD.api(a,PD.UP+'/'+id+'?uploadType=media&fields=id,name,parents',{method:'PATCH',headers:{'Content-Type':type},body:blob});
+PD.uniqueName=async(a,parent,name)=>{ const m=name.match(/^(.*?)(\.[^.]+)?$/); let n=name, k=2;
+  for(;;){ const r=await PD.api(a,'files?'+PD.qs({q:"name='"+PD.q(n)+"' and '"+parent+"' in parents and trashed=false",fields:'files(id)',pageSize:1})); if(!r.files.length) return n; n=m[1]+' ('+(k++)+')'+(m[2]||''); } };
+PD.deadHtml=()=>{ const d=PD.accs().filter(a=>!PD.isLive(a)&&!a.rt); return d.length?`<div class="pddead">Sign-in expired for ${d.length} account${d.length>1?'s':''}. Tap to reconnect: ${d.map(a=>`<button class="btn small" data-pdre="${esc(a.email)}">${esc(a.email.split('@')[0])}</button>`).join('')}</div>`:''; };
+
+/* ---- shortcuts (pinned folders) and recent files, kept in IndexedDB ---- */
+async function getPlaces(){ return (await DB.get('places'))||[]; }
+async function setPlaces(v){ await DB.set('places',v); }
+async function getRecent(){ return (await DB.get('recent'))||[]; }
+function originKey(o){ return o.kind==='pd' ? 'pd:'+o.email+':'+o.id : 'local:'+o.name+':'+(o.dirName||''); }
+async function addRecent(list){
+  let r=await getRecent();
+  for(const o of list){ if(!o) continue; const k=originKey(o); r=r.filter(x=>originKey(x)!==k); r.unshift(Object.assign({t:Date.now()},o)); }
+  await DB.set('recent', r.slice(0,8)); renderHomeLists();
+}
+function placeLink(p){
+  const base=location.origin+location.pathname;
+  if(p.kind==='pd'){ const j=JSON.stringify({n:p.name,r:p.refs.map(r=>[r.email,r.id])}); return base+'#pd='+btoa(unescape(encodeURIComponent(j))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+  return base+'#place='+p.id;
+}
+function parsePdHash(h){ try{ let s=h.replace(/-/g,'+').replace(/_/g,'/'); while(s.length%4) s+='='; const j=JSON.parse(decodeURIComponent(escape(atob(s)))); return {kind:'pd', name:j.n, refs:j.r.map(([email,id])=>({email,id}))}; }catch(e){ return null; } }
+function placeSub(p){ return p.kind==='pd' ? 'PoolDrive'+(p.refs.length>1?` · ${p.refs.length} accounts`:'') : 'This device'; }
+
+async function renderHomeLists(){
+  const box=$('#places'); if(!box) return;
+  if(!TOP){ box.innerHTML=''; $('#pdBtn').classList.add('hidden'); return; }
+  const places=await getPlaces(), recent=await getRecent();
+  const ic=k=>`<svg class="i" style="color:${k==='pd'?'#4a7c9b':'var(--accent)'}"><use href="#${k==='pd'?'i-cloud':'i-folder'}"/></svg>`;
+  let h='';
+  const canAdd = FSA_DIR || PD.has();
+  h+=`<div class="sec"><div class="sech"><b>Shortcuts</b>${canAdd?'<button class="btn small ghost" id="addPlace"><svg class="i"><use href="#i-plus"/></svg>Add folder</button>':''}</div>`;
+  if(places.length) h+='<div class="list">'+places.map((p,i)=>`<div class="li"><button class="lmain" data-place="${i}">${ic(p.kind)}<span><b>${esc(p.name)}</b><small>${placeSub(p)}</small></span></button><button class="iconbtn" data-plink="${i}" title="Copy a link that opens this folder"><svg class="i"><use href="#i-link"/></svg></button><button class="iconbtn" data-pdel="${i}" title="Remove shortcut"><svg class="i"><use href="#i-x"/></svg></button></div>`).join('')+'</div>';
+  else h+=`<p class="muted" style="margin:4px 2px 0">${canAdd?'Pin folders you use often (bills, forms, scans) to open them in one tap.':'Folder shortcuts need Chrome or Edge on a computer, or PoolDrive signed in on this browser.'}</p>`;
+  h+='</div>';
+  if(recent.length){
+    h+='<div class="sec"><div class="sech"><b>Recent</b><button class="btn small ghost" id="clrRecent">Clear</button></div><div class="list">'+recent.map((o,i)=>`<div class="li"><button class="lmain" data-recent="${i}">${o.kind==='pd'?ic('pd'):'<svg class="i" style="color:var(--muted)"><use href="#i-doc"/></svg>'}<span><b>${esc(o.name)}</b><small>${o.kind==='pd'?'PoolDrive':'This device'}${o.dirName?' · '+esc(o.dirName):''}</small></span></button></div>`).join('')+'</div></div>';
+  }
+  box.innerHTML=h;
+  $('#pdBtn').classList.toggle('hidden', !TOP);
+}
+document.addEventListener('click', async e=>{
+  const t=e.target;
+  if(!t.closest || !t.closest('#places')) return;
+  if(t.closest('#addPlace')) return addPlaceSheet();
+  if(t.closest('#clrRecent')){ await DB.set('recent',[]); renderHomeLists(); return; }
+  const pl=t.closest('[data-place]'); if(pl){ const p=(await getPlaces())[+pl.dataset.place]; if(p) openBrowser(p,'open'); return; }
+  const lk=t.closest('[data-plink]'); if(lk){ const p=(await getPlaces())[+lk.dataset.plink]; const url=placeLink(p);
+    try{ await navigator.clipboard.writeText(url); toast(p.kind==='pd'?'Link copied. Opens this folder on any device signed in to PoolDrive.':'Link copied. It opens this folder in this browser on this device.',3600); }
+    catch(err){ showLinkSheet(url); } return; }
+  const dl=t.closest('[data-pdel]'); if(dl){ const L=await getPlaces(); L.splice(+dl.dataset.pdel,1); await setPlaces(L); renderHomeLists(); return; }
+  const rc=t.closest('[data-recent]'); if(rc){ const o=(await getRecent())[+rc.dataset.recent]; if(o) openRecent(o); return; }
+});
+function showLinkSheet(url){
+  const s=document.createElement('div'); s.className='scrim';
+  s.innerHTML=`<div class="sheet"><h3>Link to this folder</h3><div class="field"><input readonly value="${esc(url)}"></div><p class="muted">Copy it, or open it and choose "Add to Home screen" to get an icon for this folder.</p><div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn small primary">Done</button></div></div>`;
+  document.body.appendChild(s); const inp=s.querySelector('input'); inp.focus(); inp.select();
+  s.addEventListener('click',ev=>{ if(ev.target===s||ev.target.closest('button')) s.remove(); });
+}
+async function openRecent(o){
+  try{
+    if(o.kind==='local'){
+      if(!(await ensurePerm(o.handle,'read'))){ toast('Permission needed to open it'); return; }
+      const f=await o.handle.getFile(); await openItems([{file:f, origin:o}], 'new');
+    } else {
+      busy(true,'Getting '+o.name+'…',0.3);
+      const a=PD.acc(o.email); const r=await PD.api(a,'files/'+o.id+'?alt=media',{raw:true});
+      const f=new File([await r.blob()],o.name,{type:mimeOf(o.name)}); busy(false);
+      await openItems([{file:f, origin:o}], 'new');
+    }
+  }catch(e){ busy(false); console.error(e); toast(e instanceof PDAuth ? 'Reconnect '+e.acc.email+' in PoolDrive first' : (e.name==='NotFoundError'?'That file was moved or deleted':'Could not open it: '+(e.message||e)), 3600); }
+}
+async function openItems(items, mode){
+  // mode 'new' = start a new document, 'add' = add pages to the open one
+  if(mode==='new' && S.pages.length) resetDoc();
+  await addFiles(items);
+  addRecent(items.map(i=>i.origin).filter(Boolean));
+}
+async function pickFromDevice(mode){
+  if(FSA){
+    let hs; try{ hs=await window.showOpenFilePicker({multiple:true, types:PICK_TYPES, excludeAcceptAllOption:false}); }catch(e){ return; }
+    const items=[]; for(const h of hs){ items.push({file:await h.getFile(), origin:{kind:'local', handle:h, name:h.name}}); }
+    await openItems(items, mode);
+  } else {
+    const inp=$(mode==='new'?'#fileHome':'#fileAdd'); inp.click();
+  }
+}
+async function addPlaceSheet(){
+  const s=document.createElement('div'); s.className='scrim';
+  s.innerHTML=`<div class="sheet"><h3>Add a folder shortcut</h3><div class="acts">
+    ${FSA_DIR?'<button class="btn" data-k="local"><svg class="i"><use href="#i-folder"/></svg>Folder on this device<small>Chrome / Edge</small></button>':''}
+    ${PD.has()?'<button class="btn" data-k="pd"><svg class="i"><use href="#i-cloud"/></svg>Folder in PoolDrive<small>all accounts</small></button>':''}
+    <button class="btn ghost" data-k="x" style="justify-content:center">Cancel</button></div></div>`;
+  document.body.appendChild(s);
+  s.addEventListener('click', async ev=>{
+    const b=ev.target.closest('[data-k]'); if(ev.target!==s && !b) return; s.remove(); if(!b) return;
+    if(b.dataset.k==='local'){
+      let d; try{ d=await window.showDirectoryPicker({mode:'readwrite', id:'pdfdesk'}); }catch(e){ return; }
+      const L=await getPlaces(); L.push({id:uid(), kind:'local', name:d.name, handle:d}); await setPlaces(L); renderHomeLists(); toast('Shortcut added: '+d.name);
+    } else if(b.dataset.k==='pd'){
+      openBrowser({kind:'pd', name:'PoolDrive', refs:null}, 'pin');
+    }
+  });
+}
+
+/* ---- folder browser (shared by open, add, pin and choose-a-save-folder) ---- */
+let BR=null;
+function openBrowser(place, mode, onPick){
+  closeBrowser();
+  BR={kind:place.kind, mode, onPick, stack:[{name:place.name, handle:place.handle, refs:place.refs||null}], items:[], sel:new Set(), q:'', seq:0, place};
+  const el=document.createElement('div'); el.className='scrim'; el.id='br';
+  const title = mode==='pick'?'Choose a folder' : mode==='pin'?'Pick a folder to pin' : mode==='add'?'Add pages from…' : 'Open';
+  el.innerHTML=`<div class="sheet br"><div class="brh"><h3>${title}</h3><button class="iconbtn" data-b="x" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    ${BR.kind==='pd'?'<div class="field" style="height:38px;margin-bottom:8px"><input type="search" id="brQ" placeholder="Search all PoolDrive accounts" autocomplete="off"></div>':''}
+    <div class="crumbs" id="brCr"></div><div id="brDead"></div><div class="brl" id="brL"></div>
+    <div class="brf"><button class="btn small ghost" data-b="pin" id="brPin"><svg class="i"><use href="#i-pin"/></svg>Pin folder</button><span class="spacer"></span><button class="btn small primary" data-b="go" id="brGo" disabled>Open</button></div></div>`;
+  document.body.appendChild(el);
+  el.addEventListener('click', brClick);
+  el.addEventListener('keydown', e=>e.stopPropagation());
+  const q=el.querySelector('#brQ'); let tm; if(q) q.addEventListener('input',()=>{ clearTimeout(tm); tm=setTimeout(()=>{ BR.q=q.value.trim(); brLoad(); },350); });
+  brLoad();
+}
+function closeBrowser(){ const el=$('#br'); if(el) el.remove(); BR=null; }
+function brTop(){ return BR.stack[BR.stack.length-1]; }
+function brFoot(){
+  if(!BR) return; const go=$('#brGo'), pin=$('#brPin');
+  const atRoot = BR.kind==='pd' && !brTop().refs;
+  pin.classList.toggle('hidden', BR.mode==='pick' || BR.q!=='' || (atRoot && BR.mode!=='pin'));
+  if(BR.mode==='pick'){ go.disabled = BR.q!=='' || atRoot && BR.kind==='pd' && false; go.textContent='Save here'; }
+  else if(BR.mode==='pin'){ pin.classList.add('hidden'); go.disabled = BR.q!=='' || (BR.kind==='pd' && atRoot); go.textContent='Pin this folder'; }
+  else { const n=BR.sel.size; go.disabled=!n; go.textContent = n ? (BR.mode==='add'?'Add ':'Open ')+n+' file'+(n>1?'s':'') : (BR.mode==='add'?'Add':'Open'); }
+}
+async function brLoad(){
+  if(!BR) return; const seq=++BR.seq; const top=brTop(); BR.items=[];
+  $('#brCr').innerHTML = BR.q ? `<b>Search: “${esc(BR.q)}”</b>` : BR.stack.map((x,i)=>i===BR.stack.length-1?`<b>${esc(x.name)}</b>`:`<button data-cr="${i}">${esc(x.name)}</button><span>›</span>`).join('');
+  $('#brL').innerHTML='<div class="brmsg">Loading…</div>'; brFoot();
+  try{
+    if(BR.kind==='local'){
+      if(!(await ensurePerm(top.handle,'readwrite'))) { $('#brL').innerHTML='<div class="brmsg">Allow access to this folder to see its files.<br><button class="btn small" data-b="retry" style="margin-top:10px">Allow</button></div>'; return; }
+      const dirs=[], files=[];
+      for await (const h of top.handle.values()){ if(h.name.startsWith('.')) continue; if(h.kind==='directory') dirs.push({dir:true,name:h.name,handle:h}); else if(isOpenable(h.name)) files.push({name:h.name,handle:h}); }
+      if(seq!==BR.seq) return;
+      const cmp=(a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'});
+      BR.items=[...dirs.sort(cmp),...files.sort(cmp)];
+    } else {
+      await PD.refreshAll().catch(()=>{});
+      $('#brDead').innerHTML=PD.deadHtml();
+      const live=PD.live();
+      if(!live.length){ $('#brL').innerHTML='<div class="brmsg">Reconnect a PoolDrive account above to see your files.</div>'; return; }
+      const mimeQ=" and (mimeType='"+PD.FOLDER+"' or mimeType='application/pdf' or mimeType contains 'image/')";
+      const jobs = BR.q ? live.map(a=>({a})) : (top.refs||live.map(a=>({email:a.email,id:'root'}))).map(r=>({a:live.find(x=>x.email===r.email),id:r.id})).filter(r=>r.a);
+      const res=await Promise.allSettled(jobs.map(async r=>{
+        if(BR.q){ const x=await PD.api(r.a,'files?'+PD.qs({q:"name contains '"+PD.q(BR.q)+"' and trashed=false"+mimeQ,fields:'files(id,name,mimeType,size,modifiedTime,parents)',pageSize:100})); return x.files.map(f=>Object.assign(f,{email:r.a.email})); }
+        return (await PD.list(r.a,r.id,mimeQ)).map(f=>Object.assign(f,{email:r.a.email}));
+      }));
+      if(!BR||seq!==BR.seq) return;
+      const folders=new Map(), files=[];
+      for(const x of res){ if(x.status!=='fulfilled') continue; for(const f of x.value){
+        if(f.mimeType===PD.FOLDER){ const k=f.name.toLowerCase(); const e=folders.get(k)||{dir:true,name:f.name,refs:[]}; e.refs.push({email:f.email,id:f.id}); folders.set(k,e); }
+        else files.push({name:f.name, size:f.size, email:f.email, id:f.id, parent:(f.parents||[])[0]}); } }
+      const cmp=(a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'});
+      BR.items=[...[...folders.values()].sort(cmp),...files.sort(cmp)];
+      if(res.some(x=>x.status==='rejected')) $('#brDead').innerHTML += '<div class="pddead">Some accounts could not be read right now.</div>';
+    }
+  }catch(e){ console.error(e); if(BR && seq===BR.seq) $('#brL').innerHTML=`<div class="brmsg">Could not open this folder.<br><small>${esc(e.message||e)}</small></div>`; return; }
+  const pickOnly = BR.mode==='pick' || BR.mode==='pin';
+  $('#brL').innerHTML = BR.items.length ? BR.items.map((f,i)=>f.dir
+    ? `<button class="brit" data-i="${i}"><svg class="i" style="color:#d9a520"><use href="#i-folder"/></svg><span class="nm">${esc(f.name)}</span><small>›</small></button>`
+    : `<button class="brit ${BR.sel.has(i)?'on':''}" data-i="${i}" ${pickOnly?'disabled':''}><span class="ft">${isPdfName(f.name)?'PDF':'IMG'}</span><span class="nm">${esc(f.name)}</span><small>${f.size?fmtSz(+f.size):''}</small><span class="ck"><svg class="i"><use href="#i-check"/></svg></span></button>`).join('')
+    : `<div class="brmsg">${BR.q?'Nothing found.':'No PDFs, photos or folders here.'}</div>`;
+  brFoot();
+}
+async function brClick(e){
+  const el=$('#br'); const t=e.target;
+  if(t===el){ closeBrowser(); return; }
+  const re=t.closest('[data-pdre]'); if(re){ try{ await PD.reconnect(PD.acc(re.dataset.pdre)); toast('Reconnected'); brLoad(); }catch(err){ toast(err.message||String(err)); } return; }
+  const b=t.closest('[data-b]');
+  if(b){ const k=b.dataset.b;
+    if(k==='x'){ closeBrowser(); return; }
+    if(k==='retry'){ brLoad(); return; }
+    if(k==='pin'){ await pinCurrent(); return; }
+    if(k==='go'){ await brGo(); return; }
+  }
+  const cr=t.closest('[data-cr]'); if(cr){ BR.stack=BR.stack.slice(0,+cr.dataset.cr+1); BR.sel.clear(); brLoad(); return; }
+  const it=t.closest('.brit'); if(!it||it.disabled) return; const i=+it.dataset.i; const f=BR.items[i];
+  if(f.dir){ BR.q=''; const q=$('#brQ'); if(q) q.value=''; BR.stack.push({name:f.name, handle:f.handle, refs:f.refs}); BR.sel.clear(); brLoad(); return; }
+  if(BR.sel.has(i)) BR.sel.delete(i); else BR.sel.add(i);
+  it.classList.toggle('on', BR.sel.has(i)); brFoot();
+}
+async function pinCurrent(){
+  const top=brTop(); const L=await getPlaces();
+  if(BR.kind==='local') L.push({id:uid(), kind:'local', name:top.name, handle:top.handle});
+  else { if(!top.refs){ toast('Open a folder first'); return; } L.push({id:uid(), kind:'pd', name:top.name, refs:top.refs}); }
+  await setPlaces(L); renderHomeLists(); toast('Pinned '+top.name+' to Shortcuts');
+  if(BR.mode==='pin') closeBrowser();
+}
+async function brGo(){
+  const top=brTop();
+  if(BR.mode==='pin'){ await pinCurrent(); return; }
+  if(BR.mode==='pick'){ const cb=BR.onPick; const dest = BR.kind==='local' ? {kind:'local-dir', handle:top.handle, name:top.name} : {kind:'pd-dir', refs:top.refs||PD.live().map(a=>({email:a.email,id:'root'})), name:top.refs?top.name:'My Drive'}; closeBrowser(); cb && cb(dest); return; }
+  const chosen=[...BR.sel].sort((a,b)=>a-b).map(i=>BR.items[i]); const mode=BR.mode==='add'?'add':'new'; const kind=BR.kind; const dirName=top.name, dirHandle=top.handle;
+  const go=$('#brGo'); go.disabled=true; go.textContent='Getting files…';
+  try{
+    const items=[];
+    for(let k=0;k<chosen.length;k++){
+      const f=chosen[k];
+      if(kind==='local'){ items.push({file:await f.handle.getFile(), origin:{kind:'local', handle:f.handle, name:f.name, dir:dirHandle, dirName}}); }
+      else { go.textContent=`Getting ${k+1} of ${chosen.length}…`; const r=await PD.api(PD.acc(f.email),'files/'+f.id+'?alt=media',{raw:true}); items.push({file:new File([await r.blob()],f.name,{type:mimeOf(f.name)}), origin:{kind:'pd', email:f.email, id:f.id, parent:f.parent, name:f.name, dirName:BR.q?'':dirName}}); }
+    }
+    closeBrowser();
+    await openItems(items, mode);
+  }catch(e){ console.error(e); toast(e instanceof PDAuth?'Reconnect '+e.acc.email+' first':'Could not get the file: '+(e.message||e)); if(BR){ brFoot(); } }
+}
+
+/* "Add files" while editing: choose where from */
+function addFromSheet(){
+  const s=document.createElement('div'); s.className='scrim';
+  getPlaces().then(places=>{
+    s.innerHTML=`<div class="sheet"><h3>Add pages from</h3><div class="acts">
+      <button class="btn" data-k="dev"><svg class="i"><use href="#i-doc"/></svg>This device</button>
+      ${PD.has()?'<button class="btn" data-k="pd"><svg class="i"><use href="#i-cloud"/></svg>PoolDrive</button>':''}
+      ${places.map((p,i)=>`<button class="btn" data-k="p${i}"><svg class="i"><use href="#${p.kind==='pd'?'i-cloud':'i-folder'}"/></svg>${esc(p.name)}<small>${placeSub(p)}</small></button>`).join('')}
+      <button class="btn ghost" data-k="x" style="justify-content:center">Cancel</button></div></div>`;
+    document.body.appendChild(s);
+    s.addEventListener('click',ev=>{ const b=ev.target.closest('[data-k]'); if(ev.target!==s&&!b) return; s.remove(); if(!b) return; const k=b.dataset.k;
+      if(k==='dev') pickFromDevice('add'); else if(k==='pd') openBrowser({kind:'pd',name:'PoolDrive',refs:null},'add'); else if(k[0]==='p') openBrowser(places[+k.slice(1)],'add'); });
+  });
+}
+
+/* ---- where a document came from, and saving back there ---- */
+function docOrigin(){ if(!S.pages.length) return null; const s=S.sources[S.pages[0].src]; return s && s.origin || null; }
+function canReplace(){
+  const o=docOrigin(); if(!o || !isPdfName(o.name)) return false;
+  if(Object.keys(usedSources()).length!==1) return false;
+  return S.name===stem(o.name);
+}
+function originLabel(o){ if(!o) return ''; return (o.kind==='pd'?'PoolDrive':'This device') + (o.dirName?' · '+o.dirName:''); }
+async function writeLocal(handle, data){ const w=await handle.createWritable(); await w.write(data instanceof Blob?data:new Blob([data])); await w.close(); }
+async function uniqueLocal(dir, name){ const m=name.match(/^(.*?)(\.[^.]+)?$/); let n=name,k=2; for(;;){ try{ await dir.getFileHandle(n); n=m[1]+' ('+(k++)+')'+(m[2]||''); }catch(e){ return n; } } }
+// returns true when saved
+async function saveOut(filename, data, dest){
+  const blob = data instanceof Blob ? data : new Blob([data],{type:mimeOf(filename)});
+  dest = dest || {kind:'download'};
+  try{
+    if(dest.kind==='replace'){
+      const o=dest.origin;
+      if(o.kind==='local'){ await writeLocal(o.handle, blob); toast('Saved to '+o.name, 2600); }
+      else { busy(true,'Saving to PoolDrive…',0.9); await PD.replace(PD.acc(o.email), o.id, blob, 'application/pdf'); busy(false); toast('Saved to '+o.name+' in PoolDrive. Older versions stay in Drive’s version history.', 3600); }
+      S.sources[S.pages[0].src].savedAt=Date.now(); return true;
+    }
+    if(dest.kind==='local-dir'){
+      if(!(await ensurePerm(dest.handle,'readwrite'))){ toast('Permission needed to save there'); return false; }
+      const n=await uniqueLocal(dest.handle, filename); const h=await dest.handle.getFileHandle(n,{create:true}); await writeLocal(h, blob);
+      toast('Saved '+n+' in '+dest.name, 2800);
+      if(isPdfName(n)) addRecent([{kind:'local', handle:h, name:n, dir:dest.handle, dirName:dest.name}]);
+      return true;
+    }
+    if(dest.kind==='pd-dir' || dest.kind==='pd-parent'){
+      let a, parent;
+      if(dest.kind==='pd-parent'){ a=PD.acc(dest.email); parent=dest.parent||'root'; }
+      else { const live=dest.refs.map(r=>({r,a:PD.live().find(x=>x.email===r.email)})).filter(x=>x.a && PD.free(x.a)>blob.size+PD.MARGIN).sort((x,y)=>PD.free(y.a)-PD.free(x.a));
+        if(!live.length){ toast('No PoolDrive account here has room or is signed in'); return false; } a=live[0].a; parent=live[0].r.id; }
+      busy(true,'Saving to PoolDrive…',0.9);
+      const n=await PD.uniqueName(a,parent,filename); const r=await PD.create(a,parent,n,blob,mimeOf(n)); busy(false);
+      toast('Saved '+n+' to PoolDrive'+(dest.name?' · '+dest.name:''), 3000);
+      if(isPdfName(n)) addRecent([{kind:'pd', email:a.email, id:r.id, parent, name:n, dirName:dest.name||''}]);
+      return true;
+    }
+    if(dest.kind==='device' && FSA_SAVE){
+      const o=docOrigin(); const opts={suggestedName:filename, id:'pdfdesk-save'};
+      if(o && o.kind==='local') opts.startIn = o.dir || o.handle;
+      const ext=(filename.match(/\.[^.]+$/)||['.pdf'])[0]; opts.types=[{description:ext.slice(1).toUpperCase()+' file', accept:{[mimeOf(filename)]:[ext]}}];
+      let h; try{ h=await window.showSaveFilePicker(opts); }catch(e){ if(e.name==='AbortError'){ toast('Not saved'); return false; } throw e; }
+      await writeLocal(h, blob); toast('Saved '+h.name, 2600);
+      if(isPdfName(h.name)) addRecent([{kind:'local', handle:h, name:h.name}]);
+      return true;
+    }
+  }catch(e){ busy(false); console.error(e); toast(e instanceof PDAuth ? 'Sign-in expired for '+e.acc.email+'. Reconnect it in PoolDrive.' : 'Could not save: '+(e.message||e), 4000); return false; }
+  return saveFile(filename, blob);
+}
+
+/* ---- links: #place=<id> (this device) and #pd=<…> (PoolDrive, any device) ---- */
+async function routeHash(){
+  const h=location.hash.slice(1); if(!h) return;
+  if(h.startsWith('pd=')){
+    const p=parsePdHash(h.slice(3)); if(!p){ toast('That link looks broken'); return; }
+    if(!PD.has()){ toast('Sign in to PoolDrive on this browser first, then open the link again.', 4000); return; }
+    showHome(); openBrowser(p,'open');
+  } else if(h.startsWith('place=')){
+    const p=(await getPlaces()).find(x=>x.id===h.slice(6)); if(!p){ toast('That shortcut is not on this device'); return; }
+    showHome();
+    const ok = p.handle && p.handle.queryPermission && (await p.handle.queryPermission({mode:'readwrite'}))==='granted';
+    if(ok) openBrowser(p,'open'); else showResumeTap(p);
+  }
+}
+function showResumeTap(p){ // browsers need a tap before giving folder access again
+  const s=document.createElement('div'); s.className='scrim';
+  s.innerHTML=`<div class="sheet"><h3>Open ${esc(p.name)}?</h3><p class="muted">Your browser asks for permission again after it restarts.</p><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn small ghost" data-k="x">Cancel</button><button class="btn small primary" data-k="go">Open folder</button></div></div>`;
+  document.body.appendChild(s);
+  s.addEventListener('click',ev=>{ const b=ev.target.closest('[data-k]'); if(ev.target!==s&&!b) return; s.remove(); if(b&&b.dataset.k==='go') openBrowser(p,'open'); });
+}
+window.addEventListener('hashchange', routeHash);
+
 /* ---------- keyboard ---------- */
 document.addEventListener('keydown',e=>{
   if(e.target.closest && e.target.closest('input,textarea,.scrim')) return;
@@ -1242,7 +1748,7 @@ document.addEventListener('keydown',e=>{
   const mod=e.ctrlKey||e.metaKey; const k=e.key.toLowerCase();
   if(mod && k==='z'){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
   if(mod && k==='y'){ e.preventDefault(); redo(); return; }
-  if(mod && k==='s'){ e.preventDefault(); openSave(); return; }
+  if(mod && k==='s'){ e.preventDefault(); $('#bSave').click(); return; }
   if(mod && (k==='='||k==='+')){ e.preventDefault(); setScale(S.scale*1.2); return; }
   if(mod && k==='-'){ e.preventDefault(); setScale(S.scale/1.2); return; }
   if(mod && k==='0'){ e.preventDefault(); setScale(fitScale()); return; }
@@ -1257,7 +1763,7 @@ document.addEventListener('keydown',e=>{
 
 /* ---------- init ---------- */
 const tl=lsGet('pdfdesk:tools',null); if(tl){ Object.assign(S.hl,tl.hl||{}); Object.assign(S.pen,tl.pen||{}); Object.assign(S.text,tl.text||{}); }
-updateSwatches(); checkResume();
+updateSwatches(); checkResume(); renderHomeLists(); routeHash();
 window.addEventListener('resize',()=>{ if(S.view==='mark' && S.pages.length && !pinch){ /* keep zoom */ } });
 window.__pdfdesk = S; // for debugging
 })();
