@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>PDF Desk</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#fffdf8">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -308,6 +312,11 @@ body.t-kp #stack{cursor:copy}
     <div class="openrow">
       <button class="btn" id="devBtn"><svg class="i"><use href="#i-doc"/></svg>This device</button>
       <button class="btn" id="pdBtn"><svg class="i" style="color:#4a7c9b"><use href="#i-cloud"/></svg>PoolDrive</button>
+    </div>
+    <div id="installBox" class="resume hidden" style="margin-top:10px">
+      <svg class="i" style="color:var(--accent)"><use href="#i-save"/></svg>
+      <div class="t"><b>Install PDF Desk as an app</b><span>Then right-click any PDF in File Explorer → Open with → PDF Desk, and Save writes straight back to that file.</span></div>
+      <button class="btn small primary" id="installBtn">Install</button>
     </div>
     <div id="resume" class="resume hidden">
       <svg class="i" style="color:var(--accent)"><use href="#i-doc"/></svg>
@@ -2069,6 +2078,26 @@ $('#srIn').addEventListener('input',e=>{ clearTimeout(srT); const q=e.target.val
 $('#srIn').addEventListener('keydown',e=>{ e.stopPropagation(); if(e.key==='Enter'){ e.preventDefault(); if(SR.q!==e.target.value.toLowerCase().replace(/\s+/g,' ').trim()){ clearTimeout(srT); runSearch(e.target.value); } else srStep(e.shiftKey?-1:1); } if(e.key==='Escape') closeSearch(); });
 $('#srPrev').onclick=()=>srStep(-1); $('#srNext').onclick=()=>srStep(1); $('#srX').onclick=closeSearch;
 $('#bSearch').onclick=()=>{ if($('#srBar').classList.contains('hidden')) openSearch(); else closeSearch(); };
+
+
+/* ---------- installed app: open PDFs from File Explorer ("Open with") ---------- */
+const PWA = !!document.querySelector('link[rel=manifest]') && TOP;
+if(PWA){
+  if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='127.0.0.1'||location.hostname==='localhost')) navigator.serviceWorker.register('sw.js').catch(()=>{});
+  let deferred=null;
+  const standalone = () => matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: window-controls-overlay)').matches;
+  window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferred=e; if(!standalone()) $('#installBox').classList.remove('hidden'); });
+  window.addEventListener('appinstalled', ()=>{ $('#installBox').classList.add('hidden'); toast('Installed. Right-click a PDF → Open with → PDF Desk.', 4500); });
+  $('#installBtn').onclick=async()=>{ if(!deferred){ toast('Use the browser menu → Apps → Install PDF Desk'); return; } deferred.prompt(); try{ await deferred.userChoice; }catch(e){} deferred=null; };
+  if('launchQueue' in window){
+    window.launchQueue.setConsumer(async params=>{
+      if(!params.files || !params.files.length) return;
+      const items=[];
+      for(const h of params.files){ try{ items.push({file:await h.getFile(), origin:{kind:'local', handle:h, name:h.name}}); }catch(e){} }
+      if(items.length){ closeBrowser && closeBrowser(); await openItems(items,'new'); }
+    });
+  }
+}
 
 /* ---------- keyboard ---------- */
 document.addEventListener('keydown',e=>{
