@@ -330,6 +330,17 @@ body.has-lib .openrow .btn{height:auto;padding:0 18px}
   .llist .linfo{grid-template-columns:1fr;gap:0}
   .fgrid{grid-template-columns:1fr}
 }
+#printArea,#printNote{display:none}
+@media print{
+  @page{margin:0}
+  html,body{height:auto!important;overflow:visible!important;background:#fff!important}
+  body>*:not(#printArea):not(#printNote){display:none!important}
+  body.printing #printArea{display:block}
+  body:not(.printing) #printNote{display:block;padding:40px;font:16px sans-serif}
+  .pp{break-after:page;page-break-after:always;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .pp:last-child{break-after:auto;page-break-after:auto}
+  .pp img{max-width:100%;max-height:100vh;display:block}
+}
 #toast{position:fixed;left:50%;top:66px;transform:translateX(-50%) translateY(-8px);background:var(--ink);color:#fff;padding:9px 15px;border-radius:11px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:40;max-width:90%;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #busy{position:fixed;inset:0;background:rgba(244,241,234,.7);z-index:30;display:flex;align-items:center;justify-content:center}
@@ -381,6 +392,7 @@ body.has-lib .openrow .btn{height:auto;padding:0 18px}
   <symbol id="i-box" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="13" rx="2"/><rect x="7" y="8.5" width="10" height="7" rx="1" fill="currentColor" stroke="none" opacity=".18"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.4-4.4"/></symbol>
   <symbol id="i-up" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 8V4h10v4"/><rect x="3.5" y="8" width="17" height="8" rx="2"/><path d="M7 13h10v7H7z"/></symbol>
   <symbol id="i-big" viewBox="0 0 24 24"><path d="M4 12h16M12 4v16" /></symbol>
 </svg>
 
@@ -507,6 +519,8 @@ body.has-lib .openrow .btn{height:auto;padding:0 18px}
 <div id="toast"></div>
 <div id="busy" class="hidden"><div class="b"><div id="busyT">Working…</div><div class="bar"><i id="busyBar"></i></div></div></div>
 <div id="dropov" class="hidden">Drop to add</div>
+<div id="printArea"></div>
+<div id="printNote">To print this PDF, use Print in PDF Desk (Ctrl+P or Save ▾ → Print).</div>
 
 <script>/**
  * @licstart The following is the entire license notice for the
@@ -1479,6 +1493,7 @@ function openSave(mode){
       <button class="btn" data-a="small"><svg class="i"><use href="#i-small"/></svg>Smaller file<small>for email / WhatsApp</small></button>
       <button class="btn" data-a="split"><svg class="i"><use href="#i-zip"/></svg>Each page as its own PDF<small>.zip</small></button>
       <button class="btn" data-a="jpg"><svg class="i"><use href="#i-img"/></svg>Pages as JPG images<small>.zip</small></button>
+      ${TOP?'<button class="btn" data-a="print"><svg class="i"><use href="#i-print"/></svg>Print<small>Ctrl P</small></button>':''}
       <button class="btn ghost" data-a="x" style="justify-content:center">Cancel</button>
     </div></div>`;
   document.body.appendChild(scrim);
@@ -1522,6 +1537,7 @@ function openSave(mode){
   });
 }
 async function doExport(act, list, name, numbers, dest){
+  if(act==='print') return printPages(list);
   const fname=outName(act,name);
   dest = dest || {kind:'download'};
   try{
@@ -2385,6 +2401,43 @@ function restorePos(){
 scroller.addEventListener('scroll', ()=>savePos(), {passive:true});
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') savePos(true); });
 window.addEventListener('pagehide', ()=>savePos(true));
+
+/* ---------- print the PDF pages (not the app screen) ---------- */
+let printing=false;
+async function printPages(list){
+  if(printing) return; if(!list || !list.length){ toast('No pages to print'); return; }
+  if(!TOP){ toast('Printing works in the installed app or the GitHub version'); return; }
+  printing=true; closeEditor(); closePop();
+  const area=$('#printArea'); area.innerHTML='';
+  const urls=[];
+  try{
+    for(let i=0;i<list.length;i++){
+      busy(true, `Preparing to print… ${i+1} of ${list.length}`, i/list.length); if(i%3===0) await nextFrame();
+      const c=await rasterPage(list[i], 2, true);
+      const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.9)); c.width=0;
+      const u=URL.createObjectURL(blob); urls.push(u);
+      const d=document.createElement('div'); d.className='pp'; const im=new Image(); im.src=u; d.appendChild(im); area.appendChild(d);
+    }
+    await Promise.all([...area.querySelectorAll('img')].map(im=>im.decode().catch(()=>{})));
+    busy(false);
+    document.body.classList.add('printing');
+    await nextFrame();
+    window.print();
+  }catch(e){ console.error(e); busy(false); toast('Could not prepare the pages for printing'); }
+  finally{
+    const done=()=>{ document.body.classList.remove('printing'); area.innerHTML=''; urls.forEach(u=>URL.revokeObjectURL(u)); printing=false; };
+    // window.print() blocks until the dialog closes in most browsers; clean up just after
+    setTimeout(done, 500);
+  }
+}
+document.addEventListener('keydown', e=>{
+  if((e.ctrlKey||e.metaKey) && !e.altKey && e.key.toLowerCase()==='p'){
+    if($('#work').classList.contains('hidden') || !S.pages.length) return;
+    e.preventDefault(); e.stopPropagation();
+    const list = S.view==='pages' && S.sel.size ? S.pages.filter(p=>S.sel.has(p.id)) : S.pages;
+    printPages(list);
+  }
+}, true);
 
 /* ---------- keyboard ---------- */
 document.addEventListener('keydown',e=>{
