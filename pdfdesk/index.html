@@ -357,7 +357,8 @@ body.has-lib .openrow .btn{height:auto;padding:0 18px}
 .zmenu button.on{font-weight:700;color:var(--accent)}
 .zmenu hr{border:0;border-top:1px solid var(--line);margin:4px 2px}
 .lcard.opening{pointer-events:none}
-.lcard.opening .lthumb::after{content:'Opening…';position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,253,248,.75);font-weight:600;font-size:13px;color:var(--accent)}
+.lcard.opening .lthumb{position:relative}
+.lcard.opening .lthumb::after{content:attr(data-stage);position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,253,248,.75);font-weight:600;font-size:13px;color:var(--accent)}
 .lcard:focus{outline:none}
 .lcard:focus-visible .lthumb{outline:2px solid var(--accent);outline-offset:2px}
 .tabbar{height:36px;flex:none;display:flex;align-items:flex-end;gap:2px;padding:0 6px;background:var(--desk);border-bottom:1px solid var(--line)}
@@ -1971,34 +1972,58 @@ function showLinkSheet(url){
   document.body.appendChild(s); const inp=s.querySelector('input'); inp.focus(); inp.select();
   s.addEventListener('click',ev=>{ if(ev.target===s||ev.target.closest('button')) s.remove(); });
 }
+const within=(p,ms)=>Promise.race([p, new Promise((_,rej)=>setTimeout(()=>rej(Object.assign(new Error('timeout'),{name:'TimeoutError'})),ms))]);
 async function openRecent(o, card){
   // called straight from the click, so the browser still lets us ask for permission
   let permP=null;
   if(o.kind==='local' && o.handle && o.handle.requestPermission){ try{ permP=o.handle.requestPermission({mode:'read'}); }catch(e){ permP=Promise.resolve('denied'); } }
-  const mark=on=>{ if(card){ card.classList.toggle('opening',on); } };
-  mark(true);
+  const stage=t=>{ if(card){ card.classList.toggle('opening',!!t); const th=card.querySelector('.lthumb'); if(t && th) th.dataset.stage=t; } };
+  stage('Opening…');
   try{
     if(o.kind==='local'){
       if(!o.handle){ throw Object.assign(new Error('no handle'),{name:'NotFoundError'}); }
-      const st = permP ? await permP : 'granted';
-      if(st!=='granted'){ mark(false); toast('PDF Desk needs your permission to open this file. Click it again and choose Allow.', 4200); return; }
-      const f=await o.handle.getFile();
+      let st='granted';
+      if(permP){ stage('Asking permission…'); try{ st=await within(permP, 7000); }catch(e){ if(e.name==='TimeoutError'){ stage(null); return chooseAgain(o,'Edge didn’t answer the permission request.'); } throw e; } }
+      if(st!=='granted'){ stage(null); return chooseAgain(o,'Edge didn’t give permission to open this file.'); }
+      stage('Reading file…');
+      let f; try{ f=await within(o.handle.getFile(), 30000); }catch(e){ if(e.name==='TimeoutError'){ stage(null); return chooseAgain(o,'The file took too long to read (it may be in OneDrive and not downloaded yet).'); } throw e; }
+      stage('Opening…');
       await openItems([{file:f, origin:o}], 'new');
     } else {
       const a=PD.acc(o.email);
-      if(!a){ mark(false); toast('That PoolDrive account isn’t signed in on this computer. Open PoolDrive, sign in, then try again.', 4500); return; }
-      busy(true,'Getting '+o.name+'…',0.3);
-      const r=await PD.api(a,'files/'+o.id+'?alt=media',{raw:true});
-      const f=new File([await r.blob()],o.name,{type:mimeOf(o.name)}); busy(false);
+      if(!a){ stage(null); toast('That PoolDrive account isn’t signed in on this computer. Open PoolDrive, sign in, then try again.', 4500); return; }
+      stage('Downloading…');
+      const r=await within(PD.api(a,'files/'+o.id+'?alt=media',{raw:true}), 60000);
+      const f=new File([await r.blob()],o.name,{type:mimeOf(o.name)});
+      stage('Opening…');
       await openItems([{file:f, origin:o}], 'new');
     }
   }catch(e){
     busy(false); console.error(e);
     if(e instanceof PDAuth){ pdReconnectSheet(e.acc, ()=>openRecent(o)); }
     else if(e.name==='NotFoundError' || /not found|could not be found/i.test(e.message||'')){ movedSheet(o); }
-    else if(e.name==='NotAllowedError' || e.name==='SecurityError'){ toast('PDF Desk needs your permission to open this file. Click it again and choose Allow.', 4200); }
+    else if(e.name==='NotAllowedError' || e.name==='SecurityError'){ chooseAgain(o,'Edge didn’t give permission to open this file.'); }
+    else if(e.name==='TimeoutError'){ toast('That took too long. Check your internet and try again.', 4200); }
     else toast('Could not open it: '+(e.message||e), 4200);
-  } finally { mark(false); }
+  } finally { stage(null); }
+}
+// pick the same file again with the normal file picker (always allowed), then keep the fresh handle in the library
+function chooseAgain(o, why){
+  if(!FSA){ toast(why+' Open it with “This device” instead.', 4500); return; }
+  const s=document.createElement('div'); s.className='scrim';
+  s.innerHTML=`<div class="sheet"><h3>Open “${esc(o.name)}”</h3><p class="muted">${esc(why)} Choose the file once more and it will open. After that it opens from the library again (if Edge asks, choose “Allow on every visit”).</p>
+    <div class="acts"><button class="btn primary" data-k="pick"><svg class="i"><use href="#i-doc"/></svg>Choose it again<small>opens in its folder</small></button><button class="btn ghost" data-k="x" style="justify-content:center">Cancel</button></div></div>`;
+  document.body.appendChild(s);
+  s.addEventListener('click', async ev=>{ const b=ev.target.closest('[data-k]'); if(ev.target!==s&&!b) return; s.remove(); if(!b||b.dataset.k!=='pick') return;
+    let hs; try{ hs=await window.showOpenFilePicker({types:PICK_TYPES, startIn:o.handle||o.dir||'documents'}); }
+    catch(e){ if(e.name==='AbortError') return; try{ hs=await window.showOpenFilePicker({types:PICK_TYPES}); }catch(e2){ return; } }
+    const h=hs[0]; const old=originKey(o); const no=Object.assign({}, o, {kind:'local', handle:h, name:h.name});
+    const r=await getRecent(); const e=r.find(x=>originKey(x)===old);
+    if(e && originKey(no)!==old){ await DB.set('recent', r.filter(x=>originKey(x)!==old)); if(POS[old]){ POS[originKey(no)]=POS[old]; lsSet('pdfdesk:pos',POS); } }
+    else if(e){ e.handle=h; await DB.set('recent', r); }
+    busy(true,'Opening…',0.3);
+    try{ const f=await h.getFile(); busy(false); await openItems([{file:f, origin:no}], 'new'); }catch(err){ busy(false); toast('Could not open it: '+(err.message||err), 4200); }
+  });
 }
 function movedSheet(o){
   const s=document.createElement('div'); s.className='scrim';
