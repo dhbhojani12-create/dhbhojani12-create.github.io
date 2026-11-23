@@ -360,6 +360,20 @@ body.has-lib .openrow .btn{height:auto;padding:0 18px}
 .lcard.opening .lthumb::after{content:'Opening…';position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,253,248,.75);font-weight:600;font-size:13px;color:var(--accent)}
 .lcard:focus{outline:none}
 .lcard:focus-visible .lthumb{outline:2px solid var(--accent);outline-offset:2px}
+.tabbar{height:36px;flex:none;display:flex;align-items:flex-end;gap:2px;padding:0 6px;background:var(--desk);border-bottom:1px solid var(--line)}
+.tabs{display:flex;align-items:flex-end;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0;flex:0 1 auto}
+.tabs::-webkit-scrollbar{display:none}
+.tab{display:flex;align-items:center;gap:6px;height:30px;padding:0 6px 0 12px;border-radius:9px 9px 0 0;background:transparent;color:var(--muted);font-size:12.5px;font-weight:600;max-width:220px;min-width:90px;flex:none;cursor:pointer;border:1px solid transparent;border-bottom:0}
+.tab:hover{background:rgba(255,253,248,.55);color:var(--ink)}
+.tab.on{background:var(--surface);color:var(--ink);border-color:var(--line);margin-bottom:-1px;height:31px}
+.tab .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.tab .dot{width:7px;height:7px;border-radius:50%;background:#e8710a;flex:none}
+.tab .x{width:20px;height:20px;border-radius:6px;display:grid;place-items:center;color:var(--muted);flex:none}
+.tab .x:hover{background:var(--line);color:var(--ink)}
+.tab .x svg{width:13px;height:13px}
+.tabnew{width:30px;height:28px;border-radius:8px;display:grid;place-items:center;color:var(--muted);flex:none;margin-bottom:3px}
+.tabnew:hover{background:rgba(255,253,248,.6);color:var(--ink)}
+.tabnew svg{width:17px;height:17px}
 #toast{position:fixed;left:50%;top:66px;transform:translateX(-50%) translateY(-8px);background:var(--ink);color:#fff;padding:9px 15px;border-radius:11px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:40;max-width:90%;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #busy{position:fixed;inset:0;background:rgba(244,241,234,.7);z-index:30;display:flex;align-items:center;justify-content:center}
@@ -458,6 +472,7 @@ body.has-lib .openrow .btn{height:auto;padding:0 18px}
 
 <!-- WORKSPACE -->
 <section id="work" class="hidden">
+  <div id="tabbar" class="tabbar hidden"><div id="tabs" class="tabs"></div><button id="tabNew" class="tabnew" title="Open another PDF in a new tab"><svg class="i"><use href="#i-plus"/></svg></button></div>
   <div class="top">
     <button class="iconbtn" id="bHome" title="Back to start"><svg class="i"><use href="#i-back"/></svg></button>
     <input id="docname" spellcheck="false" aria-label="File name">
@@ -690,8 +705,9 @@ const DB = (()=>{
 })();
 let saveT;
 function persist(){ if(typeof renderKpSoon==='function') renderKpSoon(); clearTimeout(saveT); saveT=setTimeout(()=>{
-  const used = new Set(S.pages.map(p=>p.src));
-  DB.set('session',{ name:S.name, pages:S.pages, images:S.images, srcs:[...used].map(id=>({id,name:S.sources[id].name,color:S.sources[id].color,origin:S.sources[id].origin||null})), t:Date.now(), clean:S.rev===S.savedRev, savedSig:S.savedSig });
+  const snap=st=>{ const used=new Set(st.pages.map(p=>p.src)); return {name:st.name, pages:st.pages, images:st.images, srcs:[...used].filter(id=>st.sources[id]).map(id=>({id,name:st.sources[id].name,color:st.sources[id].color,origin:st.sources[id].origin||null})), clean:st.rev===st.savedRev, savedSig:st.savedSig}; };
+  const tabs=(typeof TABS!=='undefined'?TABS:[]).map(t=> t===curTab ? snap(S) : (t.st?snap(t.st):null)).filter(x=>x && x.pages.length);
+  DB.set('session',{v:2, t:Date.now(), active:Math.max(0,(typeof TABS!=='undefined'?TABS.filter(t=>t===curTab||(t.st&&t.st.pages.length)).indexOf(curTab):0)), tabs});
 }, 600); }
 function lsGet(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
 function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
@@ -796,7 +812,7 @@ async function addFiles(input, atIndex){
   if(atIndex==null) S.pages.push(...added); else S.pages.splice(atIndex,0,...added);
   showWork();
   if(!wasEmpty) toast(`Added ${added.length} page${added.length>1?'s':''} at the end`);
-  if(wasEmpty && S.view!=='mark'){ S.view='mark'; $('#vMark').classList.add('on'); $('#vPages').classList.remove('on'); $('#scroller').classList.remove('hidden'); $('#pagesview').classList.add('hidden'); $('#zoomBox').style.visibility='visible'; }
+  if(wasEmpty){ S.view='mark'; $('#vMark').classList.add('on'); $('#vPages').classList.remove('on'); $('#scroller').classList.remove('hidden'); $('#pagesview').classList.add('hidden'); $('#zoomBox').style.visibility='visible'; }
   refreshAll(wasEmpty);
   if(wasEmpty){ restorePos(); markClean(); }
   persist();
@@ -1348,10 +1364,10 @@ $('#zVal').onclick=e=>{
     if(k==='fitw') zoomTo(fitScale(), false); else if(k==='fitp') zoomTo(fitPageScale(), true); else setScale(+k); };
   setTimeout(()=>document.addEventListener('click',function off(){ const mm=$('#zMenu'); if(mm) mm.remove(); document.removeEventListener('click',off); }),0);
 };
-$('#docname').addEventListener('input',e=>{ S.name=e.target.value.trim()||'Document'; persist(); });
+$('#docname').addEventListener('input',e=>{ S.name=e.target.value.trim()||'Document'; persist(); renderTabsSoon(); });
 $('#docname').addEventListener('keydown',e=>{ if(e.key==='Enter') e.target.blur(); e.stopPropagation(); });
 
-function showWork(){ $('#home').classList.add('hidden'); $('#work').classList.remove('hidden'); $('#docname').value=S.name; }
+function showWork(){ $('#home').classList.add('hidden'); $('#work').classList.remove('hidden'); $('#docname').value=S.name; renderTabsSoon(); }
 function showHome(){ savePos(true); closeEditor(); closePop(); if(!$('#srBar').classList.contains('hidden')) closeSearch(); $('#work').classList.add('hidden'); $('#home').classList.remove('hidden'); checkResume(); renderLibItems(); }
 $('#bHome').onclick=showHome;
 
@@ -1363,8 +1379,8 @@ let dragDepth=0;
 window.addEventListener('dragenter',e=>{ if(e.dataTransfer && [...e.dataTransfer.types].includes('Files')){ dragDepth++; $('#dropov').classList.remove('hidden'); $('#dropzone').classList.add('over'); } });
 window.addEventListener('dragleave',()=>{ dragDepth=Math.max(0,dragDepth-1); if(!dragDepth){ $('#dropov').classList.add('hidden'); $('#dropzone').classList.remove('over'); } });
 window.addEventListener('dragover',e=>{ if(e.dataTransfer && [...e.dataTransfer.types].includes('Files')) e.preventDefault(); });
-window.addEventListener('drop',async e=>{ if(!e.dataTransfer || !e.dataTransfer.files.length) return; e.preventDefault(); dragDepth=0; $('#dropov').classList.add('hidden'); $('#dropzone').classList.remove('over'); const homeOpen=!$('#home').classList.contains('hidden'); if(homeOpen && S.pages.length) resetDoc(); await addFiles(e.dataTransfer.files); });
-function resetDoc(){ Object.values(S.sources).forEach(s=>{ try{s.doc.destroy();}catch(e){} }); Object.keys(S.sources).forEach(id=>DB.del('src:'+id)); DB.del('session'); S.sources={}; S.pages=[]; S.images={}; S.sel.clear(); S.selAnn=null; S.blankId=null; S.srcCount=0; S.lastDest=null; S.pdDest=null; S._permAsked=false; S._asErr=null; S.rev=0; S.savedRev=0; undoStack=[]; redoStack=[]; vpCache.clear(); stackDirty=true; }
+window.addEventListener('drop',async e=>{ if(!e.dataTransfer || !e.dataTransfer.files.length) return; e.preventDefault(); dragDepth=0; $('#dropov').classList.add('hidden'); $('#dropzone').classList.remove('over'); const homeOpen=!$('#home').classList.contains('hidden'); if(homeOpen && S.pages.length) await newTab(); await addFiles(e.dataTransfer.files); });
+function resetDoc(){ Object.values(S.sources).forEach(s=>{ try{s.doc.destroy();}catch(e){} }); Object.keys(S.sources).forEach(id=>DB.del('src:'+id)); S.sources={}; S.pages=[]; S.images={}; S.sel.clear(); S.selAnn=null; S.blankId=null; S.srcCount=0; S.lastDest=null; S.pdDest=null; S._permAsked=false; S._asErr=null; S.rev=0; S.savedRev=0; undoStack=[]; redoStack=[]; vpCache.clear(); stackDirty=true; }
 
 $('#dropzone').addEventListener('click',e=>{ if(FSA && e.target.id!=='fileHome'){ e.preventDefault(); pickFromDevice('new'); } });
 $('#devBtn').onclick=()=>pickFromDevice('new');
@@ -1378,23 +1394,37 @@ function pdHelp(){ const s=document.createElement('div'); s.className='scrim';
 async function checkResume(){
   const ses = await DB.get('session');
   const box=$('#resume');
-  if(S.pages.length){ box.classList.remove('hidden'); $('#resName').textContent=S.name; $('#resInfo').textContent=`${S.pages.length} pages · open now`; return; }
-  if(!ses || !ses.pages || !ses.pages.length){ box.classList.add('hidden'); return; }
-  box.classList.remove('hidden'); $('#resName').textContent=ses.name; $('#resInfo').textContent=`${ses.pages.length} page${ses.pages.length>1?'s':''} · ${new Date(ses.t).toLocaleString([], {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`;
+  const nOpen=TABS.filter(t=>t===curTab?S.pages.length:(t.st&&t.st.pages.length)).length;
+  if(S.pages.length){ box.classList.remove('hidden'); $('#resName').textContent=S.name; $('#resInfo').textContent= nOpen>1 ? `${nOpen} files open · ${S.pages.length} pages here` : `${S.pages.length} pages · open now`; return; }
+  const list = ses ? (ses.v===2 ? ses.tabs : (ses.pages&&ses.pages.length?[ses]:[])) : [];
+  if(!list || !list.length){ box.classList.add('hidden'); return; }
+  const n=list.length; const first=list[0];
+  box.classList.remove('hidden'); $('#resName').textContent= n>1 ? `${first.name} + ${n-1} more` : first.name; $('#resInfo').textContent=`${n>1?n+' files':first.pages.length+' page'+(first.pages.length>1?'s':'')} · ${new Date(ses.t).toLocaleString([], {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`;
 }
 $('#resGo').onclick=async()=>{
-  if(S.pages.length){ showWork(); refreshAll(false); return; }
+  if(S.pages.length){ showWork(); refreshAll(false); renderTabs(); return; }
   const ses=await DB.get('session'); if(!ses) return;
+  const list = ses.v===2 ? ses.tabs : [ses];
+  if(!list || !list.length) return;
   busy(true,'Opening…',0.2);
   try{
-    for(const s of ses.srcs){ const rec=await DB.get('src:'+s.id); if(rec) await addSource(rec.bytes, rec.name, {id:s.id, color:rec.color, restore:true, origin:rec.origin||s.origin||null}); if(rec && rec.name==='Blank page') S.blankId=s.id; }
-    S.srcCount=ses.srcs.length;
-    S.pages=ses.pages.filter(p=>S.sources[p.src] && S.sources[p.src].pages[p.idx]); S.images=ses.images||{}; S.name=ses.name;
-    S.savedSig=ses.savedSig||structSig(); S.rev=1; S.savedRev=ses.clean?1:0;
-    busy(false); showWork(); setView('mark'); refreshAll(true); restorePos();
-  }catch(e){ console.error(e); busy(false); toast('Could not reopen that session'); }
+    let first=true;
+    for(const tb of list){
+      if(!first) await newTab(true); first=false;
+      for(const s of tb.srcs){ const rec=await DB.get('src:'+s.id); if(rec) await addSource(rec.bytes, rec.name, {id:s.id, color:rec.color, restore:true, origin:rec.origin||s.origin||null}); if(rec && rec.name==='Blank page') S.blankId=s.id; }
+      S.srcCount=tb.srcs.length;
+      S.pages=tb.pages.filter(p=>S.sources[p.src] && S.sources[p.src].pages[p.idx]); S.images=tb.images||{}; S.name=tb.name;
+      S.savedSig=tb.savedSig||structSig(); S.rev=1; S.savedRev=tb.clean?1:0; S.view='mark';
+      if(!S.pages.length) continue;
+      showWork(); setView('mark'); refreshAll(true); restorePos();
+      stashTab();
+    }
+    const target = TABS.filter(t=>t.st && t.st.pages.length)[ses.active||0] || curTab;
+    busy(false); showWork(); if(target!==curTab) await switchTab(target); else { applyTab(curTab); refreshAll(false); }
+    renderTabs();
+  }catch(e){ console.error(e); busy(false); toast('Could not reopen those files'); }
 };
-$('#resDrop').onclick=()=>{ resetDoc(); $('#resume').classList.add('hidden'); };
+$('#resDrop').onclick=async()=>{ for(const t of [...TABS]){ if(t!==curTab){ await switchTab(t,true); } resetDoc(); } TABS=[curTab]; DB.del('session'); renderTabs(); $('#resume').classList.add('hidden'); };
 
 /* ---------- export ---------- */
 const FONT_MAP={'₹':'Rs.','–':'-','—':'-','…':'...'};
@@ -1999,7 +2029,12 @@ function pdReconnectSheet(acc, after){
 }
 async function openItems(items, mode){
   // mode 'new' = start a new document, 'add' = add pages to the open one
-  if(mode==='new' && S.pages.length) resetDoc();
+  if(mode==='new'){
+    const key = items.length===1 && items[0].origin ? originKey(items[0].origin) : null;
+    const open = key && TABS.find(t=>tabKey(t)===key);
+    if(open){ showWork(); await switchTab(open); return; }
+    if(S.pages.length) await newTab();
+  }
   await addFiles(items);
   const withO=items.filter(i=>i.origin && i.srcId && S.sources[i.srcId]);
   await addRecent(withO.map(i=>Object.assign({}, i.origin, {pages:S.sources[i.srcId].pages.length})));
@@ -2529,7 +2564,7 @@ function savePos(now){
   if(now) run(); else posT=setTimeout(run, 500);
 }
 function restorePos(){
-  const k=docKey(); const ps=k && POS[k]; if(!ps || (ps.i===0 && ps.f<0.02)) return;
+  const k=docKey(); const ps=k && POS[k]; if(!ps || (ps.i===0 && ps.f<0.02)){ scroller.scrollTop=0; scroller.scrollLeft=0; return; }
   restoring=true;
   if(ps.s && Math.abs(ps.s-S.scale)>0.01){ S.scale=Math.max(0.2,Math.min(5,ps.s)); S.pages.forEach(sizePage); $('#zVal').textContent=Math.round(S.scale*100)+'%'; }
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
@@ -2539,7 +2574,7 @@ function restorePos(){
     if(i>0) toast(`Back where you left off · page ${i+1}`, 2400);
   }));
 }
-scroller.addEventListener('scroll', ()=>savePos(), {passive:true});
+scroller.addEventListener('scroll', ()=>{ if(!$('#work').classList.contains('hidden')){ S._scrollTop=scroller.scrollTop; S._scrollLeft=scroller.scrollLeft; } savePos(); }, {passive:true});
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') savePos(true); });
 window.addEventListener('pagehide', ()=>savePos(true));
 
@@ -2623,6 +2658,7 @@ async function autoSave(fromClick){
   finally{ asBusy=false; updateSaveState(); if(S.rev!==S.savedRev && !S._asErr) autoSaveSoon(); }
 }
 function updateSaveState(){
+  if(typeof renderTabsSoon==='function') renderTabsSoon();
   const b=$('#saveState'); if(!b) return;
   if(!S.pages.length || !TOP){ b.className='sstate hidden'; return; }
   const dirty=isDirty(), why=autoSaveReason();
@@ -2642,9 +2678,80 @@ $('#saveState').onclick=()=>{
   if(isDirty()) $('#bSave').click();
 };
 window.addEventListener('beforeunload', e=>{
+  if(TABS.some(t=>t!==curTab && tabDirty(t) && !(t.st && t.st._autoOk))){ e.preventDefault(); e.returnValue=''; return; }
   if(isDirty()){ if(!autoSaveReason() && !asNeedPerm){ autoSave(); } e.preventDefault(); e.returnValue=''; }
 });
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden' && isDirty() && !autoSaveReason()) autoSave(); });
+
+/* ---------- tabs: several PDFs open at once ---------- */
+let rtT; function renderTabsSoon(){ clearTimeout(rtT); rtT=setTimeout(()=>{ try{ renderTabs(); }catch(e){} },60); }
+const PER=['_scrollTop','_scrollLeft','sources','pages','images','name','sel','selAnn','blankId','srcCount','lastDest','pdDest','rev','savedRev','savedSig','_permAsked','_asErr','_thumbT','scale','view','lastSel'];
+function blankState(){ return {sources:{},pages:[],images:{},name:'Document',sel:new Set(),selAnn:null,blankId:null,srcCount:0,lastDest:null,pdDest:null,rev:0,savedRev:0,savedSig:'',_permAsked:false,_asErr:null,_thumbT:0,scale:1,view:'mark',lastSel:null,undo:[],redo:[],scrollTop:0,scrollLeft:0}; }
+let curTab={id:uid(), st:null}; let TABS=[curTab];
+function stashTab(){ const st={}; PER.forEach(k=>st[k]=S[k]); st.undo=undoStack; st.redo=redoStack; curTab.st=st; }
+function applyTab(t){ curTab=t; const st=t.st||blankState(); PER.forEach(k=>S[k]=st[k]); if(!(S.sel instanceof Set)) S.sel=new Set(); undoStack=st.undo||[]; redoStack=st.redo||[]; }
+function tabState(t){ return t===curTab ? S : (t.st||blankState()); }
+function tabKey(t){ const st=tabState(t); const p=st.pages[0]; const src=p && st.sources[p.src]; return src ? (src.origin ? originKey(src.origin) : 'f:'+src.name+':'+src.bytes.length) : null; }
+function tabDirty(t){ const st=tabState(t); return st.pages.length>0 && st.rev!==st.savedRev; }
+async function flushAutoSave(){ try{ for(let i=0;i<40 && asBusy;i++) await new Promise(r=>setTimeout(r,100)); if(isDirty() && !autoSaveReason() && !asNeedPerm){ clearTimeout(asT); await autoSave(); } }catch(e){} }
+function leaveCurrent(){ savePos(true); closeEditor(); closePop(); if(!$('#srBar').classList.contains('hidden')) closeSearch(); if(S.selAnn) S.selAnn=null; const g=getSelection(); if(g) g.removeAllRanges(); }
+async function newTab(quiet){
+  leaveCurrent(); await flushAutoSave(); stashTab();
+  const t={id:uid(), st:blankState()}; const i=TABS.indexOf(curTab); TABS.splice(i+1,0,t); applyTab(t);
+  stackDirty=true; if(!quiet) renderTabs();
+}
+async function switchTab(t, quiet){
+  if(t===curTab) return;
+  leaveCurrent(); await flushAutoSave(); stashTab(); applyTab(t);
+  stackDirty=true;
+  $('#docname').value=S.name;
+  if(!$('#work').classList.contains('hidden') || !quiet){
+    $('#vMark').classList.toggle('on',S.view==='mark'); $('#vPages').classList.toggle('on',S.view==='pages');
+    $('#scroller').classList.toggle('hidden',S.view!=='mark'); $('#pagesview').classList.toggle('hidden',S.view!=='pages');
+    $('#zoomBox').style.visibility = S.view==='mark'?'visible':'hidden';
+    refreshAll(false);
+    const st=t.st; requestAnimationFrame(()=>requestAnimationFrame(()=>{ scroller.scrollTop=st._scrollTop||0; scroller.scrollLeft=st._scrollLeft||0; }));
+    if($('#kpPanel') && !$('#kpPanel').classList.contains('hidden')) renderKp();
+  }
+  updateSaveState(); renderTabs(); persist();
+}
+async function closeTab(t){
+  if(t!==curTab) await switchTab(t);
+  if(isDirty() && (autoSaveReason() || asNeedPerm || S._asErr)){
+    const ok=await new Promise(res=>{ const s=document.createElement('div'); s.className='scrim';
+      s.innerHTML=`<div class="sheet"><h3>Close “${esc(S.name)}”?</h3><p class="muted">It has changes that aren’t saved yet.</p><div class="acts"><button class="btn primary" data-k="save"><svg class="i"><use href="#i-save"/></svg>Save first</button><button class="btn" data-k="close" style="color:var(--danger)">Close without saving</button><button class="btn ghost" data-k="x" style="justify-content:center">Cancel</button></div></div>`;
+      document.body.appendChild(s); s.addEventListener('click',ev=>{ const b=ev.target.closest('[data-k]'); if(ev.target!==s&&!b) return; s.remove(); res(b?b.dataset.k:'x'); }); });
+    if(ok==='save'){ $('#bSave').click(); return; }
+    if(ok!=='close') return;
+  } else await flushAutoSave();
+  savePos(true);
+  const i=TABS.indexOf(curTab);
+  resetDoc(); TABS.splice(i,1);
+  if(!TABS.length){ curTab={id:uid(), st:null}; TABS=[curTab]; applyTab(curTab); persist(); renderTabs(); showHome(); return; }
+  const next=TABS[Math.min(i, TABS.length-1)]; const dead=curTab; curTab=null;
+  curTab=dead; // switchTab stashes the (now empty) current state; drop it afterwards
+  await switchTab(next); TABS=TABS.filter(x=>x!==dead); renderTabs(); persist();
+}
+function renderTabs(){
+  const bar=$('#tabbar'); if(!bar) return;
+  const live=TABS.filter(t=>tabState(t).pages.length);
+  bar.classList.toggle('hidden', live.length<1);
+  $('#tabs').innerHTML = live.map(t=>{ const st=tabState(t); return `<div class="tab${t===curTab?' on':''}" data-tab="${t.id}" title="${esc(st.name)}">${tabDirty(t)?'<span class="dot" title="Not saved"></span>':''}<span class="nm">${esc(st.name)}</span><button class="x" data-tabx="${t.id}" title="Close tab"><svg class="i"><use href="#i-x"/></svg></button></div>`; }).join('');
+  const on=$('#tabs .tab.on'); if(on) on.scrollIntoView({block:'nearest', inline:'nearest'});
+}
+$('#tabs').addEventListener('click', e=>{
+  const x=e.target.closest('[data-tabx]'); if(x){ e.stopPropagation(); const t=TABS.find(t=>t.id===x.dataset.tabx); if(t) closeTab(t); return; }
+  const tb=e.target.closest('[data-tab]'); if(tb){ const t=TABS.find(t=>t.id===tb.dataset.tab); if(t) switchTab(t); }
+});
+$('#tabs').addEventListener('auxclick', e=>{ if(e.button!==1) return; const tb=e.target.closest('[data-tab]'); if(tb){ e.preventDefault(); const t=TABS.find(t=>t.id===tb.dataset.tab); if(t) closeTab(t); } });
+$('#tabNew').onclick=()=>{ showHome(); toast('Pick a file to open it in a new tab'); };
+// keyboard: Ctrl+Tab / Ctrl+Shift+Tab and Ctrl+PageDown / PageUp move between tabs (Edge may keep Ctrl+Tab for itself)
+document.addEventListener('keydown', e=>{
+  if(!(e.ctrlKey||e.metaKey) || $('#work').classList.contains('hidden')) return;
+  const live=TABS.filter(t=>tabState(t).pages.length); if(live.length<2) return;
+  let d=0; if(e.key==='Tab') d=e.shiftKey?-1:1; else if(e.key==='PageDown') d=1; else if(e.key==='PageUp') d=-1; else return;
+  e.preventDefault(); const i=live.indexOf(curTab); switchTab(live[(i+d+live.length)%live.length]);
+}, true);
 
 /* ---------- keyboard ---------- */
 document.addEventListener('keydown',e=>{
