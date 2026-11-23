@@ -356,6 +356,10 @@ body.has-lib .openrow .btn{height:auto;padding:0 18px}
 .zmenu button:hover{background:var(--bg)}
 .zmenu button.on{font-weight:700;color:var(--accent)}
 .zmenu hr{border:0;border-top:1px solid var(--line);margin:4px 2px}
+.lcard.opening{pointer-events:none}
+.lcard.opening .lthumb::after{content:'Opening…';position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,253,248,.75);font-weight:600;font-size:13px;color:var(--accent)}
+.lcard:focus{outline:none}
+.lcard:focus-visible .lthumb{outline:2px solid var(--accent);outline-offset:2px}
 #toast{position:fixed;left:50%;top:66px;transform:translateX(-50%) translateY(-8px);background:var(--ink);color:#fff;padding:9px 15px;border-radius:11px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:40;max-width:90%;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #busy{position:fixed;inset:0;background:rgba(244,241,234,.7);z-index:30;display:flex;align-items:center;justify-content:center}
@@ -1809,7 +1813,8 @@ PD.deadHtml=()=>{ const d=PD.accs().filter(a=>!PD.isLive(a)&&!a.rt); return d.le
 /* ---- shortcuts (pinned folders) and recent files, kept in IndexedDB ---- */
 async function getPlaces(){ return (await DB.get('places'))||[]; }
 async function setPlaces(v){ await DB.set('places',v); }
-async function getRecent(){ return (await DB.get('recent'))||[]; }
+let LIBMEM=[];
+async function getRecent(){ const r=(await DB.get('recent'))||[]; LIBMEM=r; return r; }
 function originKey(o){ return o.kind==='pd' ? 'pd:'+o.email+':'+o.id : 'local:'+o.name+':'+(o.dirName||''); }
 function placeLink(p){
   const base=location.origin+location.pathname;
@@ -1928,7 +1933,7 @@ document.addEventListener('click', async e=>{
     catch(err){ showLinkSheet(url); } return; }
   const dl=t.closest('[data-pdel]'); if(dl){ e.stopPropagation(); const L=await getPlaces(); L.splice(+dl.dataset.pdel,1); await setPlaces(L); renderHomeLists(); return; }
   const pl=t.closest('[data-place]'); if(pl){ const p=(await getPlaces())[+pl.dataset.place]; if(p) openBrowser(p,'open'); return; }
-  const card=t.closest('[data-lk]'); if(card){ const o=(await getRecent()).find(x=>originKey(x)===card.dataset.lk); if(o) openRecent(o); return; }
+  const card=t.closest('[data-lk]'); if(card){ const o=LIBMEM.find(x=>originKey(x)===card.dataset.lk); if(o) openRecent(o, card); return; }
 });
 function showLinkSheet(url){
   const s=document.createElement('div'); s.className='scrim';
@@ -1936,18 +1941,61 @@ function showLinkSheet(url){
   document.body.appendChild(s); const inp=s.querySelector('input'); inp.focus(); inp.select();
   s.addEventListener('click',ev=>{ if(ev.target===s||ev.target.closest('button')) s.remove(); });
 }
-async function openRecent(o){
+async function openRecent(o, card){
+  // called straight from the click, so the browser still lets us ask for permission
+  let permP=null;
+  if(o.kind==='local' && o.handle && o.handle.requestPermission){ try{ permP=o.handle.requestPermission({mode:'read'}); }catch(e){ permP=Promise.resolve('denied'); } }
+  const mark=on=>{ if(card){ card.classList.toggle('opening',on); } };
+  mark(true);
   try{
     if(o.kind==='local'){
-      if(!(await ensurePerm(o.handle,'read'))){ toast('Permission needed to open it'); return; }
-      const f=await o.handle.getFile(); await openItems([{file:f, origin:o}], 'new');
+      if(!o.handle){ throw Object.assign(new Error('no handle'),{name:'NotFoundError'}); }
+      const st = permP ? await permP : 'granted';
+      if(st!=='granted'){ mark(false); toast('PDF Desk needs your permission to open this file. Click it again and choose Allow.', 4200); return; }
+      const f=await o.handle.getFile();
+      await openItems([{file:f, origin:o}], 'new');
     } else {
+      const a=PD.acc(o.email);
+      if(!a){ mark(false); toast('That PoolDrive account isn’t signed in on this computer. Open PoolDrive, sign in, then try again.', 4500); return; }
       busy(true,'Getting '+o.name+'…',0.3);
-      const a=PD.acc(o.email); const r=await PD.api(a,'files/'+o.id+'?alt=media',{raw:true});
+      const r=await PD.api(a,'files/'+o.id+'?alt=media',{raw:true});
       const f=new File([await r.blob()],o.name,{type:mimeOf(o.name)}); busy(false);
       await openItems([{file:f, origin:o}], 'new');
     }
-  }catch(e){ busy(false); console.error(e); toast(e instanceof PDAuth ? 'Reconnect '+e.acc.email+' in PoolDrive first' : (e.name==='NotFoundError'?'That file was moved or deleted':'Could not open it: '+(e.message||e)), 3600); }
+  }catch(e){
+    busy(false); console.error(e);
+    if(e instanceof PDAuth){ pdReconnectSheet(e.acc, ()=>openRecent(o)); }
+    else if(e.name==='NotFoundError' || /not found|could not be found/i.test(e.message||'')){ movedSheet(o); }
+    else if(e.name==='NotAllowedError' || e.name==='SecurityError'){ toast('PDF Desk needs your permission to open this file. Click it again and choose Allow.', 4200); }
+    else toast('Could not open it: '+(e.message||e), 4200);
+  } finally { mark(false); }
+}
+function movedSheet(o){
+  const s=document.createElement('div'); s.className='scrim';
+  s.innerHTML=`<div class="sheet"><h3>Can’t find “${esc(o.name)}”</h3><p class="muted">It may have been moved, renamed or deleted${o.dirName?' (it was in '+esc(o.dirName)+')':''}.</p>
+    <div class="acts">${FSA?'<button class="btn primary" data-k="find"><svg class="i"><use href="#i-search"/></svg>Find it<small>pick the file where it is now</small></button>':''}
+    <button class="btn" data-k="rm"><svg class="i"><use href="#i-x"/></svg>Remove from library</button>
+    <button class="btn ghost" data-k="x" style="justify-content:center">Cancel</button></div></div>`;
+  document.body.appendChild(s);
+  s.addEventListener('click', async ev=>{ const b=ev.target.closest('[data-k]'); if(ev.target!==s&&!b) return; s.remove(); if(!b) return;
+    const old=originKey(o);
+    if(b.dataset.k==='rm'){ await DB.set('recent',(await getRecent()).filter(x=>originKey(x)!==old)); renderHomeLists(); return; }
+    if(b.dataset.k==='find'){
+      let hs; try{ hs=await window.showOpenFilePicker({types:PICK_TYPES, startIn: o.dir||'documents'}); }catch(e){ return; }
+      const h=hs[0]; const r=(await getRecent()); const e=r.find(x=>originKey(x)===old);
+      const keep = e ? {pinned:e.pinned, thumb:e.thumb, added:e.added} : {};
+      await DB.set('recent', r.filter(x=>originKey(x)!==old));
+      const no={kind:'local', handle:h, name:h.name};
+      if(POS[old]){ POS[originKey(no)]=POS[old]; lsSet('pdfdesk:pos',POS); }
+      await addRecent([Object.assign(keep,no)]);
+      openRecent(no);
+    } });
+}
+function pdReconnectSheet(acc, after){
+  const s=document.createElement('div'); s.className='scrim';
+  s.innerHTML=`<div class="sheet"><h3>PoolDrive sign-in expired</h3><p class="muted">${esc(acc.email)} needs to sign in again before this file can open.</p><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn small ghost" data-k="x">Cancel</button><button class="btn small primary" data-k="go">Reconnect</button></div></div>`;
+  document.body.appendChild(s);
+  s.addEventListener('click', async ev=>{ const b=ev.target.closest('[data-k]'); if(ev.target!==s&&!b) return; s.remove(); if(b&&b.dataset.k==='go'){ try{ await PD.reconnect(acc); toast('Reconnected'); after&&after(); }catch(e){ toast(e.message||String(e)); } } });
 }
 async function openItems(items, mode){
   // mode 'new' = start a new document, 'add' = add pages to the open one
