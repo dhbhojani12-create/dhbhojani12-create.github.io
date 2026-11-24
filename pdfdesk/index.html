@@ -375,6 +375,72 @@ body.has-lib .openrow .btn{height:auto;padding:0 18px}
 .tabnew{width:30px;height:28px;border-radius:8px;display:grid;place-items:center;color:var(--muted);flex:none;margin-bottom:3px}
 .tabnew:hover{background:rgba(255,253,248,.6);color:var(--ink)}
 .tabnew svg{width:17px;height:17px}
+/* ---- home: sidebar + library ---- */
+#home{padding:0!important;display:block!important}
+.hshell{display:flex;min-height:100%}
+.hside{width:248px;flex:none;position:sticky;top:0;height:100vh;overflow:auto;display:flex;flex-direction:column;gap:4px;padding:20px 14px 14px;border-right:1px solid var(--line);background:#efebe2}
+.hbrand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;padding:2px 6px 14px}
+.hbrand .dot{width:28px;height:28px;border-radius:8px;background:var(--accent);display:grid;place-items:center;color:#fff}
+.hopen{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.hopen .btn{height:40px;justify-content:center;width:100%}
+.hnav{display:flex;flex-direction:column;gap:2px;margin-bottom:12px}
+.hnav button{display:flex;align-items:center;gap:10px;height:36px;padding:0 10px;border-radius:9px;color:#4a453c;font-weight:600;font-size:13.5px;text-align:left}
+.hnav button span{flex:1}
+.hnav button em{font-style:normal;font-size:11.5px;color:var(--muted);font-weight:600}
+.hnav button:hover{background:rgba(255,253,248,.7)}
+.hnav button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.hnav button.on svg{color:var(--accent)}
+.hsec{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 4px 10px;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.hsec .iconbtn{width:28px;height:28px}
+.hsec .iconbtn svg{width:16px;height:16px}
+.flist{display:flex;flex-direction:column;gap:1px}
+.fitem{display:flex;align-items:center;gap:9px;height:34px;padding:0 4px 0 10px;border-radius:9px;cursor:pointer;font-size:13.5px;color:#4a453c}
+.fitem:hover{background:rgba(255,253,248,.7)}
+.fitem svg.fic{width:18px;height:18px;flex:none}
+.fitem .fn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.fitem .fn small{font-weight:500;color:var(--muted);margin-left:4px;font-size:11px}
+.fitem .iconbtn{width:26px;height:26px;color:var(--muted);opacity:0}
+.fitem .iconbtn svg{width:14px;height:14px}
+.fitem:hover .iconbtn{opacity:1}
+.fempty{font-size:12.5px;color:var(--muted);padding:2px 10px 6px;line-height:1.4}
+.hgrow{flex:1}
+.installmini{display:flex;flex-direction:column;gap:4px;padding:12px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:12.5px;margin:8px 0}
+.installmini span{color:var(--muted)}
+.installmini .btn{align-self:flex-start;margin-top:4px}
+.hfoot{font-size:11.5px;color:var(--muted);padding:6px 10px 0;margin:0}
+.hmain{flex:1;min-width:0;padding:26px 32px 40px}
+.hhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.hhead h1{font-size:22px;margin:0;flex:1;letter-spacing:-.01em}
+.openstrip{display:flex;align-items:center;gap:12px;padding:10px 12px 10px 16px;border-radius:12px;background:var(--surface);border:1px solid var(--line);margin-bottom:18px}
+.openstrip .t{flex:1;min-width:0}
+.openstrip .t b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.openstrip .t span{color:var(--muted);font-size:12.5px}
+.libfoot{display:flex;justify-content:center;margin-top:26px}
+.firstrun{max-width:640px;margin:10px auto 0}
+.firstrun .drop{padding:44px 20px}
+.firstrun .feats{margin-top:22px}
+body.lib-empty .hhead .libtools,body.lib-empty #libFoot{display:none}
+@media (max-width:760px){
+  .hshell{flex-direction:column}
+  .hside{position:static;width:auto;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:14px 14px 10px;gap:8px}
+  .hbrand{padding:0 2px 4px}
+  .hopen{margin:0;flex-direction:row}
+  .hopen .btn{width:auto;flex:1}
+  .hnav{flex-direction:row;overflow-x:auto;scrollbar-width:none;margin:0;gap:6px}
+  .hnav button{flex:none;height:32px;border:1px solid var(--line);background:var(--surface)}
+  .hnav button em{display:none}
+  .hnav button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .hnav button.on svg{color:#fff}
+  .hsec{padding:4px 2px 0}
+  .flist{flex-direction:row;overflow-x:auto;scrollbar-width:none;gap:6px}
+  .fitem{flex:none;border:1px solid var(--line);background:var(--surface);height:34px}
+  .fitem .fn small{display:none}
+  .fitem .iconbtn{display:none}
+  .hgrow,.hfoot,.installmini{display:none}
+  .hmain{padding:16px 14px 30px}
+  .hhead h1{font-size:18px}
+  .libq{width:100%;flex:1}.libtools{width:100%}
+}
 #toast{position:fixed;left:50%;top:66px;transform:translateX(-50%) translateY(-8px);background:var(--ink);color:#fff;padding:9px 15px;border-radius:11px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:40;max-width:90%;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #busy{position:fixed;inset:0;background:rgba(244,241,234,.7);z-index:30;display:flex;align-items:center;justify-content:center}
@@ -427,48 +493,70 @@ body.has-lib .openrow .btn{height:auto;padding:0 18px}
   <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.4-4.4"/></symbol>
   <symbol id="i-up" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol>
   <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 8V4h10v4"/><rect x="3.5" y="8" width="17" height="8" rx="2"/><path d="M7 13h10v7H7z"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.8 2.5 5.1 5.6.8-4.1 4 1 5.6-5-2.7-5 2.7 1-5.6-4.1-4 5.6-.8z"/></symbol>
   <symbol id="i-big" viewBox="0 0 24 24"><path d="M4 12h16M12 4v16" /></symbol>
 </svg>
 
 <!-- HOME -->
 <section id="home">
-  <div class="home-in">
-    <div class="brand"><span class="dot"><svg class="i" style="width:18px;height:18px"><use href="#i-doc"/></svg></span>PDF Desk</div>
-    <p class="lede">For your everyday PDFs: highlight, sign, merge and pull out pages, all in one calm place.</p>
-    <div class="openbar">
-    <label class="drop" id="dropzone">
-      <svg class="i" style="width:30px;height:30px;color:var(--accent)"><use href="#i-plus"/></svg>
-      <b>Open PDFs or photos</b>
-      <span>Pick several at once to merge them. Photos become PDF pages.</span>
-      <input type="file" id="fileHome" accept="application/pdf,.pdf,image/*" multiple hidden>
-    </label>
-    <div class="openrow">
-      <button class="btn" id="devBtn"><svg class="i"><use href="#i-doc"/></svg>This device</button>
-      <button class="btn" id="pdBtn"><svg class="i" style="color:#4a7c9b"><use href="#i-cloud"/></svg>PoolDrive</button>
+ <div class="hshell">
+  <aside class="hside">
+    <div class="hbrand"><span class="dot"><svg class="i" style="width:17px;height:17px"><use href="#i-doc"/></svg></span>PDF Desk</div>
+    <div class="hopen">
+      <button class="btn primary" id="devBtn"><svg class="i"><use href="#i-plus"/></svg>Open PDF</button>
+      <button class="btn" id="pdBtn" title="Open from PoolDrive"><svg class="i" style="color:#4a7c9b"><use href="#i-cloud"/></svg><span>PoolDrive</span></button>
     </div>
-    </div>
-    <div id="installBox" class="resume hidden" style="margin-top:10px">
-      <svg class="i" style="color:var(--accent)"><use href="#i-save"/></svg>
-      <div class="t"><b>Install PDF Desk as an app</b><span>Then right-click any PDF in File Explorer → Open with → PDF Desk, and Save writes straight back to that file.</span></div>
+    <nav class="hnav" id="hnav">
+      <button data-lf="all"><svg class="i"><use href="#i-grid"/></svg><span>All files</span><em id="cnt-all"></em></button>
+      <button data-lf="pin"><svg class="i"><use href="#i-star"/></svg><span>Pinned</span><em id="cnt-pin"></em></button>
+      <button data-lf="local"><svg class="i"><use href="#i-doc"/></svg><span>This device</span><em id="cnt-local"></em></button>
+      <button data-lf="pd"><svg class="i"><use href="#i-cloud"/></svg><span>PoolDrive</span><em id="cnt-pd"></em></button>
+    </nav>
+    <div class="hsec"><span>Folders</span><button id="addPlace" class="iconbtn" title="Add a folder"><svg class="i"><use href="#i-plus"/></svg></button></div>
+    <div id="folderList" class="flist"></div>
+    <div class="hgrow"></div>
+    <div id="installBox" class="installmini hidden">
+      <b>Install as an app</b><span>Open PDFs from File Explorer and save straight back.</span>
       <button class="btn small primary" id="installBtn">Install</button>
     </div>
-    <div id="resume" class="resume hidden">
+    <p class="hfoot">Your files stay on this device.</p>
+  </aside>
+  <main class="hmain">
+    <div class="hhead" id="hhead">
+      <h1 id="libTitle">All files</h1>
+      <span class="libtools">
+        <span class="field libq"><svg class="i" style="width:16px;height:16px;color:var(--muted)"><use href="#i-search"/></svg><input id="libQ" placeholder="Search files" autocomplete="off"></span>
+        <select id="libSort" class="libsel" title="Sort"><option value="recent">Last opened</option><option value="name">Name</option><option value="added">Date added</option></select>
+        <span class="seg vseg"><button data-view="grid" title="Grid"><svg class="i"><use href="#i-grid"/></svg></button><button data-view="list" title="List"><svg class="i"><use href="#i-list"/></svg></button></span>
+      </span>
+    </div>
+    <div id="resume" class="openstrip hidden">
       <svg class="i" style="color:var(--accent)"><use href="#i-doc"/></svg>
       <div class="t"><b id="resName"></b><span id="resInfo"></span></div>
-      <button class="btn small ghost" id="resDrop">Discard</button>
+      <button class="btn small ghost" id="resDrop">Close all</button>
       <button class="btn small primary" id="resGo">Continue</button>
     </div>
-    <div id="places"></div>
-    <div class="feats">
-      <div class="feat"><svg class="i"><use href="#i-hl"/></svg><div><b>Highlight &amp; write</b><span>Highlighter, pen, text boxes</span></div></div>
-      <div class="feat"><svg class="i"><use href="#i-sign"/></svg><div><b>Sign</b><span>Draw once, reuse anywhere</span></div></div>
-      <div class="feat"><svg class="i"><use href="#i-merge"/></svg><div><b>Merge</b><span>Combine files, reorder pages</span></div></div>
-      <div class="feat"><svg class="i"><use href="#i-out"/></svg><div><b>Extract &amp; split</b><span>Save only the pages you need</span></div></div>
-      <div class="feat"><svg class="i"><use href="#i-wo"/></svg><div><b>Whiteout</b><span>Cover text, write over it</span></div></div>
-      <div class="feat"><svg class="i"><use href="#i-small"/></svg><div><b>Compress</b><span>Smaller files to send</span></div></div>
+    <div id="libItems"></div>
+    <div class="libfoot" id="libFoot"><button class="btn small ghost" id="clrRecent">Clear library</button></div>
+    <div id="firstRun" class="firstrun hidden">
+      <label class="drop" id="dropzone">
+        <svg class="i" style="width:30px;height:30px;color:var(--accent)"><use href="#i-plus"/></svg>
+        <b>Open PDFs or photos</b>
+        <span>Or drop them anywhere on this window. Pick several at once to merge them.</span>
+        <input type="file" id="fileHome" accept="application/pdf,.pdf,image/*" multiple hidden>
+      </label>
+      <div class="feats">
+        <div class="feat"><svg class="i"><use href="#i-hl"/></svg><div><b>Highlight &amp; write</b><span>Highlighter, pen, text boxes</span></div></div>
+        <div class="feat"><svg class="i"><use href="#i-sign"/></svg><div><b>Sign</b><span>Draw once, reuse anywhere</span></div></div>
+        <div class="feat"><svg class="i"><use href="#i-merge"/></svg><div><b>Merge</b><span>Combine files, reorder pages</span></div></div>
+        <div class="feat"><svg class="i"><use href="#i-out"/></svg><div><b>Extract &amp; split</b><span>Save only the pages you need</span></div></div>
+        <div class="feat"><svg class="i"><use href="#i-box"/></svg><div><b>Mark boxes</b><span>Shade an area, or cover it</span></div></div>
+        <div class="feat"><svg class="i"><use href="#i-small"/></svg><div><b>Compress</b><span>Smaller files to send</span></div></div>
+      </div>
     </div>
-    <p class="foot">Your files stay on this device. Nothing is uploaded.</p>
-  </div>
+    <div id="places" hidden></div>
+  </main>
+ </div>
 </section>
 
 <!-- WORKSPACE -->
@@ -796,7 +884,7 @@ async function addFiles(input, atIndex){
       const isImg = /^image\//.test(f.type);
       const bytes = isImg ? await imageToPdfBytes(f) : new Uint8Array(await f.arrayBuffer());
       const id = await addSource(bytes, f.name, {origin: items[i].origin||null});
-      items[i].srcId = id;
+      items[i].srcId = id; S.sources[id].mtime = items[i].file.lastModified||0;
       const mk=S.sources[id].marks||{};
       const newPages = S.sources[id].pages.map((_,k)=>({id:uid(), src:id, idx:k, rot:0, ann:(mk[k]||[]).slice()}));
       try{ await importOutline(id, newPages); }catch(e){ console.warn('outline',e); }
@@ -1670,7 +1758,7 @@ async function doExport(act, list, name, numbers, dest){
   dest = dest || {kind:'download'};
   try{
     // ask for any permission / save location first, while the tap still counts as a user action
-    if(dest.kind==='replace' && dest.origin.kind==='local'){ if(!(await ensurePerm(dest.origin.handle,'readwrite'))){ toast('Permission needed to save over the original'); return; } }
+    if(dest.kind==='replace' && dest.origin.kind==='local'){ if(!(await getWriteAccess(dest.origin))){ return; } }
     if(dest.kind==='local-dir'){ if(!(await ensurePerm(dest.handle,'readwrite'))){ toast('Permission needed to save in that folder'); return; } }
     if(dest.kind==='device' && FSA_SAVE){
       const o=docOrigin(); const ext=(fname.match(/\.[^.]+$/)||['.pdf'])[0];
@@ -1836,7 +1924,7 @@ PD.multipart=(meta,blob,type)=>{ const b='pdk'+Math.random().toString(36).slice(
 PD.create=async(a,parent,name,blob,type)=>{ const m=PD.multipart({name,parents:[parent]},blob,type);
   const r=await PD.api(a,PD.UP+'?uploadType=multipart&fields=id,name,parents',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+m.b},body:m.body});
   PD.put({email:a.email,usage:(a.usage||0)+blob.size}); return r; };
-PD.replace=async(a,id,blob,type)=>PD.api(a,PD.UP+'/'+id+'?uploadType=media&fields=id,name,parents',{method:'PATCH',headers:{'Content-Type':type},body:blob});
+PD.replace=async(a,id,blob,type)=>PD.api(a,PD.UP+'/'+id+'?uploadType=media&fields=id,name,parents,modifiedTime',{method:'PATCH',headers:{'Content-Type':type},body:blob});
 PD.uniqueName=async(a,parent,name)=>{ const m=name.match(/^(.*?)(\.[^.]+)?$/); let n=name, k=2;
   for(;;){ const r=await PD.api(a,'files?'+PD.qs({q:"name='"+PD.q(n)+"' and '"+parent+"' in parents and trashed=false",fields:'files(id)',pageSize:1})); if(!r.files.length) return n; n=m[1]+' ('+(k++)+')'+(m[2]||''); } };
 PD.deadHtml=()=>{ const d=PD.accs().filter(a=>!PD.isLive(a)&&!a.rt); return d.length?`<div class="pddead">Sign-in expired for ${d.length} account${d.length>1?'s':''}. Tap to reconnect: ${d.map(a=>`<button class="btn small" data-pdre="${esc(a.email)}">${esc(a.email.split('@')[0])}</button>`).join('')}</div>`:''; };
@@ -1862,7 +1950,7 @@ async function addRecent(list){
   let r=await getRecent();
   for(const o of list){ if(!o) continue; const k=originKey(o); const old=r.find(x=>originKey(x)===k);
     r=r.filter(x=>originKey(x)!==k);
-    const keep = old ? {pinned:old.pinned, thumb:old.thumb, pages:old.pages, added:old.added} : {added:Date.now()};
+    const keep = old ? {pinned:old.pinned, thumb:old.thumb, pages:old.pages, added:old.added, cache:old.cache} : {added:Date.now()};
     const n=Object.assign({}, keep, o, {t:Date.now()}); if(!n.thumb && keep.thumb) n.thumb=keep.thumb; delete n.thumbSrc;
     r.unshift(n); }
   await DB.set('recent', r.slice(0,80)); renderHomeLists();
@@ -1876,36 +1964,31 @@ function ago(t){ if(!t) return ''; const s=(Date.now()-t)/1000; if(s<60) return 
   return d.toLocaleDateString([], {day:'numeric', month:'short'}); }
 function hue(s){ let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))%360; return h; }
 async function renderHomeLists(){
-  const box=$('#places'); if(!box) return;
-  if(!TOP){ box.innerHTML=''; $('#pdBtn').classList.add('hidden'); return; }
-  const places=await getPlaces(), lib=await getRecent();
-  document.body.classList.toggle('has-lib', lib.length>0 || places.length>0);
-  const canAdd = FSA_DIR || PD.has();
-  let h='';
-  h+=`<div class="sec"><div class="sech"><b>Folders</b></div><div class="fgrid">`+
-     places.map((p,i)=>`<div class="fcard" data-place="${i}" role="button" tabindex="0"><svg class="i fic" style="color:${p.kind==='pd'?'#4a7c9b':'#d9a520'}"><use href="#${p.kind==='pd'?'i-cloud':'i-folder'}"/></svg><span class="fn"><b>${esc(p.name)}</b><small>${placeSub(p)}</small></span><button class="iconbtn" data-plink="${i}" title="Copy a link that opens this folder"><svg class="i"><use href="#i-link"/></svg></button><button class="iconbtn" data-pdel="${i}" title="Remove folder shortcut"><svg class="i"><use href="#i-x"/></svg></button></div>`).join('')+
-     (canAdd?`<button class="fcard add" id="addPlace"><svg class="i"><use href="#i-plus"/></svg><span class="fn"><b>Add folder</b><small>${FSA_DIR?'This device or PoolDrive':'PoolDrive'}</small></span></button>`:'')+
-     `</div></div>`;
-  if(lib.length){
-    h+=`<div class="sec"><div class="sech libh"><b>Library</b><span class="libtools">
-        <span class="field libq"><svg class="i" style="width:16px;height:16px;color:var(--muted)"><use href="#i-search"/></svg><input id="libQ" placeholder="Search files" value="${esc(LIB.q)}" autocomplete="off"></span>
-        <select id="libSort" class="libsel"><option value="recent">Last opened</option><option value="name">Name</option><option value="added">Date added</option></select>
-        <span class="seg vseg"><button data-view="grid" title="Grid"><svg class="i"><use href="#i-grid"/></svg></button><button data-view="list" title="List"><svg class="i"><use href="#i-list"/></svg></button></span>
-      </span></div>
-      <div class="libchips">${[['all','All'],['local','This device'],['pd','PoolDrive'],['pin','★ Pinned']].map(([k,l])=>`<button class="chip" data-lf="${k}">${l}</button>`).join('')}<span class="spacer"></span><button class="btn small ghost" id="clrRecent">Clear library</button></div>
-      <div id="libItems"></div></div>`;
-  }
-  box.innerHTML=h;
-  const so=$('#libSort'); if(so) so.value=LIB.sort;
-  const q=$('#libQ'); if(q){ q.addEventListener('input',()=>{ LIB.q=q.value; renderLibItems(); }); q.addEventListener('keydown',e=>e.stopPropagation()); }
-  if(so) so.addEventListener('change',()=>{ LIB.sort=so.value; saveLibPrefs(); renderLibItems(); });
+  if(!TOP){ $('#pdBtn').classList.add('hidden'); $('#folderList').innerHTML=''; $('.hsec').classList.add('hidden'); }
+  const places=TOP?await getPlaces():[], lib=await getRecent();
+  const empty = !lib.length && !places.length;
+  document.body.classList.toggle('lib-empty', !lib.length);
+  $('#firstRun').classList.toggle('hidden', lib.length>0);
+  const canAdd = TOP && (FSA_DIR || PD.has());
+  $('#addPlace').classList.toggle('hidden', !canAdd);
+  $('#folderList').innerHTML = places.length ? places.map((p,i)=>`<div class="fitem" data-place="${i}" role="button" tabindex="0" title="${esc(p.name)} · ${placeSub(p)}"><svg class="i fic" style="color:${p.kind==='pd'?'#4a7c9b':'#d9a520'}"><use href="#${p.kind==='pd'?'i-cloud':'i-folder'}"/></svg><span class="fn">${esc(p.name)}${p.kind==='pd'?'<small>PoolDrive</small>':''}</span><button class="iconbtn" data-plink="${i}" title="Copy a link that opens this folder"><svg class="i"><use href="#i-link"/></svg></button><button class="iconbtn" data-pdel="${i}" title="Remove folder shortcut"><svg class="i"><use href="#i-x"/></svg></button></div>`).join('')
+    : (canAdd?'<div class="fempty">Pin folders you use often to open their files in one tap.</div>':'');
+  const cnt={all:lib.length, pin:lib.filter(o=>o.pinned).length, local:lib.filter(o=>o.kind==='local').length, pd:lib.filter(o=>o.kind==='pd').length};
+  Object.keys(cnt).forEach(k=>{ const e=$('#cnt-'+k); if(e) e.textContent=cnt[k]||''; });
   $('#pdBtn').classList.toggle('hidden', !TOP);
   renderLibItems();
   backfillThumbs(lib);
 }
+(function wireLibTools(){
+  const q=$('#libQ'), so=$('#libSort');
+  q.value=LIB.q; so.value=LIB.sort;
+  q.addEventListener('input',()=>{ LIB.q=q.value; renderLibItems(); }); q.addEventListener('keydown',e=>e.stopPropagation());
+  so.addEventListener('change',()=>{ LIB.sort=so.value; saveLibPrefs(); renderLibItems(); });
+})();
 async function renderLibItems(){
   const el=$('#libItems'); if(!el) return;
   $$('[data-lf]').forEach(b=>b.classList.toggle('on',b.dataset.lf===LIB.filter));
+  $('#libTitle').textContent = !LIBMEM.length && !(await getRecent()).length ? 'Welcome' : ({all:'All files', pin:'Pinned', local:'On this device', pd:'From PoolDrive'})[LIB.filter]||'All files';
   $$('[data-view]').forEach(b=>b.classList.toggle('on',b.dataset.view===LIB.view));
   let lib=(await getRecent()).map((o,i)=>({o,i}));
   const q=LIB.q.trim().toLowerCase();
@@ -1914,7 +1997,8 @@ async function renderLibItems(){
   const cmp = LIB.sort==='name' ? (a,b)=>a.o.name.localeCompare(b.o.name,undefined,{numeric:true,sensitivity:'base'})
             : LIB.sort==='added' ? (a,b)=>(b.o.added||0)-(a.o.added||0) : (a,b)=>(b.o.t||0)-(a.o.t||0);
   lib.sort((a,b)=>(b.o.pinned?1:0)-(a.o.pinned?1:0) || cmp(a,b));
-  if(!lib.length){ el.className=''; el.innerHTML=`<div class="empty" style="padding:30px">${q?'No files match “'+esc(LIB.q)+'”.':'Nothing here yet.'}</div>`; return; }
+  $('#libFoot').classList.toggle('hidden', !lib.length || LIB.filter!=='all' || !!q);
+  if(!lib.length){ el.className=''; el.innerHTML = LIBMEM.length ? `<div class="empty" style="padding:40px 20px">${q?'No files match “'+esc(LIB.q)+'”.': LIB.filter==='pin'?'Nothing pinned yet. Tap ☆ on a file to keep it at the top.':'No files here yet.'}</div>` : ''; return; }
   el.className = LIB.view==='list' ? 'llist' : 'lgrid';
   el.innerHTML = lib.map(({o,i})=>{
     const where = (o.kind==='pd'?'PoolDrive':'This device') + (o.dirName?' · '+esc(o.dirName):'');
@@ -1950,15 +2034,15 @@ async function backfillThumbs(lib){
 }
 document.addEventListener('click', async e=>{
   const t=e.target;
-  if(!t.closest || !t.closest('#places')) return;
+  if(!t.closest || !t.closest('#home')) return;
   if(t.closest('#addPlace')) return addPlaceSheet();
   if(t.closest('#clrRecent')){ const s=document.createElement('div'); s.className='scrim';
     s.innerHTML=`<div class="sheet"><h3>Clear the library?</h3><p class="muted">This only empties the list here. Your files stay where they are.</p><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn small ghost" data-k="x">Cancel</button><button class="btn small primary" data-k="ok">Clear</button></div></div>`;
-    document.body.appendChild(s); s.addEventListener('click',async ev=>{ const b=ev.target.closest('[data-k]'); if(ev.target!==s&&!b) return; s.remove(); if(b&&b.dataset.k==='ok'){ const keep=(await getRecent()).filter(o=>o.pinned); await DB.set('recent',keep); renderHomeLists(); } }); return; }
+    document.body.appendChild(s); s.addEventListener('click',async ev=>{ const b=ev.target.closest('[data-k]'); if(ev.target!==s&&!b) return; s.remove(); if(b&&b.dataset.k==='ok'){ const all=await getRecent(); all.filter(o=>!o.pinned).forEach(o=>cacheDel(originKey(o))); const keep=all.filter(o=>o.pinned); await DB.set('recent',keep); renderHomeLists(); } }); return; }
   const lf=t.closest('[data-lf]'); if(lf){ LIB.filter=lf.dataset.lf; saveLibPrefs(); renderLibItems(); return; }
   const vw=t.closest('[data-view]'); if(vw){ LIB.view=vw.dataset.view; saveLibPrefs(); renderLibItems(); return; }
   const pin=t.closest('[data-pin]'); if(pin){ e.stopPropagation(); const r=await getRecent(); const o=r.find(x=>originKey(x)===pin.dataset.pin); if(o){ o.pinned=!o.pinned; await DB.set('recent',r); renderLibItems(); } return; }
-  const rm=t.closest('[data-rm]'); if(rm){ e.stopPropagation(); const r=(await getRecent()).filter(x=>originKey(x)!==rm.dataset.rm); await DB.set('recent',r); if(!r.length) renderHomeLists(); else renderLibItems(); toast('Removed from the library. The file itself is untouched.'); return; }
+  const rm=t.closest('[data-rm]'); if(rm){ e.stopPropagation(); cacheDel(rm.dataset.rm); const r=(await getRecent()).filter(x=>originKey(x)!==rm.dataset.rm); await DB.set('recent',r); if(!r.length) renderHomeLists(); else renderLibItems(); toast('Removed from the library. The file itself is untouched.'); return; }
   const lk=t.closest('[data-plink]'); if(lk){ e.stopPropagation(); const p=(await getPlaces())[+lk.dataset.plink]; const url=placeLink(p);
     try{ await navigator.clipboard.writeText(url); toast(p.kind==='pd'?'Link copied. Opens this folder on any device signed in to PoolDrive.':'Link copied. It opens this folder in this browser on this device.',3600); }
     catch(err){ showLinkSheet(url); } return; }
@@ -1972,11 +2056,31 @@ function showLinkSheet(url){
   document.body.appendChild(s); const inp=s.querySelector('input'); inp.focus(); inp.select();
   s.addEventListener('click',ev=>{ if(ev.target===s||ev.target.closest('button')) s.remove(); });
 }
+// open from the copy kept on this computer; use the real file instead when we can see it has changed
+async function openFromCopy(o, card){
+  const th=card && card.querySelector('.lthumb'); if(card){ card.classList.add('opening'); if(th) th.dataset.stage='Opening…'; }
+  try{
+    const c=await cacheGet(originKey(o)); if(!c) return false;
+    let file=null;
+    if(o.kind==='local' && o.handle){
+      try{ if(await o.handle.queryPermission({mode:'read'})==='granted'){ const f=await within(o.handle.getFile(), 8000); if(f.lastModified!==o.cache.mtime || f.size!==o.cache.size) file=f; } }catch(e){}
+    } else if(o.kind==='pd'){
+      try{ const a=PD.acc(o.email); const m=await within(PD.api(a,'files/'+o.id+'?fields=modifiedTime'), 6000);
+        if(m.modifiedTime && o.cache.mtime && m.modifiedTime!==o.cache.mtime){ if(th) th.dataset.stage='Downloading…'; const r=await within(PD.api(a,'files/'+o.id+'?alt=media',{raw:true}), 60000); file=new File([await r.blob()], o.name, {type:'application/pdf'}); } }
+      catch(e){ /* offline or signed out: the copy still opens */ }
+    }
+    if(!file) file=new File([c], o.name, {type:'application/pdf', lastModified:o.cache.mtime && typeof o.cache.mtime==='number' ? o.cache.mtime : Date.now()});
+    await openItems([{file, origin:o}], 'new');
+    return true;
+  }catch(e){ console.warn('copy open', e); return false; }
+  finally{ if(card) card.classList.remove('opening'); }
+}
 const within=(p,ms)=>Promise.race([p, new Promise((_,rej)=>setTimeout(()=>rej(Object.assign(new Error('timeout'),{name:'TimeoutError'})),ms))]);
 async function openRecent(o, card){
   // called straight from the click, so the browser still lets us ask for permission
   let permP=null;
-  if(o.kind==='local' && o.handle && o.handle.requestPermission){ try{ permP=o.handle.requestPermission({mode:'read'}); }catch(e){ permP=Promise.resolve('denied'); } }
+  if(o.kind==='local' && !o.cache && o.handle && o.handle.requestPermission){ try{ permP=o.handle.requestPermission({mode:'read'}); }catch(e){ permP=Promise.resolve('denied'); } }
+  if(o.cache){ const done=await openFromCopy(o, card); if(done) return; if(o.kind==='local' && o.handle && o.handle.requestPermission){ try{ permP=o.handle.requestPermission({mode:'read'}); }catch(e){} } }
   const stage=t=>{ if(card){ card.classList.toggle('opening',!!t); const th=card.querySelector('.lthumb'); if(t && th) th.dataset.stage=t; } };
   stage('Opening…');
   try{
@@ -2063,6 +2167,7 @@ async function openItems(items, mode){
   await addFiles(items);
   const withO=items.filter(i=>i.origin && i.srcId && S.sources[i.srcId]);
   await addRecent(withO.map(i=>Object.assign({}, i.origin, {pages:S.sources[i.srcId].pages.length})));
+  cacheOpened(withO.filter(i=>isPdfName(i.file.name||i.origin.name)));
   for(const it of withO){ const p=S.pages.find(q=>q.src===it.srcId && q.idx===0); if(!p) continue; const th=await thumbOf(p); if(th) await updateRecent(originKey(it.origin),{thumb:th}); }
 }
 async function pickFromDevice(mode){
@@ -2233,8 +2338,8 @@ async function saveOut(filename, data, dest){
   try{
     if(dest.kind==='replace'){
       const o=dest.origin;
-      if(o.kind==='local'){ await writeLocal(o.handle, blob); toast('Saved to '+o.name, 2600); }
-      else { busy(true,'Saving to PoolDrive…',0.9); await PD.replace(PD.acc(o.email), o.id, blob, 'application/pdf'); busy(false); toast('Saved to '+o.name+' in PoolDrive. Older versions stay in Drive’s version history.', 3600); }
+      try{ await writeBack(o, blob); }catch(e){ if(e.name==='ChangedError'){ busy(false); changedSheet(o); return false; } throw e; }
+      if(o.kind==='local') toast('Saved to '+o.name, 2600); else toast('Saved to '+o.name+' in PoolDrive. Older versions stay in Drive’s version history.', 3600);
       S.sources[S.pages[0].src].savedAt=Date.now(); if(S._saveRev!=null){ S.savedRev=S._saveRev; S.savedSig=S._saveSig; } updateSaveState(); libAdd(o); return true;
     }
     if(dest.kind==='local-dir'){
@@ -2668,18 +2773,17 @@ async function autoSave(fromClick){
   if(o.kind==='local'){
     let st='granted'; try{ st=await o.handle.queryPermission({mode:'readwrite'}); }catch(e){}
     if(st!=='granted'){
-      if(fromClick){ if(!(await ensurePerm(o.handle,'readwrite'))){ asNeedPerm=true; updateSaveState(); return; } }
+      if(fromClick){ if(!(await getWriteAccess(o))){ asNeedPerm=true; updateSaveState(); return; } }
       else { asNeedPerm=true; updateSaveState(); return; }
     }
   }
   asNeedPerm=false; asBusy=true; const rev=S.rev, sig=structSig(); updateSaveState();
   try{
     const bytes=await buildPdf(S.pages,{silent:true});
-    if(o.kind==='local') await writeLocal(o.handle, new Blob([bytes],{type:'application/pdf'}));
-    else await PD.replace(PD.acc(o.email), o.id, new Blob([bytes],{type:'application/pdf'}), 'application/pdf');
+    await writeBack(o, new Blob([bytes],{type:'application/pdf'}));
     S.savedRev=rev; S.savedSig=sig; persist();
     if(!S._thumbT || Date.now()-S._thumbT>60000){ S._thumbT=Date.now(); libAdd(o); }
-  }catch(e){ console.warn('autosave',e); S._asErr = e instanceof PDAuth ? 'PoolDrive sign-in expired' : 'Could not save'; }
+  }catch(e){ console.warn('autosave',e); if(e.name==='ChangedError'){ S._asErr='Changed outside PDF Desk'; changedSheet(o); } else S._asErr = e instanceof PDAuth ? 'PoolDrive sign-in expired' : 'Could not save'; }
   finally{ asBusy=false; updateSaveState(); if(S.rev!==S.savedRev && !S._asErr) autoSaveSoon(); }
 }
 function updateSaveState(){
@@ -2778,6 +2882,84 @@ document.addEventListener('keydown', e=>{
   e.preventDefault(); const i=live.indexOf(curTab); switchTab(live[(i+d+live.length)%live.length]);
 }, true);
 
+/* ---------- a saved copy of every opened PDF, so the library always opens ---------- */
+const CACHE_MAX = 700*1024*1024;
+try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
+async function cacheDir(){ try{ return await (await navigator.storage.getDirectory()).getDirectoryHandle('pdfcache',{create:true}); }catch(e){ return null; } }
+function cacheName(key){ let h=0; for(const c of key) h=(h*31+c.charCodeAt(0))|0; return 'c'+(h>>>0).toString(36)+'_'+key.length+'.pdf'; }
+async function cachePut(key, blob, meta){
+  const d=await cacheDir(); if(!d || !blob) return;
+  try{ const h=await d.getFileHandle(cacheName(key),{create:true}); const w=await h.createWritable(); await w.write(blob); await w.close();
+    await updateRecent(key, {cache:Object.assign({size:blob.size, at:Date.now()}, meta||{})}); cacheEvict(); }
+  catch(e){ console.warn('cache', e); }
+}
+async function cacheGet(key){ const d=await cacheDir(); if(!d) return null; try{ return await (await d.getFileHandle(cacheName(key))).getFile(); }catch(e){ return null; } }
+async function cacheDel(key){ const d=await cacheDir(); if(d) try{ await d.removeEntry(cacheName(key)); }catch(e){} }
+let evicting=false;
+async function cacheEvict(){
+  if(evicting) return; evicting=true;
+  try{ const r=await getRecent(); let tot=0, changed=false;
+    for(const o of [...r].filter(o=>o.cache).sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0) || (b.t||0)-(a.t||0))){ tot+=o.cache.size||0; if(tot>CACHE_MAX){ await cacheDel(originKey(o)); o.cache=null; changed=true; } }
+    if(changed) await DB.set('recent', r); }
+  finally{ evicting=false; }
+}
+async function cacheOpened(items){
+  for(const it of items){
+    const o=it.origin; const key=originKey(o);
+    let meta={mtime: it.file.lastModified||0};
+    if(o.kind==='pd'){ try{ const m=await within(PD.api(PD.acc(o.email),'files/'+o.id+'?fields=modifiedTime'), 8000); meta={mtime:m.modifiedTime}; }catch(e){ meta={mtime:null}; } }
+    await cachePut(key, it.file, meta);
+  }
+}
+// write the document back into the file it came from: checks nobody changed the file meanwhile, then refreshes the saved copy
+async function writeBack(o, blob){
+  const src=S.sources[S.pages[0].src];
+  if(o.kind==='local'){
+    let cur=null; try{ cur=await within(o.handle.getFile(), 15000); }catch(e){ if(e.name==='NotFoundError') throw e; }
+    if(cur && src && src.mtime && cur.lastModified!==src.mtime && !src._overwriteOk) throw Object.assign(new Error('changed'),{name:'ChangedError', file:cur});
+    await writeLocal(o.handle, blob);
+    let mt=Date.now(); try{ mt=(await o.handle.getFile()).lastModified; }catch(e){}
+    if(src){ src.mtime=mt; src._overwriteOk=false; }
+    cachePut(originKey(o), blob, {mtime:mt});
+  } else {
+    const r=await PD.replace(PD.acc(o.email), o.id, blob, 'application/pdf');
+    cachePut(originKey(o), blob, {mtime:r && r.modifiedTime || null});
+  }
+}
+// edit permission for a device file: ask, but never hang; if the browser doesn't answer, let him pick the file in a save dialog
+async function getWriteAccess(o){
+  if(!o.handle || !o.handle.requestPermission) return true;
+  try{ if(await o.handle.queryPermission({mode:'readwrite'})==='granted') return true; }catch(e){}
+  let st='timeout'; try{ st=await within(o.handle.requestPermission({mode:'readwrite'}), 7000); }catch(e){}
+  if(st==='granted') return true;
+  return await new Promise(res=>{
+    const s=document.createElement('div'); s.className='scrim';
+    s.innerHTML=`<div class="sheet"><h3>Save into “${esc(o.name)}”</h3><p class="muted">${st==='timeout'?'Edge didn’t answer the request to edit this file.':'Edge didn’t allow editing this file.'} Pick the same file in the next window and choose Replace. After that, saving works again.</p>
+      <div class="acts"><button class="btn primary" data-k="pick"><svg class="i"><use href="#i-save"/></svg>Pick the file to save into</button><button class="btn ghost" data-k="x" style="justify-content:center">Not now</button></div></div>`;
+    document.body.appendChild(s);
+    s.addEventListener('click', async ev=>{ const b=ev.target.closest('[data-k]'); if(ev.target!==s&&!b) return; s.remove(); if(!b||b.dataset.k!=='pick'){ res(false); return; }
+      try{ const h=await window.showSaveFilePicker({suggestedName:o.name, startIn:o.handle, types:[{description:'PDF', accept:{'application/pdf':['.pdf']}}]});
+        o.handle=h; if(h.name!==o.name){ o.name=h.name; } await updateRecent(originKey(o), {handle:h}); res(true); }
+      catch(e){ res(false); } });
+  });
+}
+function changedSheet(o){
+  if($('#chgSheet')) return;
+  const s=document.createElement('div'); s.className='scrim'; s.id='chgSheet';
+  s.innerHTML=`<div class="sheet"><h3>“${esc(o.name)}” was changed</h3><p class="muted">The file was changed outside PDF Desk after you opened it here (maybe in another app or on another computer). Nothing has been overwritten.</p>
+    <div class="acts"><button class="btn" data-k="mine"><svg class="i"><use href="#i-save"/></svg>Replace it with my version</button>
+    <button class="btn" data-k="copy"><svg class="i"><use href="#i-copy"/></svg>Save mine as a separate copy</button>
+    <button class="btn" data-k="theirs"><svg class="i"><use href="#i-doc"/></svg>Open the changed file instead<small>my unsaved marks are dropped</small></button>
+    <button class="btn ghost" data-k="x" style="justify-content:center">Decide later</button></div></div>`;
+  document.body.appendChild(s);
+  s.addEventListener('click', async ev=>{ const b=ev.target.closest('[data-k]'); if(ev.target!==s&&!b) return; s.remove(); if(!b) return; const k=b.dataset.k;
+    const src=S.sources[S.pages[0].src];
+    if(k==='mine'){ src._overwriteOk=true; S._asErr=null; if(canReplace()) doExport('pdf', S.pages, S.name, false, {kind:'replace', origin:o}); }
+    else if(k==='copy'){ S._asErr=null; S.autosave=false; openSave(); toast('Auto-save is paused for this file so the changed version stays as it is.',4200); }
+    else if(k==='theirs'){ try{ const f=await o.handle.getFile(); const t=curTab; S.rev=S.savedRev; resetDoc(); await addFiles([{file:f, origin:o}]); renderTabs(); }catch(e){ toast('Could not open it: '+(e.message||e)); } }
+  });
+}
+
 /* ---------- keyboard ---------- */
 document.addEventListener('keydown',e=>{
   if(e.target.closest && e.target.closest('input,textarea,.scrim')) return;
@@ -2804,7 +2986,7 @@ document.addEventListener('keydown',e=>{
 const tl=lsGet('pdfdesk:tools',null); if(tl){ Object.assign(S.hl,tl.hl||{}); Object.assign(S.pen,tl.pen||{}); Object.assign(S.text,tl.text||{}); Object.assign(S.box,tl.box||{}); }
 updateSwatches(); checkResume(); renderHomeLists(); routeHash();
 window.addEventListener('resize',()=>{ if(S.view==='mark' && S.pages.length && !pinch){ /* keep zoom */ } });
-window.__pdfdesk = S; // for debugging
+window.__pdfdesk = S; window.__pdfdeskDB = DB; // for debugging
 })();
 </script>
 </body>
